@@ -203,9 +203,16 @@ export function createPomodoroStore(
       try {
         const abandonedSession = abandonFocusSession(activeSession, now);
         const savedSession = await dependencies.updateFocusSession(abandonedSession);
+        const rewardResult = await dependencies.petStore
+          .getState()
+          .applyHonestyReward(savedSession.id, now);
         const recentSessions = await dependencies.listRecentFocusSessions(10);
-        set({ activeSession: savedSession, recentSessions, isLoading: false });
-        return savedSession;
+        set({
+          activeSession: rewardResult.session,
+          recentSessions,
+          isLoading: false,
+        });
+        return rewardResult.session;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
         throw error;

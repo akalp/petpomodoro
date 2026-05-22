@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { claimFocusReward, type FocusSession, type PetState, type RewardLedger } from "../domain";
+import {
+  claimSessionReward,
+  type FocusSession,
+  type PetState,
+  type RewardLedger,
+} from "../domain";
 import { makePet, makeSession } from "../test/factories";
 
 import { createPetStore, type PetStoreDependencies } from "./petStore";
@@ -98,7 +103,7 @@ describe("store workflows", () => {
     expect(repo.sessions.get("session-new")).toEqual(session);
   });
 
-  it("cancels a running session without applying a reward", async () => {
+  it("cancels a running session with an honesty heart reward", async () => {
     const repo = createInMemoryRepositories({
       pet: makePet(),
       sessions: [
@@ -121,10 +126,11 @@ describe("store workflows", () => {
     expect(session.status).toBe("abandoned");
     expect(session.abandonedAt).toBe(now);
     expect(repo.pet?.xp).toBe(0);
-    expect(repo.rewardLedger.size).toBe(0);
+    expect(repo.pet?.honestyHearts).toBe(1);
+    expect(repo.rewardLedger.size).toBe(1);
   });
 
-  it("abandons an awaiting confirmation session without applying a reward", async () => {
+  it("abandons an awaiting confirmation session with an honesty heart reward", async () => {
     const repo = createInMemoryRepositories({
       pet: makePet(),
       sessions: [
@@ -147,7 +153,8 @@ describe("store workflows", () => {
     expect(session.status).toBe("abandoned");
     expect(session.abandonedAt).toBe(now);
     expect(repo.pet?.xp).toBe(0);
-    expect(repo.rewardLedger.size).toBe(0);
+    expect(repo.pet?.honestyHearts).toBe(1);
+    expect(repo.rewardLedger.size).toBe(1);
   });
 
   it("confirms completion and applies the existing honesty reward path", async () => {
@@ -175,7 +182,40 @@ describe("store workflows", () => {
     expect(session.status).toBe("completed");
     expect(session.confirmedAt).toBe(now);
     expect(repo.pet?.xp).toBe(25);
+    expect(repo.pet?.coins).toBe(10);
+    expect(repo.pet?.streak).toBe(1);
     expect(repo.rewardLedger.size).toBe(1);
+  });
+
+  it("updates level when a completion reward crosses the next threshold", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet({ xp: 90, level: 1 }),
+      sessions: [
+        makeSession({
+          status: "awaiting_confirmation",
+        }),
+      ],
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    await petStore.getState().initializePet(now);
+    await pomodoroStore.getState().loadActiveSession();
+
+    await pomodoroStore.getState().confirmCompleted(now);
+
+    expect(repo.pet?.xp).toBe(115);
+    expect(repo.pet?.level).toBe(2);
+    expect(petStore.getState().lastRewardSummary).toMatchObject({
+      leveledUp: true,
+      previousLevel: 1,
+      newLevel: 2,
+    });
   });
 
   it("keeps completion reward idempotent across repeated confirmations", async () => {
@@ -250,7 +290,7 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
       }
 
       const existingReward = rewardLedger.get(sessionId);
-      const result = claimFocusReward({
+      const result = claimSessionReward({
         pet,
         session,
         existingRewards: existingReward ? [existingReward] : [],

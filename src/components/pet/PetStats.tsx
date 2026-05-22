@@ -11,12 +11,20 @@ export function PetStats({ pet }: PetStatsProps) {
 
   return (
     <div className="space-y-3">
-      <ProgressBar label="Pet progress" max={XP_PER_LEVEL} value={levelXp} />
+      <ProgressBar label="XP progress" max={XP_PER_LEVEL} value={levelXp} />
       <div className="grid grid-cols-2 gap-3">
         <StatRow label="Level" value={pet.level} />
         <StatRow label="Mood" value={moodLabel(pet.mood)} />
       </div>
+      <div className="grid grid-cols-2 gap-3">
+        <StatRow label="Coins" value={pet.coins} />
+        <StatRow label="Streak" value={pet.streak} />
+      </div>
+      <ProgressBar label="Happiness" max={100} value={pet.happiness} />
+      <ProgressBar label="Hunger" max={100} value={pet.hunger} />
+      <ProgressBar label="Energy" max={100} value={pet.energy} />
       <StatRow label="Total XP" value={pet.xp} />
+      <StatRow label="Honesty hearts" value={pet.honestyHearts} />
     </div>
   );
 }

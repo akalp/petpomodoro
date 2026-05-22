@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { DomainError } from "./errors";
-import { claimFocusReward, FOCUS_SESSION_XP_REWARD } from "./rewards";
+import {
+  claimFocusReward,
+  claimSessionReward,
+  FOCUS_SESSION_COIN_REWARD,
+  FOCUS_SESSION_XP_REWARD,
+  HONESTY_HEART_REWARD,
+} from "./rewards";
 import { makePet, makeReward, makeSession } from "../test/factories";
 
 describe("focus rewards", () => {
@@ -22,6 +28,12 @@ describe("focus rewards", () => {
     expect(result.pet).toMatchObject({
       xp: 90 + FOCUS_SESSION_XP_REWARD,
       level: 2,
+      coins: FOCUS_SESSION_COIN_REWARD,
+      happiness: 62,
+      hunger: 100,
+      energy: 70,
+      streak: 1,
+      honestyHearts: 0,
       mood: "happy",
       updatedAt: "2026-05-22T12:31:00.000Z",
     });
@@ -30,16 +42,62 @@ describe("focus rewards", () => {
       id: "reward-1",
       sessionId: "session-1",
       petId: "pet-1",
+      rewardType: "focus_completed",
       xpAwarded: FOCUS_SESSION_XP_REWARD,
+      coinsAwarded: FOCUS_SESSION_COIN_REWARD,
+      happinessAwarded: 12,
+      hungerAwarded: 8,
+      energyAwarded: -10,
+      streakAwarded: 1,
+      honestyHeartsAwarded: 0,
       createdAt: "2026-05-22T12:31:00.000Z",
+    });
+    expect(result.summary).toMatchObject({
+      rewardType: "focus_completed",
+      xpAwarded: FOCUS_SESSION_XP_REWARD,
+      previousLevel: 1,
+      newLevel: 2,
+      leveledUp: true,
     });
   });
 
-  it("does not reward abandoned sessions", () => {
+  it("applies a small honesty heart reward for abandoned sessions", () => {
+    const result = claimSessionReward({
+      pet: makePet(),
+      session: makeSession({
+        status: "abandoned",
+        abandonedAt: "2026-05-22T12:30:00.000Z",
+      }),
+      existingRewards: [],
+      now: "2026-05-22T12:31:00.000Z",
+      rewardId: "reward-1",
+    });
+
+    expect(result.pet).toMatchObject({
+      xp: 0,
+      coins: 0,
+      happiness: 54,
+      energy: 85,
+      streak: 0,
+      honestyHearts: HONESTY_HEART_REWARD,
+    });
+    expect(result.reward).toMatchObject({
+      rewardType: "honesty",
+      xpAwarded: 0,
+      honestyHeartsAwarded: HONESTY_HEART_REWARD,
+    });
+    expect(result.summary).toMatchObject({
+      rewardType: "honesty",
+      honestyHeartsAwarded: HONESTY_HEART_REWARD,
+      leveledUp: false,
+    });
+  });
+
+  it("does not reward sessions that are not terminal", () => {
     expect(() =>
-      claimFocusReward({
+      claimSessionReward({
         pet: makePet(),
-        session: makeSession({ status: "abandoned" }),
+        session: makeSession({ status: "awaiting_confirmation" }),
         existingRewards: [],
         now: "2026-05-22T12:31:00.000Z",
         rewardId: "reward-1",
@@ -78,6 +136,7 @@ describe("focus rewards", () => {
     expect(result.pet).toBe(pet);
     expect(result.session.rewardClaimedAt).toBe("2026-05-22T12:31:00.000Z");
     expect(result.reward).toBeNull();
+    expect(result.summary).toBeNull();
   });
 
   it("does not produce a duplicate reward when a ledger row already exists", () => {
@@ -98,5 +157,6 @@ describe("focus rewards", () => {
     expect(result.pet).toBe(pet);
     expect(result.session.rewardClaimedAt).toBe("2026-05-22T12:31:00.000Z");
     expect(result.reward).toBeNull();
+    expect(result.summary).toBeNull();
   });
 });

@@ -1,6 +1,11 @@
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 
-import { applyHungerDecay, type ClaimFocusRewardResult, type PetState } from "../domain";
+import {
+  applyHungerDecay,
+  type ClaimFocusRewardResult,
+  type PetState,
+  type RewardSummary,
+} from "../domain";
 import {
   claimStoredFocusReward,
   getCurrentPet,
@@ -20,6 +25,7 @@ export interface PetStoreDependencies {
 
 export interface PetStoreState {
   pet: PetState | null;
+  lastRewardSummary: RewardSummary | null;
   isLoading: boolean;
   error: string | null;
   initializePet: (now?: string) => Promise<PetState>;
@@ -29,6 +35,7 @@ export interface PetStoreState {
     sessionId: string,
     now?: string,
   ) => Promise<ClaimFocusRewardResult>;
+  clearLastRewardSummary: () => void;
   updateDecayOnOpen: (now?: string) => Promise<PetState | null>;
   clearError: () => void;
 }
@@ -46,6 +53,7 @@ export function createPetStore(
 ): UseBoundStore<StoreApi<PetStoreState>> {
   return create<PetStoreState>((set, get) => ({
     pet: null,
+    lastRewardSummary: null,
     isLoading: false,
     error: null,
 
@@ -98,13 +106,19 @@ export function createPetStore(
           sessionId,
           now,
         });
-        set({ pet: result.pet, isLoading: false });
+        set({
+          pet: result.pet,
+          lastRewardSummary: result.summary,
+          isLoading: false,
+        });
         return result;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
         throw error;
       }
     },
+
+    clearLastRewardSummary: () => set({ lastRewardSummary: null }),
 
     updateDecayOnOpen: async (now = dependencies.now()) => {
       const pet = get().pet ?? (await get().loadCurrentPet());
@@ -127,4 +141,3 @@ export function createPetStore(
 }
 
 export const usePetStore = createPetStore();
-

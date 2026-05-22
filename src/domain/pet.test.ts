@@ -23,7 +23,7 @@ describe("pet domain logic", () => {
     expect(updated).toMatchObject({
       xp: 115,
       level: 2,
-      mood: "happy",
+      mood: "calm",
       updatedAt: "2026-05-22T12:30:00.000Z",
     });
     expect(pet.xp).toBe(90);
@@ -32,6 +32,7 @@ describe("pet domain logic", () => {
   it("decays hunger by elapsed hours without dropping below zero", () => {
     const pet = makePet({
       hunger: 10,
+      lastHungerUpdatedAt: "2026-05-22T08:00:00.000Z",
       updatedAt: "2026-05-22T08:00:00.000Z",
     });
 
@@ -43,6 +44,7 @@ describe("pet domain logic", () => {
 
     expect(updated.hunger).toBe(0);
     expect(updated.mood).toBe("sleepy");
+    expect(updated.lastHungerUpdatedAt).toBe("2026-05-22T12:00:00.000Z");
     expect(updated.updatedAt).toBe("2026-05-22T12:00:00.000Z");
   });
 

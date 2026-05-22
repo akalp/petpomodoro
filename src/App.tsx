@@ -4,6 +4,7 @@ import { AppShell } from "./components/layout/AppShell";
 import { PetDashboard } from "./components/pet/PetDashboard";
 import { AwaitingConfirmationScreen } from "./components/session/AwaitingConfirmationScreen";
 import { PomodoroStartPanel } from "./components/session/PomodoroStartPanel";
+import { RewardModal } from "./components/session/RewardModal";
 import { RunningSessionScreen } from "./components/session/RunningSessionScreen";
 import { SessionHistory } from "./components/session/SessionHistory";
 import { SettingsPanel } from "./components/settings/SettingsPanel";
@@ -19,6 +20,10 @@ export function App() {
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const pet = usePetStore((state) => state.pet);
   const petError = usePetStore((state) => state.error);
+  const lastRewardSummary = usePetStore((state) => state.lastRewardSummary);
+  const clearLastRewardSummary = usePetStore(
+    (state) => state.clearLastRewardSummary,
+  );
   const activeSession = usePomodoroStore((state) => state.activeSession);
   const recentSessions = usePomodoroStore((state) => state.recentSessions);
   const pomodoroError = usePomodoroStore((state) => state.error);
@@ -145,6 +150,12 @@ export function App() {
           selectedDuration={selectedDuration}
         />
       )}
+      {lastRewardSummary ? (
+        <RewardModal
+          onClose={clearLastRewardSummary}
+          summary={lastRewardSummary}
+        />
+      ) : null}
       <SessionHistory sessions={recentSessions} />
       <SettingsPanel />
     </AppShell>

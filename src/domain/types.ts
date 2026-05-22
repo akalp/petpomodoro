@@ -6,10 +6,18 @@ export interface PetState {
   level: number;
   xp: number;
   mood: PetMood;
+  coins: number;
+  happiness: number;
   hunger: number;
+  energy: number;
+  streak: number;
+  honestyHearts: number;
+  lastHungerUpdatedAt: string;
   createdAt: string;
   updatedAt: string;
 }
+
+export type RewardType = "focus_completed" | "honesty";
 
 export type FocusSessionStatus =
   | "idle"
@@ -33,8 +41,29 @@ export interface RewardLedger {
   id: string;
   sessionId: string;
   petId: string;
+  rewardType: RewardType;
   xpAwarded: number;
+  coinsAwarded: number;
+  happinessAwarded: number;
+  hungerAwarded: number;
+  energyAwarded: number;
+  streakAwarded: number;
+  honestyHeartsAwarded: number;
   createdAt: string;
+}
+
+export interface RewardSummary {
+  rewardType: RewardType;
+  xpAwarded: number;
+  coinsAwarded: number;
+  happinessAwarded: number;
+  hungerAwarded: number;
+  energyAwarded: number;
+  streakAwarded: number;
+  honestyHeartsAwarded: number;
+  previousLevel: number;
+  newLevel: number;
+  leveledUp: boolean;
 }
 
 export type PomodoroSession = FocusSession;

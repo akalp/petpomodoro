@@ -1,4 +1,4 @@
-import type { PetMood, PetState } from "../domain";
+import { normalizePetState, type PetMood, type PetState } from "../domain";
 
 import { db as defaultDb, type PetPomodoroDatabase } from "./database";
 
@@ -24,7 +24,13 @@ export function createInitialPet({
     level: 1,
     xp: 0,
     mood,
+    coins: 0,
+    happiness: 50,
     hunger: 100,
+    energy: 80,
+    streak: 0,
+    honestyHearts: 0,
+    lastHungerUpdatedAt: now,
     createdAt: now,
     updatedAt: now,
   };
@@ -36,10 +42,11 @@ export async function getCurrentPet(
   const defaultPet = await database.pets.get(DEFAULT_PET_ID);
 
   if (defaultPet) {
-    return defaultPet;
+    return normalizePetState(defaultPet);
   }
 
-  return database.pets.orderBy("createdAt").first();
+  const pet = await database.pets.orderBy("createdAt").first();
+  return pet ? normalizePetState(pet) : undefined;
 }
 
 export async function loadOrCreateDefaultPet(
@@ -49,7 +56,11 @@ export async function loadOrCreateDefaultPet(
   const currentPet = await getCurrentPet(database);
 
   if (currentPet) {
-    return currentPet;
+    const normalizedPet = normalizePetState(currentPet);
+    if (normalizedPet !== currentPet) {
+      await database.pets.put(normalizedPet);
+    }
+    return normalizedPet;
   }
 
   const pet = createInitialPet({ now });
@@ -72,4 +83,3 @@ export async function updatePet(
   await database.pets.put(pet);
   return pet;
 }
-

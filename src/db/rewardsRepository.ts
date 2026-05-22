@@ -1,5 +1,5 @@
 import {
-  claimFocusReward,
+  claimSessionReward,
   FOCUS_SESSION_XP_REWARD,
   type ClaimFocusRewardResult,
   type RewardLedger,
@@ -53,13 +53,13 @@ export async function claimStoredFocusReward(
         throw new RepositoryError(`Focus session not found: ${sessionId}`);
       }
 
-      const result = claimFocusReward({
+      const result = claimSessionReward({
         pet,
         session,
         existingRewards: existingReward ? [existingReward] : [],
         now,
         rewardId,
-        xpAwarded,
+        completedXpAwarded: xpAwarded,
       });
 
       await database.pets.put(result.pet);
@@ -73,4 +73,3 @@ export async function claimStoredFocusReward(
     },
   );
 }
-
