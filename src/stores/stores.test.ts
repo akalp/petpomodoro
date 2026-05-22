@@ -1,0 +1,216 @@
+import { describe, expect, it } from "vitest";
+
+import { claimFocusReward, type FocusSession, type PetState, type RewardLedger } from "../domain";
+import { makePet, makeSession } from "../test/factories";
+
+import { createPetStore, type PetStoreDependencies } from "./petStore";
+import {
+  createPomodoroStore,
+  type PomodoroStoreDependencies,
+} from "./pomodoroStore";
+
+const now = "2026-05-22T12:30:00.000Z";
+
+describe("Phase 3 stores", () => {
+  it("hydrates the default pet", async () => {
+    const repo = createInMemoryRepositories();
+    const petStore = createPetStore({
+      ...repo.petDependencies,
+      now: () => now,
+    });
+
+    const pet = await petStore.getState().initializePet(now);
+
+    expect(pet.name).toBe("Momo");
+    expect(petStore.getState().pet).toEqual(pet);
+    expect(repo.pet?.id).toBe("local-pet");
+  });
+
+  it("restores an elapsed running session to awaiting confirmation without reward", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet(),
+      sessions: [
+        makeSession({
+          status: "running",
+          expectedEndAt: "2026-05-22T12:25:00.000Z",
+        }),
+      ],
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    const session = await pomodoroStore
+      .getState()
+      .restoreRunningSessionAfterAppLaunch(now);
+
+    expect(session?.status).toBe("awaiting_confirmation");
+    expect(repo.pet?.xp).toBe(0);
+    expect(repo.rewardLedger.size).toBe(0);
+  });
+
+  it("abandons an active session without applying a reward", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet(),
+      sessions: [
+        makeSession({
+          status: "awaiting_confirmation",
+        }),
+      ],
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    await pomodoroStore.getState().loadActiveSession();
+    const session = await pomodoroStore.getState().confirmAbandoned(now);
+
+    expect(session.status).toBe("abandoned");
+    expect(session.abandonedAt).toBe(now);
+    expect(repo.pet?.xp).toBe(0);
+    expect(repo.rewardLedger.size).toBe(0);
+  });
+
+  it("keeps completion reward idempotent across repeated confirmations", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet(),
+      sessions: [
+        makeSession({
+          status: "awaiting_confirmation",
+        }),
+      ],
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    await petStore.getState().initializePet(now);
+    await pomodoroStore.getState().loadActiveSession();
+
+    const firstConfirmation = await pomodoroStore
+      .getState()
+      .confirmCompleted(now);
+    const secondConfirmation = await pomodoroStore
+      .getState()
+      .confirmCompleted("2026-05-22T12:31:00.000Z");
+
+    expect(firstConfirmation.status).toBe("completed");
+    expect(secondConfirmation.status).toBe("completed");
+    expect(repo.pet?.xp).toBe(25);
+    expect(repo.rewardLedger.size).toBe(1);
+  });
+});
+
+interface InMemoryRepositoryState {
+  pet?: PetState;
+  sessions?: FocusSession[];
+}
+
+function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
+  let pet = state.pet;
+  const sessions = new Map(
+    (state.sessions ?? []).map((session) => [session.id, session]),
+  );
+  const rewardLedger = new Map<string, RewardLedger>();
+
+  const petDependencies: PetStoreDependencies = {
+    getCurrentPet: async () => pet,
+    loadOrCreateDefaultPet: async (createdAt) => {
+      pet ??= makePet({
+        id: "local-pet",
+        createdAt,
+        updatedAt: createdAt,
+      });
+      return pet;
+    },
+    updatePet: async (nextPet) => {
+      pet = nextPet;
+      return nextPet;
+    },
+    claimStoredFocusReward: async ({ petId, sessionId, now: rewardNow }) => {
+      if (!pet || pet.id !== petId) {
+        throw new Error("Pet not found.");
+      }
+
+      const session = sessions.get(sessionId);
+
+      if (!session) {
+        throw new Error("Session not found.");
+      }
+
+      const existingReward = rewardLedger.get(sessionId);
+      const result = claimFocusReward({
+        pet,
+        session,
+        existingRewards: existingReward ? [existingReward] : [],
+        now: rewardNow,
+        rewardId: `reward-${sessionId}`,
+      });
+
+      pet = result.pet;
+      sessions.set(sessionId, result.session);
+
+      if (result.reward) {
+        rewardLedger.set(sessionId, result.reward);
+      }
+
+      return result;
+    },
+    now: () => now,
+  };
+
+  const pomodoroDependencies: Omit<
+    PomodoroStoreDependencies,
+    "petStore" | "now" | "createId"
+  > = {
+    createFocusSession: async (session) => {
+      sessions.set(session.id, session);
+      return session;
+    },
+    getActiveFocusSession: async () => {
+      return [...sessions.values()]
+        .filter(
+          (session) =>
+            session.status === "running" ||
+            session.status === "awaiting_confirmation",
+        )
+        .sort(
+          (a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt),
+        )[0];
+    },
+    listRecentFocusSessions: async (limit = 10) => {
+      return [...sessions.values()]
+        .sort(
+          (a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt),
+        )
+        .slice(0, limit);
+    },
+    updateFocusSession: async (session) => {
+      sessions.set(session.id, session);
+      return session;
+    },
+  };
+
+  return {
+    get pet() {
+      return pet;
+    },
+    sessions,
+    rewardLedger,
+    petDependencies,
+    pomodoroDependencies,
+  };
+}
+
