@@ -117,7 +117,8 @@ export function createPomodoroStore(
           currentStatus,
         });
         const savedSession = await dependencies.createFocusSession(session);
-        set({ activeSession: savedSession, isLoading: false });
+        const recentSessions = await dependencies.listRecentFocusSessions(10);
+        set({ activeSession: savedSession, recentSessions, isLoading: false });
         return savedSession;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
@@ -143,18 +144,21 @@ export function createPomodoroStore(
         return activeSession;
       }
 
-      set({ isLoading: true, error: null });
-
       try {
         const nextSession = moveRunningSessionToAwaitingConfirmation(
           activeSession,
           now,
         );
-        const savedSession =
-          nextSession === activeSession
-            ? activeSession
-            : await dependencies.updateFocusSession(nextSession);
-        set({ activeSession: savedSession, isLoading: false });
+
+        if (nextSession === activeSession) {
+          set({ activeSession, error: null });
+          return activeSession;
+        }
+
+        set({ isLoading: true, error: null });
+        const savedSession = await dependencies.updateFocusSession(nextSession);
+        const recentSessions = await dependencies.listRecentFocusSessions(10);
+        set({ activeSession: savedSession, recentSessions, isLoading: false });
         return savedSession;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
@@ -181,6 +185,7 @@ export function createPomodoroStore(
 
         set({
           activeSession: rewardResult.session,
+          recentSessions: await dependencies.listRecentFocusSessions(10),
           isLoading: false,
         });
 
@@ -198,7 +203,8 @@ export function createPomodoroStore(
       try {
         const abandonedSession = abandonFocusSession(activeSession, now);
         const savedSession = await dependencies.updateFocusSession(abandonedSession);
-        set({ activeSession: savedSession, isLoading: false });
+        const recentSessions = await dependencies.listRecentFocusSessions(10);
+        set({ activeSession: savedSession, recentSessions, isLoading: false });
         return savedSession;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
@@ -227,4 +233,3 @@ function requireActiveSession(session: FocusSession | null): FocusSession {
 }
 
 export const usePomodoroStore = createPomodoroStore();
-

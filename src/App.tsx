@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AppShell } from "./components/layout/AppShell";
 import { PetDashboard } from "./components/pet/PetDashboard";
@@ -12,8 +12,11 @@ import { Card } from "./components/ui/Card";
 import { usePetStore, usePomodoroStore, useUiStore } from "./stores";
 
 let appInitialization: Promise<void> | null = null;
+const FOCUS_DURATIONS = [5, 15, 25, 50];
 
 export function App() {
+  const [selectedDuration, setSelectedDuration] = useState(25);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
   const pet = usePetStore((state) => state.pet);
   const petError = usePetStore((state) => state.error);
   const activeSession = usePomodoroStore((state) => state.activeSession);
@@ -23,6 +26,11 @@ export function App() {
   const loadRecentSessions = usePomodoroStore((state) => state.loadRecentSessions);
   const startSession = usePomodoroStore((state) => state.startSession);
   const cancelSession = usePomodoroStore((state) => state.cancelSession);
+  const refreshSessionStatus = usePomodoroStore(
+    (state) => state.refreshSessionStatus,
+  );
+  const confirmCompleted = usePomodoroStore((state) => state.confirmCompleted);
+  const confirmAbandoned = usePomodoroStore((state) => state.confirmAbandoned);
   const hasHydrated = useUiStore((state) => state.hasHydrated);
   const isInitializing = useUiStore((state) => state.isInitializing);
   const uiError = useUiStore((state) => state.error);
@@ -36,17 +44,75 @@ export function App() {
       .catch(() => undefined);
   }, [initializeApp, loadRecentSessions]);
 
+  const refreshSession = useCallback(() => {
+    void refreshSessionStatus()
+      .then(() => loadRecentSessions())
+      .catch(() => undefined);
+  }, [loadRecentSessions, refreshSessionStatus]);
+
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
+    const handleFocus = () => {
+      setCurrentTime(Date.now());
+      refreshSession();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        setCurrentTime(Date.now());
+        refreshSession();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [hasHydrated, refreshSession]);
+
+  useEffect(() => {
+    if (activeSession?.status !== "running") {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setCurrentTime(Date.now());
+      refreshSession();
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [activeSession?.status, refreshSession]);
+
   const isBusy = isInitializing || isSessionLoading;
   const error = uiError ?? petError ?? pomodoroError;
 
-  const handleStart = () => {
-    void startSession()
+  const handleStart = (duration: number) => {
+    setCurrentTime(Date.now());
+    void startSession(duration)
       .then(() => loadRecentSessions())
       .catch(() => undefined);
   };
 
   const handleEnd = () => {
     void cancelSession()
+      .then(() => loadRecentSessions())
+      .catch(() => undefined);
+  };
+
+  const handleCompleted = () => {
+    void confirmCompleted()
+      .then(() => loadRecentSessions())
+      .catch(() => undefined);
+  };
+
+  const handleAbandoned = () => {
+    void confirmAbandoned()
       .then(() => loadRecentSessions())
       .catch(() => undefined);
   };
@@ -58,19 +124,42 @@ export function App() {
       <PetDashboard pet={pet} />
       {activeSession?.status === "running" ? (
         <RunningSessionScreen
+          countdownLabel={formatCountdown(activeSession.expectedEndAt, currentTime)}
           disabled={isBusy}
           onEnd={handleEnd}
           session={activeSession}
         />
       ) : activeSession?.status === "awaiting_confirmation" ? (
-        <AwaitingConfirmationScreen disabled={isBusy} session={activeSession} />
+        <AwaitingConfirmationScreen
+          disabled={isBusy}
+          onAbandoned={handleAbandoned}
+          onCompleted={handleCompleted}
+          session={activeSession}
+        />
       ) : (
-        <PomodoroStartPanel disabled={isBusy || !hasHydrated} onStart={handleStart} />
+        <PomodoroStartPanel
+          disabled={isBusy || !hasHydrated}
+          durations={FOCUS_DURATIONS}
+          onDurationChange={setSelectedDuration}
+          onStart={handleStart}
+          selectedDuration={selectedDuration}
+        />
       )}
       <SessionHistory sessions={recentSessions} />
       <SettingsPanel />
     </AppShell>
   );
+}
+
+function formatCountdown(expectedEndAt: string, nowMs: number): string {
+  const remainingSeconds = Math.max(
+    0,
+    Math.ceil((Date.parse(expectedEndAt) - nowMs) / 1000),
+  );
+  const minutes = Math.floor(remainingSeconds / 60);
+  const seconds = remainingSeconds % 60;
+
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
 function LoadingCard() {

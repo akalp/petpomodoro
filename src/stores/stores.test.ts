@@ -11,7 +11,7 @@ import {
 
 const now = "2026-05-22T12:30:00.000Z";
 
-describe("Phase 3 stores", () => {
+describe("store workflows", () => {
   it("hydrates the default pet", async () => {
     const repo = createInMemoryRepositories();
     const petStore = createPetStore({
@@ -53,7 +53,78 @@ describe("Phase 3 stores", () => {
     expect(repo.rewardLedger.size).toBe(0);
   });
 
-  it("abandons an active session without applying a reward", async () => {
+  it("keeps a running session active before its expected end time", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet(),
+      sessions: [
+        makeSession({
+          status: "running",
+          expectedEndAt: "2026-05-22T12:35:00.000Z",
+        }),
+      ],
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    await pomodoroStore.getState().loadActiveSession();
+    const session = await pomodoroStore.getState().refreshSessionStatus(now);
+
+    expect(session?.status).toBe("running");
+    expect(repo.rewardLedger.size).toBe(0);
+  });
+
+  it("starts and persists a focus session with the requested duration", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet(),
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    const session = await pomodoroStore.getState().startSession(15, now);
+
+    expect(session.status).toBe("running");
+    expect(session.plannedDurationMinutes).toBe(15);
+    expect(session.expectedEndAt).toBe("2026-05-22T12:45:00.000Z");
+    expect(repo.sessions.get("session-new")).toEqual(session);
+  });
+
+  it("cancels a running session without applying a reward", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet(),
+      sessions: [
+        makeSession({
+          status: "running",
+        }),
+      ],
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    await pomodoroStore.getState().loadActiveSession();
+    const session = await pomodoroStore.getState().cancelSession(now);
+
+    expect(session.status).toBe("abandoned");
+    expect(session.abandonedAt).toBe(now);
+    expect(repo.pet?.xp).toBe(0);
+    expect(repo.rewardLedger.size).toBe(0);
+  });
+
+  it("abandons an awaiting confirmation session without applying a reward", async () => {
     const repo = createInMemoryRepositories({
       pet: makePet(),
       sessions: [
@@ -77,6 +148,34 @@ describe("Phase 3 stores", () => {
     expect(session.abandonedAt).toBe(now);
     expect(repo.pet?.xp).toBe(0);
     expect(repo.rewardLedger.size).toBe(0);
+  });
+
+  it("confirms completion and applies the existing honesty reward path", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet(),
+      sessions: [
+        makeSession({
+          status: "awaiting_confirmation",
+        }),
+      ],
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    await petStore.getState().initializePet(now);
+    await pomodoroStore.getState().loadActiveSession();
+
+    const session = await pomodoroStore.getState().confirmCompleted(now);
+
+    expect(session.status).toBe("completed");
+    expect(session.confirmedAt).toBe(now);
+    expect(repo.pet?.xp).toBe(25);
+    expect(repo.rewardLedger.size).toBe(1);
   });
 
   it("keeps completion reward idempotent across repeated confirmations", async () => {
@@ -213,4 +312,3 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
     pomodoroDependencies,
   };
 }
-

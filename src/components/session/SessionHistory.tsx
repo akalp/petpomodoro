@@ -31,9 +31,14 @@ export function SessionHistory({ sessions }: SessionHistoryProps) {
                   {formatDate(session.startedAt)}
                 </p>
               </div>
-              <p className="text-sm font-semibold text-rose-700">
-                {session.plannedDurationMinutes} min
-              </p>
+              <div className="text-right">
+                <p className="text-sm font-semibold text-rose-700">
+                  {session.plannedDurationMinutes} min
+                </p>
+                <p className="mt-1 text-xs font-medium uppercase text-slate-500">
+                  {statusMetaLabel(session.status)}
+                </p>
+              </div>
             </Card>
           ))}
         </div>
@@ -56,6 +61,14 @@ function statusLabel(status: FocusSession["status"]): string {
   }
 
   return "In progress";
+}
+
+function statusMetaLabel(status: FocusSession["status"]): string {
+  if (status === "awaiting_confirmation") {
+    return "Awaiting confirmation";
+  }
+
+  return status;
 }
 
 function formatDate(value: string): string {

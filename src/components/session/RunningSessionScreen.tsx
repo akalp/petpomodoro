@@ -4,12 +4,14 @@ import { Card } from "../ui/Card";
 import { StatRow } from "../ui/StatRow";
 
 interface RunningSessionScreenProps {
+  countdownLabel: string;
   disabled?: boolean;
   onEnd?: () => void;
   session: FocusSession;
 }
 
 export function RunningSessionScreen({
+  countdownLabel,
   disabled = false,
   onEnd,
   session,
@@ -26,6 +28,14 @@ export function RunningSessionScreen({
         </p>
       </div>
       <div className="space-y-3">
+        <div className="rounded-lg bg-teal-50 px-4 py-5 text-center">
+          <p className="text-sm font-semibold uppercase text-teal-700">
+            Time remaining
+          </p>
+          <p className="mt-2 text-4xl font-semibold text-slate-950">
+            {countdownLabel}
+          </p>
+        </div>
         <StatRow
           label="Focus time"
           value={`${session.plannedDurationMinutes} min`}
