@@ -33,6 +33,32 @@ The tone should be cozy, trusting, and non-accusatory. The user is rewarded for 
 
 Dependencies should not be installed until the project setup phase begins.
 
+## Local Development
+
+Install dependencies:
+
+```sh
+npm install
+```
+
+Start the Vite dev server:
+
+```sh
+npm run dev
+```
+
+Run a production build:
+
+```sh
+npm run build
+```
+
+Run tests:
+
+```sh
+npm test
+```
+
 ## Local-First Architecture
 
 PetPomodoro will store all product data in IndexedDB on the user's device. React components should remain UI-focused. Business logic should live in pure functions under `src/domain` later, persistence should be isolated under `src/db`, and Zustand stores should coordinate UI state, domain actions, and database reads or writes.
@@ -71,4 +97,3 @@ The MVP should include:
 - Mobile-first UI optimized for iOS Home Screen usage.
 
 The MVP should not include backend services, auth, cloud sync, social features, cross-device recovery, or any claim that PetPomodoro can verify a native iOS timer.
-
