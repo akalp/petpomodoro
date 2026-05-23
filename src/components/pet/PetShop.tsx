@@ -18,6 +18,7 @@ interface PetShopProps {
   onBuyFood: (foodId: FoodItemId) => void;
   onClearPurchase: () => void;
   pet: PetState;
+  showCoinBalance?: boolean;
   showHeader?: boolean;
   t: Translator;
 }
@@ -51,6 +52,7 @@ export function PetShop({
   onBuyFood,
   onClearPurchase,
   pet,
+  showCoinBalance = true,
   showHeader = true,
   t,
 }: PetShopProps) {
@@ -67,10 +69,12 @@ export function PetShop({
             </p>
           </div>
         ) : null}
-        {showHeader ? <CoinBalance coins={pet.coins} t={t} variant="pill" /> : null}
+        {showHeader && showCoinBalance ? (
+          <CoinBalance coins={pet.coins} t={t} variant="pill" />
+        ) : null}
       </div>
 
-      {!showHeader ? (
+      {!showHeader && showCoinBalance ? (
         <CoinBalance coins={pet.coins} t={t} variant="bar" />
       ) : null}
 
@@ -102,7 +106,7 @@ export function PetShop({
         </motion.div>
       ) : null}
 
-      <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:auto-rows-fr">
         {FOOD_CATALOG.map((food) => (
           <FoodButton
             disabled={disabled || pet.coins < food.cost}
@@ -152,10 +156,10 @@ function FoodButton({
   return (
     <button
       className={[
-        "min-h-44 min-w-0 rounded-lg border p-4 text-left transition active:scale-[0.99]",
+        "flex min-h-60 min-w-0 flex-col rounded-lg border p-4 text-left transition active:scale-[0.99]",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500",
         disabled
-          ? "border-slate-200 bg-slate-50 text-slate-400"
+          ? "cursor-not-allowed border-slate-200 bg-slate-50 text-slate-500"
           : "border-rose-100 bg-white text-slate-900 shadow-sm shadow-rose-100 hover:border-rose-200 hover:bg-rose-50",
       ].join(" ")}
       data-testid={`food-${food.id}`}
@@ -163,23 +167,37 @@ function FoodButton({
       onClick={() => onBuyFood(food.id)}
       type="button"
     >
-      <div className="flex items-start gap-3">
+      <div className="flex min-h-24 items-start gap-3">
         <FoodVisual foodId={food.id} isDisabled={disabled} />
         <div className="min-w-0 flex-1">
-          <p className="text-base font-semibold leading-tight">
+          <p
+            className={[
+              "text-base font-semibold leading-tight",
+              disabled ? "text-slate-500" : "text-slate-950",
+            ].join(" ")}
+          >
             {t(foodCopy[food.id].name)}
           </p>
-          <p className="mt-1 text-sm leading-5 text-slate-600">
+          <p
+            className={[
+              "mt-1 text-sm leading-5",
+              disabled ? "text-slate-500" : "text-slate-600",
+            ].join(" ")}
+          >
             {t(foodCopy[food.id].description)}
           </p>
         </div>
       </div>
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-semibold">
-        <StatBoost label={t("hunger")} value={food.hunger} />
-        <StatBoost label={t("happiness")} value={food.happiness} />
-        <StatBoost label={t("energy")} value={food.energy} />
+        <StatBoost disabled={disabled} label={t("hunger")} value={food.hunger} />
+        <StatBoost
+          disabled={disabled}
+          label={t("happiness")}
+          value={food.happiness}
+        />
+        <StatBoost disabled={disabled} label={t("energy")} value={food.energy} />
       </dl>
-      <div className="mt-4 flex min-w-0 flex-wrap items-center justify-between gap-2 text-sm font-semibold">
+      <div className="mt-auto flex min-w-0 flex-wrap items-center justify-between gap-2 pt-4 text-sm font-semibold">
         <span className="shrink-0 rounded-full bg-amber-100 px-3 py-1 text-amber-900">
           {t("foodCost", { coins: food.cost })}
         </span>
@@ -225,10 +243,28 @@ function CoinBalance({
   );
 }
 
-function StatBoost({ label, value }: { label: string; value: number }) {
+function StatBoost({
+  disabled,
+  label,
+  value,
+}: {
+  disabled: boolean;
+  label: string;
+  value: number;
+}) {
   return (
-    <div className="rounded-md bg-slate-50 px-2 py-2 text-slate-700">
-      <dt className="min-h-7 text-[0.62rem] font-medium leading-tight text-slate-500">
+    <div
+      className={[
+        "rounded-md px-2 py-2",
+        disabled ? "bg-white/70 text-slate-500" : "bg-slate-50 text-slate-700",
+      ].join(" ")}
+    >
+      <dt
+        className={[
+          "min-h-7 text-[0.62rem] font-medium leading-tight",
+          disabled ? "text-slate-400" : "text-slate-500",
+        ].join(" ")}
+      >
         {label}
       </dt>
       <dd className="mt-1 text-sm">{formatSigned(value)}</dd>

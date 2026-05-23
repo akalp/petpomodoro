@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { createTranslator } from "../../i18n";
 import { makePet } from "../../test/factories";
-import { Modal } from "../ui/Modal";
+import { Drawer } from "../ui/Drawer";
 
 import { PetShop } from "./PetShop";
 
@@ -28,11 +28,11 @@ describe("PetShop", () => {
     expect(html).toContain("Need more coins");
   });
 
-  it("renders inside the Store modal without its duplicate header", () => {
+  it("renders inside the Store drawer without its duplicate header", () => {
     const html = renderToStaticMarkup(
-      <Modal
-        closeLabel="Close"
+      <Drawer
         description="Spend focus coins on a small bite for your pet."
+        headerAction={<span>10 coins</span>}
         isOpen
         onClose={() => undefined}
         title="Pet snack shop"
@@ -44,14 +44,17 @@ describe("PetShop", () => {
           onBuyFood={() => undefined}
           onClearPurchase={() => undefined}
           pet={makePet({ coins: 10 })}
+          showCoinBalance={false}
           showHeader={false}
           t={createTranslator("en")}
         />
-      </Modal>,
+      </Drawer>,
     );
 
     expect(html).toContain("role=\"dialog\"");
+    expect(html).toContain("data-testid=\"drawer-backdrop\"");
     expect(html).toContain("Pet snack shop");
+    expect(html).toContain("10 coins");
     expect(html).toContain("Moon milk");
     expect(html).toContain("Feed");
   });

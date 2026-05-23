@@ -14,7 +14,7 @@ import { SessionHistory } from "./components/session/SessionHistory";
 import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { Button } from "./components/ui/Button";
 import { Card } from "./components/ui/Card";
-import { Modal } from "./components/ui/Modal";
+import { Drawer } from "./components/ui/Drawer";
 import { resetLocalData } from "./db";
 import {
   DEFAULT_FOCUS_DURATION_MINUTES,
@@ -469,9 +469,11 @@ export function App() {
         sessions={recentSessions}
         t={t}
       />
-      <Modal
-        closeLabel={t("close")}
+      <Drawer
         description={t("shopSupport")}
+        headerAction={
+          pet ? <StoreCoinBadge coins={pet.coins} t={t} /> : undefined
+        }
         isOpen={activeDialog === "store" && Boolean(pet)}
         onClose={closeDialog}
         title={t("shopTitle")}
@@ -484,13 +486,13 @@ export function App() {
             onBuyFood={handleBuyFood}
             onClearPurchase={clearLastFoodPurchase}
             pet={pet}
+            showCoinBalance={false}
             showHeader={false}
             t={t}
           />
         ) : null}
-      </Modal>
-      <Modal
-        closeLabel={t("close")}
+      </Drawer>
+      <Drawer
         description={t("settingsSupport")}
         isOpen={activeDialog === "settings"}
         onClose={closeDialog}
@@ -524,8 +526,16 @@ export function App() {
           showHeader={false}
           t={t}
         />
-      </Modal>
+      </Drawer>
     </AppShell>
+  );
+}
+
+function StoreCoinBadge({ coins, t }: { coins: number; t: Translator }) {
+  return (
+    <div className="inline-flex min-h-10 items-center justify-center rounded-lg border border-amber-100 bg-amber-50 px-3 text-sm font-bold text-amber-950">
+      {t("shopCoinBalance", { coins })}
+    </div>
   );
 }
 
