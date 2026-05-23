@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { AppShell } from "./components/layout/AppShell";
 import { PetDashboard } from "./components/pet/PetDashboard";
+import { InstallHint } from "./components/pwa/InstallHint";
 import { AwaitingConfirmationScreen } from "./components/session/AwaitingConfirmationScreen";
 import { PomodoroStartPanel } from "./components/session/PomodoroStartPanel";
 import { RewardModal } from "./components/session/RewardModal";
@@ -10,6 +11,7 @@ import { SessionHistory } from "./components/session/SessionHistory";
 import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { Button } from "./components/ui/Button";
 import { Card } from "./components/ui/Card";
+import { clearShortcutReturn, parseShortcutReturn } from "./pwa/shortcuts";
 import { usePetStore, usePomodoroStore, useUiStore } from "./stores";
 
 let appInitialization: Promise<void> | null = null;
@@ -94,6 +96,41 @@ export function App() {
     return () => window.clearInterval(intervalId);
   }, [activeSession?.status, refreshSession]);
 
+  useEffect(() => {
+    if (!hasHydrated) {
+      return;
+    }
+
+    const { completedSessionId } = parseShortcutReturn(window.location.href);
+
+    if (!completedSessionId) {
+      return;
+    }
+
+    const refreshNow =
+      activeSession?.id === completedSessionId &&
+      activeSession.status === "running"
+        ? activeSession.expectedEndAt
+        : new Date().toISOString();
+
+    void refreshSessionStatus(refreshNow)
+      .then(() => loadRecentSessions())
+      .catch(() => undefined);
+
+    window.history.replaceState(
+      null,
+      "",
+      clearShortcutReturn(window.location.href),
+    );
+  }, [
+    activeSession?.expectedEndAt,
+    activeSession?.id,
+    activeSession?.status,
+    hasHydrated,
+    loadRecentSessions,
+    refreshSessionStatus,
+  ]);
+
   const isBusy = isInitializing || isSessionLoading;
   const error = uiError ?? petError ?? pomodoroError;
 
@@ -126,6 +163,7 @@ export function App() {
     <AppShell>
       {error ? <ErrorNotice message={error} /> : null}
       {!hasHydrated && isInitializing ? <LoadingCard /> : null}
+      <InstallHint />
       <PetDashboard pet={pet} />
       {activeSession?.status === "running" ? (
         <RunningSessionScreen
