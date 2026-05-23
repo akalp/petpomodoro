@@ -38,8 +38,8 @@ The user ended the session early or honestly said they did not complete it. Earl
 | From | To | Trigger | Data changes | Reward behavior |
 | --- | --- | --- | --- | --- |
 | `idle` | `running` | User starts a focus session | Create session with `startedAt`, `expectedEndAt`, `plannedDurationMinutes`, `rewardClaimedAt = null` | No reward |
-| `running` | `awaiting_confirmation` | Current local time is greater than or equal to `expectedEndAt` | Update status to `awaiting_confirmation` | No reward |
-| `running` | `abandoned` | User ends a running session early | Set `abandonedAt`, `abandonmentReason = cancelled`, status `abandoned` | No reward |
+| `running` | `awaiting_confirmation` | Current local time is greater than or equal to `expectedEndAt` | Apply elapsed focus care impact through `expectedEndAt`; update status to `awaiting_confirmation` | Base focus coins only; no completion reward |
+| `running` | `abandoned` | User ends a running session early | Apply elapsed focus care impact through `abandonedAt`; set `abandonedAt`, `abandonmentReason = cancelled`, status `abandoned` | Base focus coins only; no completion reward |
 | `awaiting_confirmation` | `completed` | User selects "Yes, we did it" | Set `confirmedAt`, status `completed` | Apply reward if unclaimed |
 | `awaiting_confirmation` | `abandoned` | User selects "Not this time" | Set `abandonedAt`, `abandonmentReason = honest_confirmation`, status `abandoned` | Apply one honesty reward if unclaimed |
 | `completed` | `idle` | User dismisses result or starts another session | Clear active session reference | Reward already handled |
@@ -118,7 +118,7 @@ Rules:
 - Set `abandonmentReason = cancelled` for early ending from `running`.
 - Set `abandonmentReason = honest_confirmation` for "Not this time" from `awaiting_confirmation`.
 - Leave `confirmedAt = null`.
-- Early cancellation leaves `rewardClaimedAt = null`, creates no ledger record, and changes no pet stats.
+- Early cancellation leaves `rewardClaimedAt = null` and creates no ledger record. Elapsed focus care impact and base focus coins still apply through the cancellation time.
 - Honest declined confirmation may set `rewardClaimedAt`, create one ledger record, and apply only the documented honesty reward; it does not grant completion XP or levels.
 
 ### Return To Idle
@@ -135,7 +135,7 @@ Rules:
 
 ## Reward Application
 
-The MVP rewards are deterministic multi-stat updates: honestly completed focus sessions grant completion rewards, and a declined confirmation grants a smaller honesty-heart reward without completion XP.
+The MVP rewards are deterministic multi-stat updates: honestly completed focus sessions grant completion rewards, and a declined confirmation grants a smaller honesty-heart reward without completion XP. Elapsed focus time separately decreases hunger and energy and awards base focus coins, whether the session is completed or abandoned.
 
 Reward logic should:
 

@@ -63,7 +63,7 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Close the tab or app before `expectedEndAt`.
 - [ ] Reopen after `expectedEndAt`.
 - [ ] The session moves to `awaiting_confirmation`.
-- [ ] No reward is applied during rehydration.
+- [ ] Elapsed focus care impact is applied once, but no completion reward is applied during rehydration.
 - [ ] The confirmation prompt appears exactly as: "Your pet waited for you. Did you really finish this focus session?"
 
 ## Awaiting Confirmation
@@ -106,7 +106,8 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Start a running session.
 - [ ] Tap "End this session".
 - [ ] The session becomes `abandoned`.
-- [ ] No reward or reward-ledger entry is applied.
+- [ ] Elapsed focus care impact and base focus coins are applied.
+- [ ] No completion reward or reward-ledger entry is applied.
 - [ ] The app returns to the idle start state after result handling.
 - [ ] Session history shows a neutral abandoned entry.
 

@@ -14,14 +14,15 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
   - "Yes, we did it"
   - "Not this time"
 - Multi-stat completion rewards with idempotent reward protection.
-- Neutral abandoned-session handling: early cancellation grants no reward, while honestly declining after the planned window grants one small honesty reward.
+- Duration-based focus care impact and base focus coins for elapsed work time.
+- Neutral abandoned-session handling: early cancellation grants no completion reward, while honestly declining after the planned window grants one small honesty reward.
 - Recent session history.
 - IndexedDB-backed settings for pet name, preferred focus duration, Shortcut preference, reminders, and resetting local data.
 - PWA manifest, app icons, service worker precaching, and offline app-shell support after first load.
 - iOS Safari install hint and Home Screen metadata.
 - Optional iOS Shortcut launch for starting a native timer with the selected duration.
 - Optional local notification reminders while the PWA is allowed to keep running.
-- Care stats, hunger decay, streak tracking, and honesty hearts.
+- Care stats, hunger and happiness decay, streak tracking, and honesty hearts.
 
 ## Not Included
 

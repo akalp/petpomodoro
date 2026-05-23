@@ -84,7 +84,7 @@ Each task should be small enough to review and commit separately. Keep app imple
 - Prevent duplicate reward from double tap or retry.
 - Add UI feedback for XP gained.
 - Add UI feedback for level up.
-- Add hunger decay on reopen using local timestamps.
+- Add hunger, happiness, and duration-based focus care decay using local timestamps.
 - Add tests for reward idempotency through the store and database transaction.
 
 ## Phase 7: PWA Setup
@@ -114,7 +114,7 @@ Each task should be small enough to review and commit separately. Keep app imple
 
 - Test fresh load in desktop browser.
 - Test starting a session.
-- Test cancelling a running session without reward.
+- Test cancelling a running session with elapsed focus care impact and no completion reward.
 - Test declining confirmation with one honesty reward.
 - Test custom durations and settings migration/reset.
 - Test reaching awaiting confirmation while the app remains open.

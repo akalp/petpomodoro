@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  applyFocusSessionImpact,
+  applyIdlePetDecay,
   claimSessionReward,
   createDefaultSettings,
   type AppSettings,
@@ -16,6 +18,7 @@ import {
   type PomodoroStoreDependencies,
 } from "./pomodoroStore";
 import { createSettingsStore } from "./settingsStore";
+import { createUiStore } from "./uiStore";
 
 const now = "2026-05-22T12:30:00.000Z";
 
@@ -58,7 +61,47 @@ describe("store workflows", () => {
 
     expect(session?.status).toBe("awaiting_confirmation");
     expect(repo.pet?.xp).toBe(0);
+    expect(repo.pet?.coins).toBe(5);
+    expect(repo.pet?.hunger).toBeCloseTo(94.67, 2);
+    expect(repo.pet?.energy).toBe(73);
     expect(repo.rewardLedger.size).toBe(0);
+  });
+
+  it("initializes an active elapsed session without double-counting idle decay", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet(),
+      sessions: [
+        makeSession({
+          status: "running",
+          expectedEndAt: "2026-05-22T12:25:00.000Z",
+        }),
+      ],
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+    const settingsStore = createSettingsStore({
+      loadOrCreateSettings: async (createdAt) => createDefaultSettings(createdAt),
+      updateSettings: async (settings) => settings,
+      readLegacySettings: () => ({}),
+      clearLegacySettings: () => undefined,
+      now: () => now,
+    });
+    const uiStore = createUiStore({
+      petStore,
+      pomodoroStore,
+      settingsStore,
+      now: () => now,
+    });
+
+    await uiStore.getState().initializeApp(now);
+
+    expect(repo.pet?.coins).toBe(5);
+    expect(repo.pet?.hunger).toBeCloseTo(94.67, 2);
   });
 
   it("keeps a running session active before its expected end time", async () => {
@@ -112,6 +155,9 @@ describe("store workflows", () => {
       sessions: [
         makeSession({
           status: "running",
+          startedAt: "2026-05-22T12:20:00.000Z",
+          expectedEndAt: "2026-05-22T12:45:00.000Z",
+          focusImpactAppliedUntil: "2026-05-22T12:20:00.000Z",
         }),
       ],
     });
@@ -130,6 +176,9 @@ describe("store workflows", () => {
     expect(session.abandonmentReason).toBe("cancelled");
     expect(session.abandonedAt).toBe(now);
     expect(repo.pet?.xp).toBe(0);
+    expect(repo.pet?.coins).toBe(2);
+    expect(repo.pet?.hunger).toBe(98);
+    expect(repo.pet?.energy).toBeCloseTo(77.2);
     expect(repo.pet?.honestyHearts).toBe(0);
     expect(repo.rewardLedger.size).toBe(0);
   });
@@ -158,6 +207,7 @@ describe("store workflows", () => {
     expect(session.abandonmentReason).toBe("honest_confirmation");
     expect(session.abandonedAt).toBe(now);
     expect(repo.pet?.xp).toBe(0);
+    expect(repo.pet?.coins).toBe(5);
     expect(repo.pet?.honestyHearts).toBe(1);
     expect(repo.rewardLedger.size).toBe(1);
   });
@@ -187,7 +237,7 @@ describe("store workflows", () => {
     expect(session.status).toBe("completed");
     expect(session.confirmedAt).toBe(now);
     expect(repo.pet?.xp).toBe(25);
-    expect(repo.pet?.coins).toBe(10);
+    expect(repo.pet?.coins).toBe(15);
     expect(repo.pet?.streak).toBe(1);
     expect(repo.rewardLedger.size).toBe(1);
   });
@@ -269,6 +319,7 @@ describe("store workflows", () => {
     expect(firstConfirmation.status).toBe("completed");
     expect(secondConfirmation.status).toBe("completed");
     expect(repo.pet?.xp).toBe(25);
+    expect(repo.pet?.coins).toBe(15);
     expect(repo.rewardLedger.size).toBe(1);
   });
 });
@@ -355,7 +406,12 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
       pet = nextPet;
       return nextPet;
     },
-    claimStoredSessionReward: async ({ petId, sessionId, now: rewardNow }) => {
+    claimStoredSessionReward: async ({
+      petId,
+      sessionId,
+      now: rewardNow,
+      session: nextSession,
+    }) => {
       if (!pet || pet.id !== petId) {
         throw new Error("Pet not found.");
       }
@@ -366,10 +422,25 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
         throw new Error("Session not found.");
       }
 
+      const rewardSession = nextSession ?? session;
       const existingReward = rewardLedger.get(sessionId);
+
+      if (rewardSession.rewardClaimedAt !== null || existingReward) {
+        const result = claimSessionReward({
+          pet,
+          session: rewardSession,
+          existingRewards: existingReward ? [existingReward] : [],
+          now: rewardNow,
+          rewardId: `reward-${sessionId}`,
+        });
+        sessions.set(sessionId, result.session);
+        return result;
+      }
+
+      const impactResult = applyStoredImpactValues(pet, rewardSession, rewardNow);
       const result = claimSessionReward({
-        pet,
-        session,
+        pet: impactResult.pet,
+        session: impactResult.session,
         existingRewards: existingReward ? [existingReward] : [],
         now: rewardNow,
         rewardId: `reward-${sessionId}`,
@@ -382,6 +453,20 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
         rewardLedger.set(sessionId, result.reward);
       }
 
+      return result;
+    },
+    applyStoredSessionImpact: async ({ petId, session, now: impactNow }) => {
+      if (!pet || pet.id !== petId) {
+        throw new Error("Pet not found.");
+      }
+
+      if (!sessions.has(session.id)) {
+        throw new Error("Session not found.");
+      }
+
+      const result = applyStoredImpactValues(pet, session, impactNow);
+      pet = result.pet;
+      sessions.set(session.id, result.session);
       return result;
     },
     now: () => now,
@@ -427,5 +512,20 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
     rewardLedger,
     petDependencies,
     pomodoroDependencies,
+  };
+}
+
+function applyStoredImpactValues(
+  pet: PetState,
+  session: FocusSession,
+  impactNow: string,
+): { pet: PetState; session: FocusSession } {
+  const focusResult = applyFocusSessionImpact(pet, session, impactNow);
+  return {
+    pet:
+      focusResult.session.status === "running"
+        ? focusResult.pet
+        : applyIdlePetDecay(focusResult.pet, impactNow),
+    session: focusResult.session,
   };
 }

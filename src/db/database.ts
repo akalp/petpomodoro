@@ -34,6 +34,30 @@ export class PetPomodoroDatabase extends Dexie {
             session.abandonmentReason ??= null;
           }),
       );
+
+    this.version(3)
+      .stores({
+        pets: "id, createdAt, updatedAt",
+        sessions: "id, status, startedAt, expectedEndAt, rewardClaimedAt",
+        rewardLedger: "id, &sessionId, petId, createdAt",
+        settings: "id, updatedAt",
+      })
+      .upgrade(async (transaction) => {
+        await transaction
+          .table("pets")
+          .toCollection()
+          .modify((pet: Partial<PetState>) => {
+            pet.lastAppOpenedAt ??= pet.lastHungerUpdatedAt ?? pet.updatedAt;
+          });
+
+        await transaction
+          .table("sessions")
+          .toCollection()
+          .modify((session: Partial<FocusSession>) => {
+            session.focusImpactAppliedUntil ??= session.startedAt;
+            session.focusCoinsAwarded ??= 0;
+          });
+      });
   }
 }
 

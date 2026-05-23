@@ -11,9 +11,13 @@ interface PetAvatarProps {
 const moodFace: Record<PetDisplayMood, string> = {
   calm: "^_^",
   happy: "*_*",
-  sleepy: "-_-",
+  hungry: "u_u",
+  tired: "-_-",
+  sad: ";_;",
   working: "o_o",
 };
+
+const lowEnergyMoods: PetDisplayMood[] = ["hungry", "tired", "sad"];
 
 export function PetAvatar({ mood, t }: PetAvatarProps) {
   const shouldReduceMotion = useReducedMotion();
@@ -31,7 +35,7 @@ export function PetAvatar({ mood, t }: PetAvatarProps) {
                     ? [0, -1, 0]
                     : [0, 1, 0],
               y:
-                mood === "sleepy"
+                lowEnergyMoods.includes(mood)
                   ? [0, 2, 0]
                   : mood === "working"
                     ? [0, -1, 0]
@@ -76,8 +80,16 @@ function moodLabel(mood: PetDisplayMood, t: Translator): string {
     return t("moodHappy");
   }
 
-  if (mood === "sleepy") {
-    return t("moodSleepy");
+  if (mood === "hungry") {
+    return t("moodHungry");
+  }
+
+  if (mood === "tired") {
+    return t("moodTired");
+  }
+
+  if (mood === "sad") {
+    return t("moodSad");
   }
 
   return t("moodCalm");

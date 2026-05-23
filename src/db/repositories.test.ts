@@ -94,6 +94,9 @@ describe("Dexie repositories", () => {
     );
 
     expect(first.pet.xp).toBe(25);
+    expect(first.pet.coins).toBe(15);
+    expect(first.pet.hunger).toBeCloseTo(94.6);
+    expect(first.pet.energy).toBe(73);
     expect(second.reward).toBeNull();
     expect(await completedDatabase.rewardLedger.count()).toBe(1);
 
@@ -112,6 +115,9 @@ describe("Dexie repositories", () => {
       honestyDatabase,
     );
 
+    expect(honesty.pet.coins).toBe(5);
+    expect(honesty.pet.hunger).toBeCloseTo(94.6);
+    expect(honesty.pet.energy).toBe(78);
     expect(honesty.pet.honestyHearts).toBe(1);
     expect(honesty.reward?.rewardType).toBe("honesty");
   });

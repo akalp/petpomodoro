@@ -5,6 +5,7 @@ import {
   confirmFocusSession,
   createRunningSession,
   moveRunningSessionToAwaitingConfirmation,
+  shouldPersistFocusSessionImpact,
   type FocusSession,
   type FocusSessionStatus,
 } from "../domain";
@@ -24,7 +25,9 @@ export interface PomodoroStoreDependencies {
   getActiveFocusSession: typeof getActiveFocusSession;
   listRecentFocusSessions: typeof listRecentFocusSessions;
   updateFocusSession: typeof updateFocusSession;
-  petStore: UseBoundStore<StoreApi<Pick<PetStoreState, "applyHonestyReward">>>;
+  petStore: UseBoundStore<
+    StoreApi<Pick<PetStoreState, "applyFocusImpact" | "applySessionReward">>
+  >;
   now: () => string;
   createId: () => string;
 }
@@ -83,8 +86,16 @@ export function createPomodoroStore(
     restoreRunningSessionAfterAppLaunch: async (now = dependencies.now()) => {
       const activeSession = await get().loadActiveSession();
 
-      if (!activeSession || activeSession.status !== "running") {
-        return activeSession;
+      if (!activeSession) {
+        return null;
+      }
+
+      if (activeSession.status !== "running") {
+        const impactResult = await dependencies.petStore
+          .getState()
+          .applyFocusImpact(activeSession, now);
+        set({ activeSession: impactResult.session });
+        return impactResult.session;
       }
 
       return get().refreshSessionStatus(now);
@@ -137,10 +148,16 @@ export function createPomodoroStore(
           "cancelled",
           now,
         );
-        const savedSession = await dependencies.updateFocusSession(abandonedSession);
+        const impactResult = await dependencies.petStore
+          .getState()
+          .applyFocusImpact(abandonedSession, now);
         const recentSessions = await dependencies.listRecentFocusSessions(10);
-        set({ activeSession: savedSession, recentSessions, isLoading: false });
-        return savedSession;
+        set({
+          activeSession: impactResult.session,
+          recentSessions,
+          isLoading: false,
+        });
+        return impactResult.session;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
         throw error;
@@ -157,8 +174,11 @@ export function createPomodoroStore(
       }
 
       if (activeSession.status !== "running") {
-        set({ activeSession });
-        return activeSession;
+        const impactResult = await dependencies.petStore
+          .getState()
+          .applyFocusImpact(activeSession, now);
+        set({ activeSession: impactResult.session });
+        return impactResult.session;
       }
 
       try {
@@ -167,16 +187,25 @@ export function createPomodoroStore(
           now,
         );
 
-        if (nextSession === activeSession) {
+        if (
+          nextSession === activeSession &&
+          !shouldPersistFocusSessionImpact(activeSession, now)
+        ) {
           set({ activeSession, error: null });
           return activeSession;
         }
 
         set({ isLoading: true, error: null });
-        const savedSession = await dependencies.updateFocusSession(nextSession);
+        const impactResult = await dependencies.petStore
+          .getState()
+          .applyFocusImpact(nextSession, now);
         const recentSessions = await dependencies.listRecentFocusSessions(10);
-        set({ activeSession: savedSession, recentSessions, isLoading: false });
-        return savedSession;
+        set({
+          activeSession: impactResult.session,
+          recentSessions,
+          isLoading: false,
+        });
+        return impactResult.session;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
         throw error;
@@ -192,13 +221,9 @@ export function createPomodoroStore(
           activeSession.status === "completed"
             ? activeSession
             : confirmFocusSession(activeSession, now);
-        const savedSession =
-          completedSession === activeSession
-            ? activeSession
-            : await dependencies.updateFocusSession(completedSession);
         const rewardResult = await dependencies.petStore
           .getState()
-          .applyHonestyReward(savedSession.id, now);
+          .applySessionReward(completedSession, now);
 
         set({
           activeSession: rewardResult.session,
@@ -223,10 +248,9 @@ export function createPomodoroStore(
           "honest_confirmation",
           now,
         );
-        const savedSession = await dependencies.updateFocusSession(abandonedSession);
         const rewardResult = await dependencies.petStore
           .getState()
-          .applyHonestyReward(savedSession.id, now);
+          .applySessionReward(abandonedSession, now);
         const recentSessions = await dependencies.listRecentFocusSessions(10);
         set({
           activeSession: rewardResult.session,

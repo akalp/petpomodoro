@@ -31,6 +31,8 @@ export function createRunningSession({
     abandonedAt: null,
     abandonmentReason: null,
     rewardClaimedAt: null,
+    focusImpactAppliedUntil: now,
+    focusCoinsAwarded: 0,
   };
 }
 

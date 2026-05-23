@@ -31,6 +31,7 @@ export function createInitialPet({
     streak: 0,
     honestyHearts: 0,
     lastHungerUpdatedAt: now,
+    lastAppOpenedAt: now,
     createdAt: now,
     updatedAt: now,
   };

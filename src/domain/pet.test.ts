@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
   addPetXp,
+  applyAppOpenDecay,
+  applyFocusSessionImpact,
   applyHungerDecay,
   calculateLevel,
   DEFAULT_HUNGER_DECAY_PER_HOUR,
   displayMoodForSession,
+  moodForStats,
 } from "./pet";
-import { makePet } from "../test/factories";
+import { makePet, makeSession } from "../test/factories";
 
 describe("pet domain logic", () => {
   it("calculates deterministic levels from total XP", () => {
@@ -44,9 +47,84 @@ describe("pet domain logic", () => {
     );
 
     expect(updated.hunger).toBe(0);
-    expect(updated.mood).toBe("sleepy");
+    expect(updated.happiness).toBeLessThan(50);
+    expect(updated.mood).toBe("hungry");
     expect(updated.lastHungerUpdatedAt).toBe("2026-05-22T12:00:00.000Z");
     expect(updated.updatedAt).toBe("2026-05-22T12:00:00.000Z");
+  });
+
+  it("applies focus impact from elapsed minutes once", () => {
+    const result = applyFocusSessionImpact(
+      makePet(),
+      makeSession(),
+      "2026-05-22T12:25:00.000Z",
+    );
+
+    expect(result.pet).toMatchObject({
+      coins: 5,
+      hunger: 95,
+      energy: 73,
+      lastHungerUpdatedAt: "2026-05-22T12:25:00.000Z",
+    });
+    expect(result.session).toMatchObject({
+      focusImpactAppliedUntil: "2026-05-22T12:25:00.000Z",
+      focusCoinsAwarded: 5,
+    });
+
+    const repeated = applyFocusSessionImpact(
+      result.pet,
+      result.session,
+      "2026-05-22T12:25:00.000Z",
+    );
+
+    expect(repeated.pet).toBe(result.pet);
+    expect(repeated.session).toBe(result.session);
+  });
+
+  it("scales focus impact for longer custom durations", () => {
+    const result = applyFocusSessionImpact(
+      makePet(),
+      makeSession({
+        plannedDurationMinutes: 90,
+        expectedEndAt: "2026-05-22T13:30:00.000Z",
+      }),
+      "2026-05-22T13:30:00.000Z",
+    );
+
+    expect(result.pet.coins).toBe(18);
+    expect(result.pet.hunger).toBe(82);
+    expect(result.pet.energy).toBeCloseTo(54.8);
+  });
+
+  it("awards focus coins only for full five minute blocks", () => {
+    const first = applyFocusSessionImpact(
+      makePet(),
+      makeSession(),
+      "2026-05-22T12:07:00.000Z",
+    );
+    const second = applyFocusSessionImpact(
+      first.pet,
+      first.session,
+      "2026-05-22T12:10:00.000Z",
+    );
+
+    expect(first.pet.coins).toBe(1);
+    expect(first.session.focusCoinsAwarded).toBe(1);
+    expect(second.pet.coins).toBe(2);
+    expect(second.session.focusCoinsAwarded).toBe(2);
+  });
+
+  it("applies capped app-open happiness decay", () => {
+    const updated = applyAppOpenDecay(
+      makePet({
+        happiness: 80,
+        lastAppOpenedAt: "2026-05-21T12:00:00.000Z",
+      }),
+      "2026-05-22T12:00:00.000Z",
+    );
+
+    expect(updated.happiness).toBe(74);
+    expect(updated.lastAppOpenedAt).toBe("2026-05-22T12:00:00.000Z");
   });
 
   it("does not decay hunger when time has not moved forward", () => {
@@ -58,6 +136,22 @@ describe("pet domain logic", () => {
   it("shows a working mood only while a focus session is running", () => {
     expect(displayMoodForSession("happy", "running")).toBe("working");
     expect(displayMoodForSession("happy", "awaiting_confirmation")).toBe("happy");
-    expect(displayMoodForSession("sleepy", null)).toBe("sleepy");
+    expect(displayMoodForSession("tired", null)).toBe("tired");
+  });
+
+  it("derives actionable moods from care stats", () => {
+    expect(moodForStats({ happiness: 80, hunger: 20, energy: 80 })).toBe(
+      "hungry",
+    );
+    expect(moodForStats({ happiness: 80, hunger: 80, energy: 10 })).toBe(
+      "tired",
+    );
+    expect(moodForStats({ happiness: 20, hunger: 80, energy: 80 })).toBe("sad");
+    expect(moodForStats({ happiness: 80, hunger: 80, energy: 80 })).toBe(
+      "happy",
+    );
+    expect(moodForStats({ happiness: 50, hunger: 80, energy: 80 })).toBe(
+      "calm",
+    );
   });
 });

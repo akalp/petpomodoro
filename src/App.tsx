@@ -67,6 +67,7 @@ export function App() {
     (state) => state.clearLastRewardSummary,
   );
   const renamePet = usePetStore((state) => state.renamePet);
+  const updateAppOpenDecay = usePetStore((state) => state.updateAppOpenDecay);
   const activeSession = usePomodoroStore((state) => state.activeSession);
   const recentSessions = usePomodoroStore((state) => state.recentSessions);
   const pomodoroError = usePomodoroStore((state) => state.error);
@@ -191,8 +192,8 @@ export function App() {
     document.documentElement.lang = language;
   }, [language]);
 
-  const refreshSession = useCallback(() => {
-    void refreshSessionStatus()
+  const refreshSession = useCallback((now = new Date().toISOString()) => {
+    void refreshSessionStatus(now)
       .then(() => loadRecentSessions())
       .catch(() => undefined);
   }, [loadRecentSessions, refreshSessionStatus]);
@@ -203,16 +204,22 @@ export function App() {
     }
 
     const handleFocus = () => {
-      setCurrentTime(Date.now());
+      const now = new Date().toISOString();
+      setCurrentTime(Date.parse(now));
       setNotificationPermission(getNotificationPermission());
-      refreshSession();
+      void updateAppOpenDecay(now)
+        .then(() => refreshSession(now))
+        .catch(() => undefined);
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        setCurrentTime(Date.now());
+        const now = new Date().toISOString();
+        setCurrentTime(Date.parse(now));
         setNotificationPermission(getNotificationPermission());
-        refreshSession();
+        void updateAppOpenDecay(now)
+          .then(() => refreshSession(now))
+          .catch(() => undefined);
       }
     };
 
@@ -223,7 +230,7 @@ export function App() {
       window.removeEventListener("focus", handleFocus);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [hasHydrated, refreshSession]);
+  }, [hasHydrated, refreshSession, updateAppOpenDecay]);
 
   useEffect(() => {
     if (activeSession?.status !== "running") {

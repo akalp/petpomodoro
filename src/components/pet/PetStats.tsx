@@ -41,8 +41,16 @@ function moodLabel(mood: PetDisplayMood, t: Translator): string {
     return t("moodHappy");
   }
 
-  if (mood === "sleepy") {
-    return t("moodSleepy");
+  if (mood === "hungry") {
+    return t("moodHungry");
+  }
+
+  if (mood === "tired") {
+    return t("moodTired");
+  }
+
+  if (mood === "sad") {
+    return t("moodSad");
   }
 
   return t("moodCalm");

@@ -1,12 +1,16 @@
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 
 import {
+  applyAppOpenDecay,
+  applyFocusSessionImpact,
   applyHungerDecay,
   type ClaimFocusRewardResult,
+  type FocusSession,
   type PetState,
   type RewardSummary,
 } from "../domain";
 import {
+  applyStoredSessionImpact,
   claimStoredSessionReward,
   getCurrentPet,
   loadOrCreateDefaultPet,
@@ -20,6 +24,7 @@ export interface PetStoreDependencies {
   loadOrCreateDefaultPet: typeof loadOrCreateDefaultPet;
   updatePet: typeof updatePet;
   claimStoredSessionReward: typeof claimStoredSessionReward;
+  applyStoredSessionImpact: typeof applyStoredSessionImpact;
   now: () => string;
 }
 
@@ -35,8 +40,17 @@ export interface PetStoreState {
     sessionId: string,
     now?: string,
   ) => Promise<ClaimFocusRewardResult>;
+  applySessionReward: (
+    session: FocusSession,
+    now?: string,
+  ) => Promise<ClaimFocusRewardResult>;
+  applyFocusImpact: (
+    session: FocusSession,
+    now?: string,
+  ) => Promise<{ pet: PetState; session: FocusSession }>;
   renamePet: (name: string, now?: string) => Promise<PetState>;
   clearLastRewardSummary: () => void;
+  updateAppOpenDecay: (now?: string) => Promise<PetState | null>;
   updateDecayOnOpen: (now?: string) => Promise<PetState | null>;
   clearError: () => void;
 }
@@ -46,6 +60,7 @@ const defaultDependencies: PetStoreDependencies = {
   loadOrCreateDefaultPet,
   updatePet,
   claimStoredSessionReward,
+  applyStoredSessionImpact,
   now: () => new Date().toISOString(),
 };
 
@@ -119,6 +134,57 @@ export function createPetStore(
       }
     },
 
+    applySessionReward: async (session, now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().initializePet(now));
+      set({ isLoading: true, error: null });
+
+      try {
+        const result = await dependencies.claimStoredSessionReward({
+          petId: pet.id,
+          sessionId: session.id,
+          session,
+          now,
+        });
+        set({
+          pet: result.pet,
+          lastRewardSummary: result.summary,
+          isLoading: false,
+        });
+        return result;
+      } catch (error) {
+        set({ error: errorMessage(error), isLoading: false });
+        throw error;
+      }
+    },
+
+    applyFocusImpact: async (session, now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().initializePet(now));
+      set({ isLoading: true, error: null });
+
+      try {
+        const localImpact = applyFocusSessionImpact(pet, session, now);
+        if (
+          localImpact.pet === pet &&
+          localImpact.session === session &&
+          session.status === "running"
+        ) {
+          set({ isLoading: false });
+          return localImpact;
+        }
+
+        const result = await dependencies.applyStoredSessionImpact({
+          petId: pet.id,
+          session,
+          now,
+        });
+        set({ pet: result.pet, isLoading: false });
+        return result;
+      } catch (error) {
+        set({ error: errorMessage(error), isLoading: false });
+        throw error;
+      }
+    },
+
     renamePet: async (name, now = dependencies.now()) => {
       const pet = get().pet ?? (await get().initializePet(now));
       const trimmedName = name.trim();
@@ -137,6 +203,22 @@ export function createPetStore(
     },
 
     clearLastRewardSummary: () => set({ lastRewardSummary: null }),
+
+    updateAppOpenDecay: async (now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().loadCurrentPet());
+
+      if (!pet) {
+        return null;
+      }
+
+      const decayedPet = applyAppOpenDecay(pet, now);
+
+      if (decayedPet === pet) {
+        return pet;
+      }
+
+      return get().applyReward(decayedPet);
+    },
 
     updateDecayOnOpen: async (now = dependencies.now()) => {
       const pet = get().pet ?? (await get().loadCurrentPet());

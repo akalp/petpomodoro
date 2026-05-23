@@ -7,7 +7,12 @@ import { useSettingsStore, type SettingsStoreState } from "./settingsStore";
 
 export interface UiStoreDependencies {
   petStore: UseBoundStore<
-    StoreApi<Pick<PetStoreState, "initializePet" | "updateDecayOnOpen">>
+    StoreApi<
+      Pick<
+        PetStoreState,
+        "initializePet" | "updateAppOpenDecay" | "updateDecayOnOpen"
+      >
+    >
   >;
   pomodoroStore: UseBoundStore<
     StoreApi<Pick<PomodoroStoreState, "restoreRunningSessionAfterAppLaunch">>
@@ -47,10 +52,13 @@ export function createUiStore(
       try {
         await dependencies.settingsStore.getState().initializeSettings(now);
         await dependencies.petStore.getState().initializePet(now);
-        await dependencies.petStore.getState().updateDecayOnOpen(now);
-        await dependencies.pomodoroStore
+        await dependencies.petStore.getState().updateAppOpenDecay(now);
+        const activeSession = await dependencies.pomodoroStore
           .getState()
           .restoreRunningSessionAfterAppLaunch(now);
+        if (!activeSession) {
+          await dependencies.petStore.getState().updateDecayOnOpen(now);
+        }
         set({ hasHydrated: true, isInitializing: false });
       } catch (error) {
         set({ error: errorMessage(error), isInitializing: false });

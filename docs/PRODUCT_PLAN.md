@@ -33,7 +33,7 @@ The first version should be optimized for one-handed mobile use and iOS Home Scr
 8. If the user selects "Not this time", the session is abandoned without punishment and receives one small honesty-heart reward.
 9. The user can start another session when ready.
 
-Ending a running session before it reaches confirmation abandons it without any reward.
+Ending a running session before it reaches confirmation abandons it without a completion reward. Elapsed focus care impact and base focus coins still apply because the pet spent that time working with the user.
 
 ## MVP Features
 
@@ -46,6 +46,7 @@ Ending a running session before it reaches confirmation abandons it without any 
   - Yes, we did it
   - Not this time
 - Multi-stat reward application for completed sessions and a small honesty reward for declined confirmation.
+- Duration-based focus care impact and base focus coins for elapsed focus time.
 - Idempotent reward protection per session.
 - Hunger decay based on locally stored timestamps.
 - Local session history for recent completed and abandoned sessions.

@@ -26,6 +26,8 @@ describe("focus session transitions", () => {
       abandonedAt: null,
       abandonmentReason: null,
       rewardClaimedAt: null,
+      focusImpactAppliedUntil: "2026-05-22T12:00:00.000Z",
+      focusCoinsAwarded: 0,
     });
   });
 

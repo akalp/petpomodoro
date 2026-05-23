@@ -54,6 +54,9 @@ Status labels:
 - Expected finish
 - In progress
 - Mood: Working / Odaklanıyor
+- Mood: Hungry / Aç
+- Mood: Tired / Yorgun
+- Mood: Sad / Üzgün
 
 Pet reaction:
 

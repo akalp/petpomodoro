@@ -50,7 +50,7 @@ This structure may be adjusted during implementation, but the boundaries should 
 Planned TypeScript model shapes:
 
 ```ts
-type PetMood = "calm" | "happy" | "sleepy";
+type PetMood = "calm" | "happy" | "hungry" | "tired" | "sad";
 type PetDisplayMood = PetMood | "working";
 
 interface Pet {
@@ -66,6 +66,7 @@ interface Pet {
   streak: number;
   honestyHearts: number;
   lastHungerUpdatedAt: string;
+  lastAppOpenedAt: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -87,6 +88,8 @@ interface PomodoroSession {
   abandonedAt: string | null;
   abandonmentReason: "cancelled" | "honest_confirmation" | null;
   rewardClaimedAt: string | null;
+  focusImpactAppliedUntil: string;
+  focusCoinsAwarded: number;
 }
 
 interface RewardLedger {
@@ -131,7 +134,7 @@ Initial schema:
 
 The unique `rewardLedger.sessionId` index is required. It is the persistence-level guard that prevents one Pomodoro session from rewarding the pet more than once, for completion or honest declined confirmation.
 
-Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data.
+Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`.
 
 Reward application should happen in a Dexie transaction that:
 
@@ -228,7 +231,7 @@ Store tests:
 - Hydration creates a default pet if none exists.
 - Hydration restores active running or awaiting confirmation sessions.
 - Confirm completion updates session, pet, and reward ledger.
-- Cancelling a running session applies no reward.
+- Cancelling a running session applies elapsed focus care impact and base focus coins, but no completion reward or reward-ledger row.
 - Declining confirmation applies one honesty reward.
 - Hydration migrates and restores settings.
 

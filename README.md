@@ -121,8 +121,8 @@ The MVP should include:
 - Preset focus durations plus a custom 1 to 180 minute option, defaulting to 25 minutes.
 - A local session lifecycle: idle, running, awaiting confirmation, completed, abandoned.
 - A trust-based completion prompt after the expected end time.
-- Multi-stat completion rewards and hunger decay between visits.
-- An honesty-heart reward only when the user declines completion from the confirmation prompt; ending a running session early gives no reward.
+- Multi-stat completion rewards, duration-based focus care impact, and hunger decay between visits.
+- An honesty-heart reward only when the user declines completion from the confirmation prompt; ending a running session early gives no completion reward, but elapsed focus care impact and base coins still apply.
 - Idempotent rewards so the same session cannot reward the pet twice.
 - Local session history.
 - Offline support after first load.

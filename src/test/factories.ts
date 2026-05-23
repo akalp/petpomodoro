@@ -16,6 +16,7 @@ export function makePet(overrides: Partial<PetState> = {}): PetState {
     streak: 0,
     honestyHearts: 0,
     lastHungerUpdatedAt: baseNow,
+    lastAppOpenedAt: baseNow,
     createdAt: baseNow,
     updatedAt: baseNow,
     ...overrides,
@@ -35,6 +36,8 @@ export function makeSession(
     abandonedAt: null,
     abandonmentReason: null,
     rewardClaimedAt: null,
+    focusImpactAppliedUntil: baseNow,
+    focusCoinsAwarded: 0,
     ...overrides,
   };
 }
@@ -50,8 +53,8 @@ export function makeReward(
     xpAwarded: 25,
     coinsAwarded: 10,
     happinessAwarded: 12,
-    hungerAwarded: 8,
-    energyAwarded: -10,
+    hungerAwarded: 0,
+    energyAwarded: 0,
     streakAwarded: 1,
     honestyHeartsAwarded: 0,
     createdAt: "2026-05-22T12:30:00.000Z",

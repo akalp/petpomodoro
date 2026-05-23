@@ -11,8 +11,8 @@ import type {
 export const FOCUS_SESSION_XP_REWARD = 25;
 export const FOCUS_SESSION_COIN_REWARD = 10;
 export const FOCUS_SESSION_HAPPINESS_REWARD = 12;
-export const FOCUS_SESSION_HUNGER_REWARD = 8;
-export const FOCUS_SESSION_ENERGY_REWARD = -10;
+export const FOCUS_SESSION_HUNGER_REWARD = 0;
+export const FOCUS_SESSION_ENERGY_REWARD = 0;
 export const HONESTY_HAPPINESS_REWARD = 4;
 export const HONESTY_ENERGY_REWARD = 5;
 export const HONESTY_HEART_REWARD = 1;

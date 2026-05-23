@@ -1,4 +1,4 @@
-export type PetMood = "calm" | "happy" | "sleepy";
+export type PetMood = "calm" | "happy" | "hungry" | "tired" | "sad";
 export type PetDisplayMood = PetMood | "working";
 export type SupportedLanguage = "en" | "tr";
 
@@ -15,6 +15,7 @@ export interface PetState {
   streak: number;
   honestyHearts: number;
   lastHungerUpdatedAt: string;
+  lastAppOpenedAt: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -40,6 +41,8 @@ export interface FocusSession {
   abandonedAt: string | null;
   abandonmentReason: AbandonmentReason | null;
   rewardClaimedAt: string | null;
+  focusImpactAppliedUntil: string;
+  focusCoinsAwarded: number;
 }
 
 export interface AppSettings {
