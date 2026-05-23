@@ -47,7 +47,7 @@ export function Drawer({
           aria-describedby={description ? descriptionId : undefined}
           aria-labelledby={titleId}
           aria-modal="true"
-          className="fixed inset-0 z-20 flex items-end justify-center bg-slate-950/40 px-2 pt-4 pb-[max(0.5rem,env(safe-area-inset-bottom))] focus:outline-none sm:px-6 sm:pt-8"
+          className="fixed inset-0 z-20 flex items-end justify-center bg-slate-950/40 px-2 pt-4 pb-0 focus:outline-none sm:px-6 sm:pt-8"
           data-testid="drawer-backdrop"
           exit={{ opacity: 0 }}
           initial={{ opacity: 0 }}
