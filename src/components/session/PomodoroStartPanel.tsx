@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 
@@ -17,7 +19,12 @@ export function PomodoroStartPanel({
   selectedDuration,
 }: PomodoroStartPanelProps) {
   return (
-    <Card className="space-y-4">
+    <motion.div
+      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 8 }}
+      transition={{ duration: 0.22 }}
+    >
+      <Card className="space-y-4">
       <div>
         <h2 className="text-2xl font-semibold text-slate-950">
           Ready to focus together?
@@ -41,7 +48,7 @@ export function PomodoroStartPanel({
             <button
               aria-pressed={isSelected}
               className={[
-                "min-h-11 rounded-lg border px-2 text-sm font-semibold transition",
+                "min-h-12 rounded-lg border px-2 text-sm font-semibold transition active:scale-[0.98]",
                 "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500",
                 isSelected
                   ? "border-rose-600 bg-rose-600 text-white"
@@ -64,6 +71,7 @@ export function PomodoroStartPanel({
       >
         Start focus
       </Button>
-    </Card>
+      </Card>
+    </motion.div>
   );
 }

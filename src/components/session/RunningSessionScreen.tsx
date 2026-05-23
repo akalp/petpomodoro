@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 import type { FocusSession } from "../../domain";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
@@ -17,7 +19,12 @@ export function RunningSessionScreen({
   session,
 }: RunningSessionScreenProps) {
   return (
-    <Card className="space-y-4">
+    <motion.div
+      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 8 }}
+      transition={{ duration: 0.22 }}
+    >
+      <Card className="space-y-4">
       <div>
         <p className="text-sm font-semibold uppercase text-teal-700">In progress</p>
         <h2 className="mt-2 text-2xl font-semibold text-slate-950">
@@ -28,13 +35,19 @@ export function RunningSessionScreen({
         </p>
       </div>
       <div className="space-y-3">
-        <div className="rounded-lg bg-teal-50 px-4 py-5 text-center">
+        <div className="rounded-lg bg-teal-50 px-4 py-5 text-center shadow-inner shadow-teal-100">
           <p className="text-sm font-semibold uppercase text-teal-700">
             Time remaining
           </p>
-          <p className="mt-2 text-4xl font-semibold text-slate-950">
+          <motion.p
+            animate={{ opacity: 1, scale: 1 }}
+            className="mt-2 text-4xl font-semibold tabular-nums text-slate-950"
+            initial={{ opacity: 0.9, scale: 0.98 }}
+            key={countdownLabel}
+            transition={{ duration: 0.16 }}
+          >
             {countdownLabel}
-          </p>
+          </motion.p>
         </div>
         <StatRow
           label="Focus time"
@@ -52,7 +65,8 @@ export function RunningSessionScreen({
           End this session
         </Button>
       ) : null}
-    </Card>
+      </Card>
+    </motion.div>
   );
 }
 

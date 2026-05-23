@@ -11,6 +11,7 @@ import { SessionHistory } from "./components/session/SessionHistory";
 import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { Button } from "./components/ui/Button";
 import { Card } from "./components/ui/Card";
+import { resetLocalData } from "./db";
 import { clearShortcutReturn, parseShortcutReturn } from "./pwa/shortcuts";
 import { usePetStore, usePomodoroStore, useUiStore } from "./stores";
 
@@ -18,7 +19,9 @@ let appInitialization: Promise<void> | null = null;
 const FOCUS_DURATIONS = [5, 15, 25, 50];
 
 export function App() {
-  const [selectedDuration, setSelectedDuration] = useState(25);
+  const [selectedDuration, setSelectedDuration] = useState(() =>
+    readPreferredDuration(),
+  );
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const pet = usePetStore((state) => state.pet);
   const petError = usePetStore((state) => state.error);
@@ -26,6 +29,7 @@ export function App() {
   const clearLastRewardSummary = usePetStore(
     (state) => state.clearLastRewardSummary,
   );
+  const renamePet = usePetStore((state) => state.renamePet);
   const activeSession = usePomodoroStore((state) => state.activeSession);
   const recentSessions = usePomodoroStore((state) => state.recentSessions);
   const pomodoroError = usePomodoroStore((state) => state.error);
@@ -42,6 +46,11 @@ export function App() {
   const isInitializing = useUiStore((state) => state.isInitializing);
   const uiError = useUiStore((state) => state.error);
   const initializeApp = useUiStore((state) => state.initializeApp);
+
+  const setPreferredDuration = (duration: number) => {
+    setSelectedDuration(duration);
+    window.localStorage.setItem(PREFERRED_DURATION_KEY, String(duration));
+  };
 
   useEffect(() => {
     appInitialization ??= initializeApp();
@@ -159,6 +168,45 @@ export function App() {
       .catch(() => undefined);
   };
 
+  const handlePetNameSave = (name: string) => {
+    void renamePet(name).catch(() => undefined);
+  };
+
+  const handleResetLocalData = () => {
+    const shouldReset = window.confirm(
+      "Reset the pet, sessions, and rewards saved on this device?",
+    );
+
+    if (!shouldReset) {
+      return;
+    }
+
+    void resetLocalData()
+      .then(() => {
+        appInitialization = null;
+        usePetStore.setState({
+          error: null,
+          isLoading: false,
+          lastRewardSummary: null,
+          pet: null,
+        });
+        usePomodoroStore.setState({
+          activeSession: null,
+          error: null,
+          isLoading: false,
+          recentSessions: [],
+        });
+        useUiStore.setState({
+          error: null,
+          hasHydrated: false,
+          isInitializing: false,
+        });
+        appInitialization = initializeApp();
+        return appInitialization.then(() => loadRecentSessions());
+      })
+      .catch(() => undefined);
+  };
+
   return (
     <AppShell>
       {error ? <ErrorNotice message={error} /> : null}
@@ -183,7 +231,7 @@ export function App() {
         <PomodoroStartPanel
           disabled={isBusy || !hasHydrated}
           durations={FOCUS_DURATIONS}
-          onDurationChange={setSelectedDuration}
+          onDurationChange={setPreferredDuration}
           onStart={handleStart}
           selectedDuration={selectedDuration}
         />
@@ -194,10 +242,26 @@ export function App() {
           summary={lastRewardSummary}
         />
       ) : null}
-      <SessionHistory sessions={recentSessions} />
-      <SettingsPanel />
+      <SessionHistory isLoading={isBusy && hasHydrated} sessions={recentSessions} />
+      <SettingsPanel
+        disabled={isBusy || !hasHydrated}
+        durations={FOCUS_DURATIONS}
+        onDurationChange={setPreferredDuration}
+        onPetNameSave={handlePetNameSave}
+        onResetLocalData={handleResetLocalData}
+        pet={pet}
+        selectedDuration={selectedDuration}
+      />
     </AppShell>
   );
+}
+
+const PREFERRED_DURATION_KEY = "petpomodoro.preferredDuration";
+
+function readPreferredDuration(): number {
+  const savedDuration = Number(window.localStorage.getItem(PREFERRED_DURATION_KEY));
+
+  return FOCUS_DURATIONS.includes(savedDuration) ? savedDuration : 25;
 }
 
 function formatCountdown(expectedEndAt: string, nowMs: number): string {
@@ -213,8 +277,11 @@ function formatCountdown(expectedEndAt: string, nowMs: number): string {
 
 function LoadingCard() {
   return (
-    <Card className="text-sm leading-6 text-slate-600">
-      Your cozy focus companion is getting ready.
+    <Card className="space-y-3 text-sm leading-6 text-slate-600">
+      <div className="h-3 w-24 animate-pulse rounded-full bg-rose-100" />
+      <div className="h-3 w-full animate-pulse rounded-full bg-rose-100" />
+      <div className="h-3 w-2/3 animate-pulse rounded-full bg-rose-100" />
+      <p>Your cozy focus companion is getting ready.</p>
     </Card>
   );
 }
@@ -236,6 +303,10 @@ function ErrorNotice({ message }: { message: string }) {
         Something got in the way.
       </p>
       <p className="mt-2 text-sm leading-6 text-rose-900">{message}</p>
+      <p className="mt-2 text-sm leading-6 text-rose-900">
+        If local storage is blocked or full, PetPomodoro cannot safely save
+        progress. Nothing is sent to a server.
+      </p>
       <Button className="mt-4" onClick={clearErrors} variant="secondary">
         Continue
       </Button>

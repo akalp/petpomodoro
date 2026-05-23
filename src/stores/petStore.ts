@@ -35,6 +35,7 @@ export interface PetStoreState {
     sessionId: string,
     now?: string,
   ) => Promise<ClaimFocusRewardResult>;
+  renamePet: (name: string, now?: string) => Promise<PetState>;
   clearLastRewardSummary: () => void;
   updateDecayOnOpen: (now?: string) => Promise<PetState | null>;
   clearError: () => void;
@@ -116,6 +117,23 @@ export function createPetStore(
         set({ error: errorMessage(error), isLoading: false });
         throw error;
       }
+    },
+
+    renamePet: async (name, now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().initializePet(now));
+      const trimmedName = name.trim();
+
+      if (!trimmedName) {
+        throw new Error("Your pet needs a small name to answer to.");
+      }
+
+      const nextPet: PetState = {
+        ...pet,
+        name: trimmedName.slice(0, 24),
+        updatedAt: now,
+      };
+
+      return get().applyReward(nextPet);
     },
 
     clearLastRewardSummary: () => set({ lastRewardSummary: null }),

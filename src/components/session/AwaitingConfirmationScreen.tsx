@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 import type { FocusSession } from "../../domain";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
@@ -17,7 +19,12 @@ export function AwaitingConfirmationScreen({
   session,
 }: AwaitingConfirmationScreenProps) {
   return (
-    <Card className="space-y-4">
+    <motion.div
+      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 8 }}
+      transition={{ duration: 0.22 }}
+    >
+      <Card className="space-y-4 border-rose-200">
       <div>
         <p className="text-sm font-semibold uppercase text-rose-700">
           Ready for your answer
@@ -26,7 +33,7 @@ export function AwaitingConfirmationScreen({
           Your pet waited for you. Did you really finish this focus session?
         </h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          No pressure. Just answer honestly.
+          No pressure. Just answer honestly. Trust keeps this little ritual meaningful.
         </p>
       </div>
       <StatRow label="Focus time" value={`${session.plannedDurationMinutes} min`} />
@@ -42,6 +49,7 @@ export function AwaitingConfirmationScreen({
           Not this time
         </Button>
       </div>
-    </Card>
+      </Card>
+    </motion.div>
   );
 }

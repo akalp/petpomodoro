@@ -22,3 +22,9 @@ export class PetPomodoroDatabase extends Dexie {
 
 export const db = new PetPomodoroDatabase();
 
+export async function resetLocalData(
+  database: PetPomodoroDatabase = db,
+): Promise<void> {
+  await database.delete();
+  await database.open();
+}

@@ -1,6 +1,8 @@
+import { motion } from "framer-motion";
+
 import type { PetState } from "../../domain";
-import { Card } from "../ui/Card";
 import { Badge } from "../ui/Badge";
+import { Card } from "../ui/Card";
 
 import { PetAvatar } from "./PetAvatar";
 import { PetStats } from "./PetStats";
@@ -13,7 +15,7 @@ export function PetDashboard({ pet }: PetDashboardProps) {
   if (!pet) {
     return (
       <Card className="text-center">
-        <div className="mx-auto h-32 w-32 rounded-full bg-rose-100" />
+        <div className="mx-auto h-32 w-32 animate-pulse rounded-full bg-rose-100" />
         <p className="mt-5 text-lg font-semibold text-slate-900">
           Meet your focus friend.
         </p>
@@ -25,7 +27,12 @@ export function PetDashboard({ pet }: PetDashboardProps) {
   }
 
   return (
-    <Card className="space-y-5 text-center">
+    <motion.div
+      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 8 }}
+      transition={{ duration: 0.25 }}
+    >
+      <Card className="space-y-5 text-center">
       <div className="flex items-center justify-between gap-3 text-left">
         <div>
           <p className="text-sm font-medium text-rose-700">PetPomodoro</p>
@@ -35,6 +42,7 @@ export function PetDashboard({ pet }: PetDashboardProps) {
       </div>
       <PetAvatar mood={pet.mood} />
       <PetStats pet={pet} />
-    </Card>
+      </Card>
+    </motion.div>
   );
 }

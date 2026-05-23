@@ -26,7 +26,7 @@ export function Button({
   return (
     <button
       className={[
-        "inline-flex min-h-12 items-center justify-center rounded-lg px-5 py-3 text-base font-semibold transition disabled:cursor-not-allowed",
+        "inline-flex min-h-12 items-center justify-center rounded-lg px-5 py-3 text-center text-base font-semibold leading-tight transition active:scale-[0.99] disabled:cursor-not-allowed",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500",
         variantClasses[variant],
         className,
