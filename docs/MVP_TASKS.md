@@ -14,13 +14,13 @@ Each task should be small enough to review and commit separately. Keep app imple
 
 ## Phase 1: Domain Models And Tests
 
-- Define `Pet`, `PomodoroSession`, `RewardLedger`, and session status types.
+- Define `Pet`, `PomodoroSession`, `RewardLedger`, `AppSettings`, abandonment reason, and session status types.
 - Add test factories for pets and sessions.
 - Implement pure function to create a running session.
 - Implement pure function to move running sessions to awaiting confirmation based on time.
-- Implement pure function to abandon a running or awaiting session.
+- Implement pure function to abandon a running session as cancelled or an awaiting session as honest confirmation.
 - Implement pure function to confirm a session.
-- Implement pure reward calculation for XP and level.
+- Implement pure reward calculation for XP, care stats, level, and honesty hearts.
 - Add tests for every allowed state transition.
 - Add tests that invalid transitions are rejected.
 - Add tests that duplicate reward inputs do not produce another reward.
@@ -28,12 +28,13 @@ Each task should be small enough to review and commit separately. Keep app imple
 ## Phase 2: Local Database
 
 - Add Dexie database setup.
-- Create `pets`, `sessions`, and `rewardLedger` tables.
+- Create `pets`, `sessions`, `rewardLedger`, and singleton `settings` tables.
 - Add a unique index for `rewardLedger.sessionId`.
 - Add repository function to load or create the default pet.
 - Add repository functions to create, read, and update sessions.
 - Add repository function to read recent session history.
 - Add transactional reward claim function.
+- Add a versioned settings/session migration that preserves existing local data.
 - Add tests for schema initialization.
 - Add tests for unique reward ledger enforcement.
 - Add tests for atomic reward application.
@@ -43,18 +44,20 @@ Each task should be small enough to review and commit separately. Keep app imple
 - Add app hydration store or slice.
 - Add pet store or slice for current pet state.
 - Add session store or slice for active session state.
+- Add settings store for duration and optional device convenience preferences.
 - Add action to hydrate pet and active session from IndexedDB.
 - Add action to start a session.
 - Add action to check whether a running session is ready for confirmation.
 - Add action to confirm completion.
-- Add action to abandon a session.
+- Add separate actions for early cancellation and declined confirmation.
 - Add store-level tests for hydration and core actions.
 
 ## Phase 4: Basic UI
 
 - Build the mobile-first app shell.
-- Add pet home screen with name, level, XP, and mood.
+- Add pet home screen with name, level, XP, mood, and care stats.
 - Add primary focus session control.
+- Add preset and custom whole-minute durations from 1 to 180 minutes.
 - Add visible active session status.
 - Add empty state for no session history.
 - Add basic recent session history.
@@ -69,17 +72,19 @@ Each task should be small enough to review and commit separately. Keep app imple
 - Run rehydration check on app launch.
 - Show awaiting confirmation UI after expected end time.
 - Wire "Yes, we did it" to completion.
-- Wire "Not this time" to abandonment.
+- Wire "Not this time" to honesty-rewarded abandonment.
 - Handle refresh or reopen during running and awaiting confirmation states.
 
 ## Phase 6: Pet Rewards
 
-- Apply fixed XP reward on honest completion.
+- Apply multi-stat reward on honest completion.
+- Apply a small honesty reward only after declined confirmation.
 - Update pet level when XP crosses level thresholds.
 - Save reward ledger entry for each rewarded session.
 - Prevent duplicate reward from double tap or retry.
 - Add UI feedback for XP gained.
 - Add UI feedback for level up.
+- Add hunger decay on reopen using local timestamps.
 - Add tests for reward idempotency through the store and database transaction.
 
 ## Phase 7: PWA Setup
@@ -91,6 +96,7 @@ Each task should be small enough to review and commit separately. Keep app imple
 - Add offline fallback for the main route.
 - Add iOS Home Screen metadata.
 - Add install hint copy for Safari on iOS.
+- Add optional Shortcut launch and best-effort local reminder controls.
 - Verify the app opens offline after first load.
 
 ## Phase 8: Polish
@@ -107,7 +113,9 @@ Each task should be small enough to review and commit separately. Keep app imple
 
 - Test fresh load in desktop browser.
 - Test starting a session.
-- Test abandoning a running session.
+- Test cancelling a running session without reward.
+- Test declining confirmation with one honesty reward.
+- Test custom durations and settings migration/reset.
 - Test reaching awaiting confirmation while the app remains open.
 - Test closing the app and reopening after `expectedEndAt`.
 - Test confirming completion once.
@@ -117,4 +125,3 @@ Each task should be small enough to review and commit separately. Keep app imple
 - Test offline launch after first load.
 - Test installed iOS Home Screen behavior.
 - Test that no UI copy claims native timer verification.
-

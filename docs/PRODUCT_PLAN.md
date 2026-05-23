@@ -22,7 +22,7 @@ The first version should be optimized for one-handed mobile use and iOS Home Scr
 
 1. The user opens PetPomodoro.
 2. The user sees their pet and current progress.
-3. The user starts a focus session, defaulting to 25 minutes.
+3. The user starts a preset or custom whole-minute focus session from 1 to 180 minutes, defaulting to 25 minutes.
 4. The app records `startedAt` and `expectedEndAt` locally.
 5. The user may leave the app and use the native iOS timer, a Shortcut, or another reminder method.
 6. When the user returns after the expected end time, PetPomodoro asks:
@@ -30,23 +30,27 @@ The first version should be optimized for one-handed mobile use and iOS Home Scr
    > Your pet waited for you. Did you really finish this focus session?
 
 7. If the user confirms, the session is completed and the pet receives XP once.
-8. If the user selects "Not this time", the session is abandoned without punishment.
+8. If the user selects "Not this time", the session is abandoned without punishment and receives one small honesty-heart reward.
 9. The user can start another session when ready.
+
+Ending a running session before it reaches confirmation abandons it without any reward.
 
 ## MVP Features
 
-- Single local pet with name, level, XP, mood, and timestamps.
-- Pomodoro session creation with a default 25-minute duration.
+- Single local pet with name, level, XP, mood, coins, care stats, streak, honesty hearts, and timestamps.
+- Pomodoro session creation with preset durations and custom whole-minute durations from 1 to 180 minutes.
 - Session states: idle, running, awaiting confirmation, completed, abandoned.
 - Local time-based transition from running to awaiting confirmation.
 - Honesty confirmation with two choices:
   - Yes, we did it
   - Not this time
-- Reward application for completed sessions.
+- Multi-stat reward application for completed sessions and a small honesty reward for declined confirmation.
 - Idempotent reward protection per session.
+- Hunger decay based on locally stored timestamps.
 - Local session history for recent completed and abandoned sessions.
 - Offline-capable installed PWA after first load.
 - Cozy mobile-first interface and copy.
+- Optional iOS Shortcut launch and best-effort local reminder notifications.
 
 ## Non-Goals
 
@@ -98,13 +102,10 @@ The abandoned path should be neutral and supportive. A user who chooses "Not thi
 - Multiple pets.
 - Pet customization.
 - Themes and habitats.
-- Optional streaks with forgiving recovery rules.
-- Configurable session durations.
+- More forgiving or richer streak rules.
 - Break timers.
 - Focus intention notes.
-- Gentle local reminders where platform support allows.
-- Richer iOS Shortcut templates for starting a native timer alongside PetPomodoro.
+- Richer reminder and iOS Shortcut templates.
 - Import and export backup files.
 - Optional local analytics dashboard.
 - Seasonal cosmetics stored locally.
-

@@ -88,6 +88,13 @@ export function claimSessionReward({
     };
   }
 
+  if (
+    session.status === "abandoned" &&
+    session.abandonmentReason !== "honest_confirmation"
+  ) {
+    throw new DomainError("Only honestly declined sessions can claim honesty rewards.");
+  }
+
   const rewardValues = rewardValuesForSession(session.status, completedXpAwarded);
   const nextPet = applyPetStatAdjustments(
     pet,

@@ -128,7 +128,23 @@ export function createPomodoroStore(
     },
 
     cancelSession: async (now = dependencies.now()) => {
-      return get().confirmAbandoned(now);
+      const activeSession = requireActiveSession(get().activeSession);
+      set({ isLoading: true, error: null });
+
+      try {
+        const abandonedSession = abandonFocusSession(
+          activeSession,
+          "cancelled",
+          now,
+        );
+        const savedSession = await dependencies.updateFocusSession(abandonedSession);
+        const recentSessions = await dependencies.listRecentFocusSessions(10);
+        set({ activeSession: savedSession, recentSessions, isLoading: false });
+        return savedSession;
+      } catch (error) {
+        set({ error: errorMessage(error), isLoading: false });
+        throw error;
+      }
     },
 
     refreshSessionStatus: async (now = dependencies.now()) => {
@@ -202,7 +218,11 @@ export function createPomodoroStore(
       set({ isLoading: true, error: null });
 
       try {
-        const abandonedSession = abandonFocusSession(activeSession, now);
+        const abandonedSession = abandonFocusSession(
+          activeSession,
+          "honest_confirmation",
+          now,
+        );
         const savedSession = await dependencies.updateFocusSession(abandonedSession);
         const rewardResult = await dependencies.petStore
           .getState()

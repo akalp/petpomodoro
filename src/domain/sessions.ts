@@ -1,5 +1,6 @@
 import { DomainError } from "./errors";
-import type { FocusSession, FocusSessionStatus } from "./types";
+import { validateFocusDurationMinutes } from "./settings";
+import type { AbandonmentReason, FocusSession, FocusSessionStatus } from "./types";
 
 export interface CreateRunningSessionInput {
   id: string;
@@ -18,9 +19,7 @@ export function createRunningSession({
     throw new DomainError("A focus session can only start from idle.");
   }
 
-  if (!Number.isFinite(plannedDurationMinutes) || plannedDurationMinutes <= 0) {
-    throw new DomainError("Focus session duration must be greater than zero.");
-  }
+  validateFocusDurationMinutes(plannedDurationMinutes);
 
   return {
     id,
@@ -30,6 +29,7 @@ export function createRunningSession({
     expectedEndAt: addMinutes(now, plannedDurationMinutes),
     confirmedAt: null,
     abandonedAt: null,
+    abandonmentReason: null,
     rewardClaimedAt: null,
   };
 }
@@ -54,10 +54,22 @@ export function moveRunningSessionToAwaitingConfirmation(
 
 export function abandonFocusSession(
   session: FocusSession,
+  abandonmentReason: AbandonmentReason,
   now: string,
 ): FocusSession {
   if (session.status !== "running" && session.status !== "awaiting_confirmation") {
     throw new DomainError("Only running or awaiting confirmation sessions can be abandoned.");
+  }
+
+  if (session.status === "running" && abandonmentReason !== "cancelled") {
+    throw new DomainError("A running session can only be cancelled.");
+  }
+
+  if (
+    session.status === "awaiting_confirmation" &&
+    abandonmentReason !== "honest_confirmation"
+  ) {
+    throw new DomainError("A session awaiting confirmation needs an honest answer.");
   }
 
   return {
@@ -65,6 +77,7 @@ export function abandonFocusSession(
     status: "abandoned",
     confirmedAt: null,
     abandonedAt: now,
+    abandonmentReason,
     rewardClaimedAt: null,
   };
 }

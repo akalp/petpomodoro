@@ -111,15 +111,17 @@ Development should proceed in small, reviewable steps:
 
 The MVP should include:
 
-- One local pet.
-- A default 25-minute focus session.
+- One local pet with level, XP, mood, and care stats.
+- Preset focus durations plus a custom 1 to 180 minute option, defaulting to 25 minutes.
 - A local session lifecycle: idle, running, awaiting confirmation, completed, abandoned.
 - A trust-based completion prompt after the expected end time.
-- Pet XP rewards for honestly completed sessions.
+- Multi-stat completion rewards and hunger decay between visits.
+- An honesty-heart reward only when the user declines completion from the confirmation prompt; ending a running session early gives no reward.
 - Idempotent rewards so the same session cannot reward the pet twice.
 - Local session history.
 - Offline support after first load.
 - Mobile-first UI optimized for iOS Home Screen usage.
+- Optional native-timer Shortcut launch and best-effort local reminders as convenience features only.
 
 The MVP should not include backend services, auth, cloud sync, social features, cross-device recovery, or any claim that PetPomodoro can verify a native iOS timer.
 

@@ -6,7 +6,7 @@ PetPomodoro should use a local-first frontend architecture:
 
 - React renders the UI and handles interaction events.
 - Zustand stores coordinate app state, hydration, and async workflows.
-- Domain functions in `src/domain` implement session transitions, pet XP, level logic, and reward idempotency checks.
+- Domain functions in `src/domain` implement session transitions, pet care stats, XP, level logic, hunger decay, and reward idempotency checks.
 - Dexie repositories in `src/db` isolate IndexedDB reads, writes, transactions, and schema versioning.
 - PWA configuration handles app shell caching, install metadata, and offline fallback.
 
@@ -58,6 +58,13 @@ interface Pet {
   level: number;
   xp: number;
   mood: PetMood;
+  coins: number;
+  happiness: number;
+  hunger: number;
+  energy: number;
+  streak: number;
+  honestyHearts: number;
+  lastHungerUpdatedAt: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -77,6 +84,7 @@ interface PomodoroSession {
   expectedEndAt: string;
   confirmedAt: string | null;
   abandonedAt: string | null;
+  abandonmentReason: "cancelled" | "honest_confirmation" | null;
   rewardClaimedAt: string | null;
 }
 
@@ -84,8 +92,23 @@ interface RewardLedger {
   id: string;
   sessionId: string;
   petId: string;
+  rewardType: "focus_completed" | "honesty";
   xpAwarded: number;
+  coinsAwarded: number;
+  happinessAwarded: number;
+  hungerAwarded: number;
+  energyAwarded: number;
+  streakAwarded: number;
+  honestyHeartsAwarded: number;
   createdAt: string;
+}
+
+interface AppSettings {
+  id: "local-settings";
+  preferredDurationMinutes: number;
+  hasInstalledShortcut: boolean;
+  hasEnabledFocusNotifications: boolean;
+  updatedAt: string;
 }
 ```
 
@@ -100,13 +123,16 @@ Initial schema:
 - `pets`: primary key `id`; indexes `createdAt`, `updatedAt`.
 - `sessions`: primary key `id`; indexes `status`, `startedAt`, `expectedEndAt`, `rewardClaimedAt`.
 - `rewardLedger`: primary key `id`; unique index `sessionId`; indexes `petId`, `createdAt`.
+- `settings`: singleton primary key `id`; index `updatedAt`.
 
-The unique `rewardLedger.sessionId` index is required. It is the persistence-level guard that prevents one Pomodoro session from rewarding the pet more than once.
+The unique `rewardLedger.sessionId` index is required. It is the persistence-level guard that prevents one Pomodoro session from rewarding the pet more than once, for completion or honest declined confirmation.
+
+Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data.
 
 Reward application should happen in a Dexie transaction that:
 
 1. Reads the session.
-2. Checks that the session is eligible for reward.
+2. Checks that the session is completed or was honestly declined from confirmation.
 3. Checks that no reward ledger row exists for `sessionId`.
 4. Updates the pet XP and level.
 5. Marks the session reward as claimed.
@@ -134,6 +160,10 @@ Use small stores or slices with clear responsibilities:
   - confirm completion
   - abandon session
   - rehydrate running sessions after app launch
+- Settings state:
+  - preferred duration, including custom whole-minute values from 1 to 180
+  - optional Shortcut and local-reminder preferences
+  - one-time migration of legacy localStorage preferences into IndexedDB
 
 Store actions may be async, but all transition decisions should be delegated to pure domain functions.
 
@@ -153,7 +183,7 @@ The app should be tested both in a desktop browser and as an installed iOS Home 
 
 ## iOS Shortcut Integration Approach
 
-For MVP, the app should not depend on Shortcuts. It can provide guidance for a user-created Shortcut later:
+For MVP, the app may optionally launch a user-installed Shortcut as a convenience:
 
 1. Open PetPomodoro.
 2. Start a focus session in the app.
@@ -174,7 +204,8 @@ Domain tests:
 - Running session remains running when `now < expectedEndAt`.
 - Awaiting confirmation can become completed.
 - Awaiting confirmation can become abandoned.
-- Abandoned sessions cannot receive rewards.
+- Cancelled running sessions cannot receive rewards.
+- An honestly declined confirmation can receive one idempotent honesty reward.
 - Completed sessions cannot receive duplicate rewards.
 - XP and level calculations are deterministic.
 
@@ -185,13 +216,16 @@ Database tests:
 - Repositories create and update sessions.
 - Reward ledger enforces one reward per session.
 - Reward transaction is atomic.
+- Schema migration and settings persistence preserve existing local data.
 
 Store tests:
 
 - Hydration creates a default pet if none exists.
 - Hydration restores active running or awaiting confirmation sessions.
 - Confirm completion updates session, pet, and reward ledger.
-- Abandoning a session applies no reward.
+- Cancelling a running session applies no reward.
+- Declining confirmation applies one honesty reward.
+- Hydration migrates and restores settings.
 
 Manual QA:
 
@@ -204,7 +238,7 @@ Manual QA:
 
 ## Offline Strategy
 
-The app should cache the static app shell after first load. Product data should live entirely in IndexedDB. On launch, the app should:
+The app should cache the static app shell after first load. Product data and device preferences should live in IndexedDB after one-time legacy preference migration. On launch, the app should:
 
 1. Open IndexedDB.
 2. Load or create the local pet.
@@ -214,4 +248,3 @@ The app should cache the static app shell after first load. Product data should 
 6. Render the appropriate screen.
 
 If the app is offline, all MVP flows should continue to work. If IndexedDB is unavailable or blocked, the app should show a clear local storage error rather than pretending progress is saved.
-

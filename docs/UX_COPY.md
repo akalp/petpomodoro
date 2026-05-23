@@ -28,6 +28,7 @@ Secondary options:
 
 - Maybe later
 - Change duration
+- Custom minutes
 
 ## Running Session
 
@@ -103,9 +104,29 @@ Supporting:
 - Thanks for being honest with your pet.
 - Some sessions do not go as planned.
 
+For an early cancellation, do not show reward language. After "Not this time" from the confirmation prompt, the honesty reward copy may be shown.
+
 Action:
 
 - Back home
+
+## Completion Reward
+
+Primary:
+
+- You showed up. Your pet noticed.
+
+Supporting:
+
+- That focus time counts.
+- A little care goes a long way.
+- Your pet gained XP and care progress from this completed focus session.
+
+Short labels:
+
+- XP gained
+- Reward saved
+- Session complete
 
 ## Honesty Reward
 
@@ -115,15 +136,13 @@ Primary:
 
 Supporting:
 
-- Your pet gained XP from this completed focus session.
-- You kept the promise, and your pet grew a little.
-- Honest focus is worth celebrating.
+- No points lost. No scolding.
+- Your honesty heart was saved.
 
 Short labels:
 
-- XP gained
+- Honesty hearts
 - Reward saved
-- Session complete
 
 ## Pet Level Up
 

@@ -67,6 +67,7 @@ describe("focus rewards", () => {
       session: makeSession({
         status: "abandoned",
         abandonedAt: "2026-05-22T12:30:00.000Z",
+        abandonmentReason: "honest_confirmation",
       }),
       existingRewards: [],
       now: "2026-05-22T12:31:00.000Z",
@@ -91,6 +92,22 @@ describe("focus rewards", () => {
       honestyHeartsAwarded: HONESTY_HEART_REWARD,
       leveledUp: false,
     });
+  });
+
+  it("does not reward sessions cancelled before confirmation", () => {
+    expect(() =>
+      claimSessionReward({
+        pet: makePet(),
+        session: makeSession({
+          status: "abandoned",
+          abandonedAt: "2026-05-22T12:10:00.000Z",
+          abandonmentReason: "cancelled",
+        }),
+        existingRewards: [],
+        now: "2026-05-22T12:31:00.000Z",
+        rewardId: "reward-1",
+      }),
+    ).toThrow(DomainError);
   });
 
   it("does not reward sessions that are not terminal", () => {

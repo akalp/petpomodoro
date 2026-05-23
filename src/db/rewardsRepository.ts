@@ -9,7 +9,7 @@ import { createLocalId } from "../id";
 import { db as defaultDb, type PetPomodoroDatabase } from "./database";
 import { RepositoryError } from "./errors";
 
-export interface ClaimStoredFocusRewardInput {
+export interface ClaimStoredSessionRewardInput {
   petId: string;
   sessionId: string;
   now: string;
@@ -24,14 +24,14 @@ export async function getRewardBySessionId(
   return database.rewardLedger.where("sessionId").equals(sessionId).first();
 }
 
-export async function claimStoredFocusReward(
+export async function claimStoredSessionReward(
   {
     petId,
     sessionId,
     now,
     rewardId = createLocalId(),
     xpAwarded = FOCUS_SESSION_XP_REWARD,
-  }: ClaimStoredFocusRewardInput,
+  }: ClaimStoredSessionRewardInput,
   database: PetPomodoroDatabase = defaultDb,
 ): Promise<ClaimFocusRewardResult> {
   return database.transaction(

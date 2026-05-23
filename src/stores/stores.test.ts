@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   claimSessionReward,
+  createDefaultSettings,
+  type AppSettings,
   type FocusSession,
   type PetState,
   type RewardLedger,
@@ -13,6 +15,7 @@ import {
   createPomodoroStore,
   type PomodoroStoreDependencies,
 } from "./pomodoroStore";
+import { createSettingsStore } from "./settingsStore";
 
 const now = "2026-05-22T12:30:00.000Z";
 
@@ -103,7 +106,7 @@ describe("store workflows", () => {
     expect(repo.sessions.get("session-new")).toEqual(session);
   });
 
-  it("cancels a running session with an honesty heart reward", async () => {
+  it("cancels a running session without a reward", async () => {
     const repo = createInMemoryRepositories({
       pet: makePet(),
       sessions: [
@@ -124,10 +127,11 @@ describe("store workflows", () => {
     const session = await pomodoroStore.getState().cancelSession(now);
 
     expect(session.status).toBe("abandoned");
+    expect(session.abandonmentReason).toBe("cancelled");
     expect(session.abandonedAt).toBe(now);
     expect(repo.pet?.xp).toBe(0);
-    expect(repo.pet?.honestyHearts).toBe(1);
-    expect(repo.rewardLedger.size).toBe(1);
+    expect(repo.pet?.honestyHearts).toBe(0);
+    expect(repo.rewardLedger.size).toBe(0);
   });
 
   it("abandons an awaiting confirmation session with an honesty heart reward", async () => {
@@ -151,6 +155,7 @@ describe("store workflows", () => {
     const session = await pomodoroStore.getState().confirmAbandoned(now);
 
     expect(session.status).toBe("abandoned");
+    expect(session.abandonmentReason).toBe("honest_confirmation");
     expect(session.abandonedAt).toBe(now);
     expect(repo.pet?.xp).toBe(0);
     expect(repo.pet?.honestyHearts).toBe(1);
@@ -185,6 +190,22 @@ describe("store workflows", () => {
     expect(repo.pet?.coins).toBe(10);
     expect(repo.pet?.streak).toBe(1);
     expect(repo.rewardLedger.size).toBe(1);
+  });
+
+  it("starts a session using a saved custom duration", async () => {
+    const repo = createInMemoryRepositories({ pet: makePet() });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-custom",
+    });
+
+    const session = await pomodoroStore.getState().startSession(90, now);
+
+    expect(session.plannedDurationMinutes).toBe(90);
+    expect(session.expectedEndAt).toBe("2026-05-22T14:00:00.000Z");
   });
 
   it("updates level when a completion reward crosses the next threshold", async () => {
@@ -252,6 +273,58 @@ describe("store workflows", () => {
   });
 });
 
+describe("settings workflows", () => {
+  it("migrates legacy preferences once and persists custom durations", async () => {
+    let settings: AppSettings | undefined;
+    let legacyCleared = false;
+    const store = createSettingsStore({
+      loadOrCreateSettings: async (createdAt, initialValues) => {
+        settings ??= { ...createDefaultSettings(createdAt), ...initialValues };
+        return settings;
+      },
+      updateSettings: async (nextSettings) => {
+        settings = nextSettings;
+        return nextSettings;
+      },
+      readLegacySettings: () => ({
+        preferredDurationMinutes: 50,
+        hasInstalledShortcut: true,
+        hasEnabledFocusNotifications: true,
+      }),
+      clearLegacySettings: () => {
+        legacyCleared = true;
+      },
+      now: () => now,
+    });
+
+    const hydrated = await store.getState().initializeSettings(now);
+    const updated = await store.getState().updatePreferredDuration(90, now);
+
+    expect(hydrated).toMatchObject({
+      preferredDurationMinutes: 50,
+      hasInstalledShortcut: true,
+      hasEnabledFocusNotifications: true,
+    });
+    expect(updated.preferredDurationMinutes).toBe(90);
+    expect(legacyCleared).toBe(true);
+  });
+
+  it("clears hydrated settings state when local data is reset", async () => {
+    const store = createSettingsStore({
+      loadOrCreateSettings: async (createdAt) => createDefaultSettings(createdAt),
+      updateSettings: async (settings) => settings,
+      readLegacySettings: () => ({}),
+      clearLegacySettings: () => undefined,
+      now: () => now,
+    });
+
+    await store.getState().initializeSettings(now);
+    store.getState().clearAfterLocalDataReset();
+
+    expect(store.getState().settings).toBeNull();
+  });
+});
+
 interface InMemoryRepositoryState {
   pet?: PetState;
   sessions?: FocusSession[];
@@ -278,7 +351,7 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
       pet = nextPet;
       return nextPet;
     },
-    claimStoredFocusReward: async ({ petId, sessionId, now: rewardNow }) => {
+    claimStoredSessionReward: async ({ petId, sessionId, now: rewardNow }) => {
       if (!pet || pet.id !== petId) {
         throw new Error("Pet not found.");
       }

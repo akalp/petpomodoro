@@ -19,6 +19,8 @@ export interface PetState {
 
 export type RewardType = "focus_completed" | "honesty";
 
+export type AbandonmentReason = "cancelled" | "honest_confirmation";
+
 export type FocusSessionStatus =
   | "idle"
   | "running"
@@ -34,7 +36,16 @@ export interface FocusSession {
   expectedEndAt: string;
   confirmedAt: string | null;
   abandonedAt: string | null;
+  abandonmentReason: AbandonmentReason | null;
   rewardClaimedAt: string | null;
+}
+
+export interface AppSettings {
+  id: "local-settings";
+  preferredDurationMinutes: number;
+  hasInstalledShortcut: boolean;
+  hasEnabledFocusNotifications: boolean;
+  updatedAt: string;
 }
 
 export interface RewardLedger {

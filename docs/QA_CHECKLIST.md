@@ -33,6 +33,8 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Select `15m` and start a session.
 - [ ] Select `25m` and start a session.
 - [ ] Select `50m` and start a session.
+- [ ] Enter a custom whole-minute duration from `1` to `180` and start a session.
+- [ ] Invalid custom values cannot be persisted or started.
 - [ ] The selected duration remains visually clear.
 - [ ] The preferred duration setting updates the start panel selection.
 - [ ] Starting a session creates exactly one running session.
@@ -84,6 +86,7 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] The session becomes `abandoned`.
 - [ ] No completion XP is applied.
 - [ ] Any honesty-only reward behavior remains non-punitive.
+- [ ] One honesty reward is saved and cannot be claimed twice.
 - [ ] Copy says there are no points lost and no scolding.
 - [ ] Session history records the abandoned session.
 
@@ -101,7 +104,7 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Start a running session.
 - [ ] Tap "End this session".
 - [ ] The session becomes `abandoned`.
-- [ ] No completion XP is applied.
+- [ ] No reward or reward-ledger entry is applied.
 - [ ] The app returns to the idle start state after result handling.
 - [ ] Session history shows a neutral abandoned entry.
 
@@ -143,8 +146,14 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Open Settings.
 - [ ] Confirm the reset checkbox enables the reset button.
 - [ ] Cancel the browser confirmation and verify data remains.
-- [ ] Confirm reset and verify pet, sessions, rewards, and settings reset locally.
+- [ ] Confirm reset and verify pet, sessions, rewards, duration, Shortcut preference, and reminder preference reset locally.
 - [ ] Reload after reset and verify a fresh pet is initialized.
+
+## Settings Migration
+
+- [ ] Seed legacy browser preferences, then load the upgraded app.
+- [ ] Preferences appear in the UI after being migrated into IndexedDB once.
+- [ ] Existing session and reward history remains unchanged after the schema upgrade.
 
 ## Offline Reload After First Load
 

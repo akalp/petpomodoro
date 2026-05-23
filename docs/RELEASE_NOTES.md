@@ -7,20 +7,21 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 ## Included
 
 - One local pet with name, level, XP, mood, and care stats.
-- Focus durations for 5, 15, 25, and 50 minutes.
+- Focus durations for 5, 15, 25, and 50 minutes, plus custom whole-minute durations from 1 to 180 minutes.
 - Local session states: `idle`, `running`, `awaiting_confirmation`, `completed`, and `abandoned`.
 - Trust-based confirmation after the planned focus window:
   - "Your pet waited for you. Did you really finish this focus session?"
   - "Yes, we did it"
   - "Not this time"
-- Completion rewards with idempotent reward protection.
-- Neutral abandoned-session handling with no shame copy.
+- Multi-stat completion rewards with idempotent reward protection.
+- Neutral abandoned-session handling: early cancellation grants no reward, while honestly declining after the planned window grants one small honesty reward.
 - Recent session history.
-- Basic settings for pet name, preferred focus duration, and resetting local data.
+- IndexedDB-backed settings for pet name, preferred focus duration, Shortcut preference, reminders, and resetting local data.
 - PWA manifest, app icons, service worker precaching, and offline app-shell support after first load.
 - iOS Safari install hint and Home Screen metadata.
 - Optional iOS Shortcut launch for starting a native timer with the selected duration.
 - Optional local notification reminders while the PWA is allowed to keep running.
+- Care stats, hunger decay, streak tracking, and honesty hearts.
 
 ## Not Included
 
@@ -60,6 +61,7 @@ Use the preview build for browser and PWA checks. Use a real iPhone Safari sessi
 - Shortcut launch can start a native timer as a convenience, but the user must return to PetPomodoro manually for honesty confirmation.
 - Local notification reminders are best-effort and are not Web Push or a closed-app delivery guarantee.
 - This MVP has no export or backup flow for local data.
+- The database upgrades in place so existing pets, sessions, rewards, and migrated settings remain on the device.
 
 ## Deployment Notes
 

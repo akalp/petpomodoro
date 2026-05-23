@@ -2,5 +2,5 @@ export * from "./database";
 export * from "./errors";
 export * from "./petsRepository";
 export * from "./rewardsRepository";
+export * from "./settingsRepository";
 export * from "./sessionsRepository";
-

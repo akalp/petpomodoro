@@ -13,6 +13,10 @@ import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { Button } from "./components/ui/Button";
 import { Card } from "./components/ui/Card";
 import { resetLocalData } from "./db";
+import {
+  DEFAULT_FOCUS_DURATION_MINUTES,
+  parseFocusDurationInput,
+} from "./domain";
 import { isStandaloneDisplayMode } from "./pwa/installHints";
 import {
   getNotificationPermission,
@@ -25,20 +29,21 @@ import {
   buildStartNativeTimerShortcutUrl,
   shouldRunStartNativeTimerShortcut,
 } from "./pwa/shortcuts";
-import { usePetStore, usePomodoroStore, useUiStore } from "./stores";
+import {
+  usePetStore,
+  usePomodoroStore,
+  useSettingsStore,
+  useUiStore,
+} from "./stores";
 
 let appInitialization: Promise<void> | null = null;
 const FOCUS_DURATIONS = [5, 15, 25, 50];
 
 export function App() {
-  const [selectedDuration, setSelectedDuration] = useState(() =>
-    readPreferredDuration(),
+  const [customDurationDraft, setCustomDurationDraft] = useState<string | null>(
+    null,
   );
-  const [hasInstalledShortcut, setHasInstalledShortcut] = useState(() =>
-    readHasInstalledShortcut(),
-  );
-  const [hasEnabledFocusNotifications, setHasEnabledFocusNotifications] =
-    useState(() => readHasEnabledFocusNotifications());
+  const [durationError, setDurationError] = useState<string | null>(null);
   const [notificationPermission, setNotificationPermission] =
     useState<LocalNotificationPermission>(() => getNotificationPermission());
   const [notificationNotice, setNotificationNotice] = useState<string | null>(
@@ -65,25 +70,50 @@ export function App() {
   );
   const confirmCompleted = usePomodoroStore((state) => state.confirmCompleted);
   const confirmAbandoned = usePomodoroStore((state) => state.confirmAbandoned);
+  const settings = useSettingsStore((state) => state.settings);
+  const settingsError = useSettingsStore((state) => state.error);
+  const updatePreferredDuration = useSettingsStore(
+    (state) => state.updatePreferredDuration,
+  );
+  const saveShortcutInstalled = useSettingsStore(
+    (state) => state.setShortcutInstalled,
+  );
+  const saveFocusNotificationsEnabled = useSettingsStore(
+    (state) => state.setFocusNotificationsEnabled,
+  );
+  const clearAfterLocalDataReset = useSettingsStore(
+    (state) => state.clearAfterLocalDataReset,
+  );
   const hasHydrated = useUiStore((state) => state.hasHydrated);
   const isInitializing = useUiStore((state) => state.isInitializing);
   const uiError = useUiStore((state) => state.error);
   const initializeApp = useUiStore((state) => state.initializeApp);
 
+  const persistedDuration =
+    settings?.preferredDurationMinutes ?? DEFAULT_FOCUS_DURATION_MINUTES;
+  const selectedDuration =
+    customDurationDraft === null
+      ? persistedDuration
+      : (parseFocusDurationInput(customDurationDraft) ?? persistedDuration);
+  const hasInstalledShortcut = settings?.hasInstalledShortcut ?? false;
+  const hasEnabledFocusNotifications =
+    settings?.hasEnabledFocusNotifications ?? false;
+  const customDurationInput =
+    customDurationDraft ?? String(selectedDuration);
+
   const setPreferredDuration = (duration: number) => {
-    setSelectedDuration(duration);
-    savePreferredDuration(duration);
+    setCustomDurationDraft(String(duration));
+    setDurationError(null);
+    void updatePreferredDuration(duration).catch(() => undefined);
   };
 
   const setShortcutInstalled = (isInstalled: boolean) => {
-    setHasInstalledShortcut(isInstalled);
-    saveHasInstalledShortcut(isInstalled);
+    void saveShortcutInstalled(isInstalled).catch(() => undefined);
   };
 
   const setFocusNotificationsEnabled = async (isEnabled: boolean) => {
     if (!isEnabled) {
-      setHasEnabledFocusNotifications(false);
-      saveHasEnabledFocusNotifications(false);
+      await saveFocusNotificationsEnabled(false);
       setNotificationNotice(null);
       setNotificationPermission(getNotificationPermission());
       return;
@@ -94,19 +124,37 @@ export function App() {
     setNotificationPermission(nextPermission);
 
     if (isGranted) {
-      setHasEnabledFocusNotifications(true);
-      saveHasEnabledFocusNotifications(true);
+      await saveFocusNotificationsEnabled(true);
       setNotificationNotice(null);
       return;
     }
 
-    setHasEnabledFocusNotifications(false);
-    saveHasEnabledFocusNotifications(false);
+    await saveFocusNotificationsEnabled(false);
     setNotificationNotice(
       nextPermission === "unsupported"
         ? "Notifications are not available on this device."
         : "Notifications are off for this device.",
     );
+  };
+
+  const handleCustomDurationChange = (value: string) => {
+    setCustomDurationDraft(value);
+    const duration = parseFocusDurationInput(value);
+
+    if (duration === null) {
+      setDurationError("Enter a whole number from 1 to 180 minutes.");
+      return;
+    }
+
+    setDurationError(null);
+  };
+
+  const commitCustomDuration = (value: string) => {
+    const duration = parseFocusDurationInput(value);
+
+    if (duration !== null) {
+      void updatePreferredDuration(duration).catch(() => undefined);
+    }
   };
 
   useEffect(() => {
@@ -211,10 +259,11 @@ export function App() {
   ]);
 
   const isBusy = isInitializing || isSessionLoading;
-  const error = uiError ?? petError ?? pomodoroError;
+  const error = uiError ?? petError ?? pomodoroError ?? settingsError;
 
   const handleStart = (duration: number) => {
     setCurrentTime(Date.now());
+    void updatePreferredDuration(duration).catch(() => undefined);
     void startSession(duration)
       .then((session) => {
         void loadRecentSessions();
@@ -272,6 +321,10 @@ export function App() {
           isLoading: false,
           recentSessions: [],
         });
+        clearAfterLocalDataReset();
+        setCustomDurationDraft(null);
+        setDurationError(null);
+        setNotificationNotice(null);
         useUiStore.setState({
           error: null,
           hasHydrated: false,
@@ -310,7 +363,11 @@ export function App() {
       ) : (
         <PomodoroStartPanel
           disabled={isBusy || !hasHydrated}
+          customDurationInput={customDurationInput}
+          durationError={durationError}
           durations={FOCUS_DURATIONS}
+          onCustomDurationChange={handleCustomDurationChange}
+          onCustomDurationCommit={commitCustomDuration}
           onDurationChange={setPreferredDuration}
           onStart={handleStart}
           selectedDuration={selectedDuration}
@@ -325,14 +382,18 @@ export function App() {
       <SessionHistory isLoading={isBusy && hasHydrated} sessions={recentSessions} />
       <SettingsPanel
         disabled={isBusy || !hasHydrated}
+        customDurationInput={customDurationInput}
+        durationError={durationError}
         durations={FOCUS_DURATIONS}
         hasEnabledFocusNotifications={hasEnabledFocusNotifications}
         hasInstalledShortcut={hasInstalledShortcut}
         notificationNotice={notificationNotice}
         notificationPermission={notificationPermission}
+        onCustomDurationChange={handleCustomDurationChange}
+        onCustomDurationCommit={commitCustomDuration}
         onDurationChange={setPreferredDuration}
         onFocusNotificationsChange={(isEnabled) => {
-          void setFocusNotificationsEnabled(isEnabled);
+          void setFocusNotificationsEnabled(isEnabled).catch(() => undefined);
         }}
         onPetNameSave={handlePetNameSave}
         onResetLocalData={handleResetLocalData}
@@ -342,71 +403,6 @@ export function App() {
       />
     </AppShell>
   );
-}
-
-const PREFERRED_DURATION_KEY = "petpomodoro.preferredDuration";
-const HAS_INSTALLED_SHORTCUT_KEY = "petpomodoro.hasInstalledShortcut";
-const HAS_ENABLED_FOCUS_NOTIFICATIONS_KEY =
-  "petpomodoro.hasEnabledFocusNotifications";
-
-function readPreferredDuration(): number {
-  try {
-    const savedDuration = Number(
-      window.localStorage.getItem(PREFERRED_DURATION_KEY),
-    );
-
-    return FOCUS_DURATIONS.includes(savedDuration) ? savedDuration : 25;
-  } catch {
-    return 25;
-  }
-}
-
-function savePreferredDuration(duration: number): void {
-  try {
-    window.localStorage.setItem(PREFERRED_DURATION_KEY, String(duration));
-  } catch {
-    // IndexedDB holds core app data. This preference can safely fall back to 25m.
-  }
-}
-
-function readHasInstalledShortcut(): boolean {
-  try {
-    return window.localStorage.getItem(HAS_INSTALLED_SHORTCUT_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
-
-function saveHasInstalledShortcut(isInstalled: boolean): void {
-  try {
-    window.localStorage.setItem(
-      HAS_INSTALLED_SHORTCUT_KEY,
-      String(isInstalled),
-    );
-  } catch {
-    // This only controls whether the optional Shortcut hint is shown.
-  }
-}
-
-function readHasEnabledFocusNotifications(): boolean {
-  try {
-    return (
-      window.localStorage.getItem(HAS_ENABLED_FOCUS_NOTIFICATIONS_KEY) === "true"
-    );
-  } catch {
-    return false;
-  }
-}
-
-function saveHasEnabledFocusNotifications(isEnabled: boolean): void {
-  try {
-    window.localStorage.setItem(
-      HAS_ENABLED_FOCUS_NOTIFICATIONS_KEY,
-      String(isEnabled),
-    );
-  } catch {
-    // This only controls whether optional local reminders are scheduled.
-  }
 }
 
 function runStartNativeTimerShortcut(
@@ -454,11 +450,13 @@ function ErrorNotice({ message }: { message: string }) {
   const clearUiError = useUiStore((state) => state.clearError);
   const clearPetError = usePetStore((state) => state.clearError);
   const clearPomodoroError = usePomodoroStore((state) => state.clearError);
+  const clearSettingsError = useSettingsStore((state) => state.clearError);
 
   const clearErrors = () => {
     clearUiError();
     clearPetError();
     clearPomodoroError();
+    clearSettingsError();
   };
 
   return (

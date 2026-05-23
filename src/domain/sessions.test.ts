@@ -24,6 +24,7 @@ describe("focus session transitions", () => {
       expectedEndAt: "2026-05-22T12:25:00.000Z",
       confirmedAt: null,
       abandonedAt: null,
+      abandonmentReason: null,
       rewardClaimedAt: null,
     });
   });
@@ -55,24 +56,34 @@ describe("focus session transitions", () => {
 
   it("abandons a running session without reward data", () => {
     const session = makeSession();
-    const abandoned = abandonFocusSession(session, "2026-05-22T12:10:00.000Z");
+    const abandoned = abandonFocusSession(
+      session,
+      "cancelled",
+      "2026-05-22T12:10:00.000Z",
+    );
 
     expect(abandoned).toMatchObject({
       status: "abandoned",
       confirmedAt: null,
       abandonedAt: "2026-05-22T12:10:00.000Z",
+      abandonmentReason: "cancelled",
       rewardClaimedAt: null,
     });
   });
 
   it("abandons an awaiting confirmation session without reward data", () => {
     const session = makeSession({ status: "awaiting_confirmation" });
-    const abandoned = abandonFocusSession(session, "2026-05-22T12:30:00.000Z");
+    const abandoned = abandonFocusSession(
+      session,
+      "honest_confirmation",
+      "2026-05-22T12:30:00.000Z",
+    );
 
     expect(abandoned).toMatchObject({
       status: "abandoned",
       confirmedAt: null,
       abandonedAt: "2026-05-22T12:30:00.000Z",
+      abandonmentReason: "honest_confirmation",
       rewardClaimedAt: null,
     });
   });
@@ -108,6 +119,14 @@ describe("focus session transitions", () => {
     ).toThrow(DomainError);
 
     expect(() =>
+      createRunningSession({
+        id: "session-1",
+        plannedDurationMinutes: 181,
+        now: "2026-05-22T12:00:00.000Z",
+      }),
+    ).toThrow(DomainError);
+
+    expect(() =>
       moveRunningSessionToAwaitingConfirmation(
         makeSession({ status: "completed" }),
         "2026-05-22T12:30:00.000Z",
@@ -117,6 +136,15 @@ describe("focus session transitions", () => {
     expect(() =>
       abandonFocusSession(
         makeSession({ status: "completed" }),
+        "cancelled",
+        "2026-05-22T12:30:00.000Z",
+      ),
+    ).toThrow(DomainError);
+
+    expect(() =>
+      abandonFocusSession(
+        makeSession({ status: "running" }),
+        "honest_confirmation",
         "2026-05-22T12:30:00.000Z",
       ),
     ).toThrow(DomainError);

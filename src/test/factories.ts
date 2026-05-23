@@ -33,6 +33,7 @@ export function makeSession(
     expectedEndAt: "2026-05-22T12:25:00.000Z",
     confirmedAt: null,
     abandonedAt: null,
+    abandonmentReason: null,
     rewardClaimedAt: null,
     ...overrides,
   };

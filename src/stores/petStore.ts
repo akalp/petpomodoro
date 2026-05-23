@@ -7,7 +7,7 @@ import {
   type RewardSummary,
 } from "../domain";
 import {
-  claimStoredFocusReward,
+  claimStoredSessionReward,
   getCurrentPet,
   loadOrCreateDefaultPet,
   updatePet,
@@ -19,7 +19,7 @@ export interface PetStoreDependencies {
   getCurrentPet: typeof getCurrentPet;
   loadOrCreateDefaultPet: typeof loadOrCreateDefaultPet;
   updatePet: typeof updatePet;
-  claimStoredFocusReward: typeof claimStoredFocusReward;
+  claimStoredSessionReward: typeof claimStoredSessionReward;
   now: () => string;
 }
 
@@ -45,7 +45,7 @@ const defaultDependencies: PetStoreDependencies = {
   getCurrentPet,
   loadOrCreateDefaultPet,
   updatePet,
-  claimStoredFocusReward,
+  claimStoredSessionReward,
   now: () => new Date().toISOString(),
 };
 
@@ -102,7 +102,7 @@ export function createPetStore(
       set({ isLoading: true, error: null });
 
       try {
-        const result = await dependencies.claimStoredFocusReward({
+        const result = await dependencies.claimStoredSessionReward({
           petId: pet.id,
           sessionId,
           now,

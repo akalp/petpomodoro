@@ -3,6 +3,7 @@ import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { errorMessage } from "./errors";
 import { usePetStore, type PetStoreState } from "./petStore";
 import { usePomodoroStore, type PomodoroStoreState } from "./pomodoroStore";
+import { useSettingsStore, type SettingsStoreState } from "./settingsStore";
 
 export interface UiStoreDependencies {
   petStore: UseBoundStore<
@@ -10,6 +11,9 @@ export interface UiStoreDependencies {
   >;
   pomodoroStore: UseBoundStore<
     StoreApi<Pick<PomodoroStoreState, "restoreRunningSessionAfterAppLaunch">>
+  >;
+  settingsStore: UseBoundStore<
+    StoreApi<Pick<SettingsStoreState, "initializeSettings">>
   >;
   now: () => string;
 }
@@ -25,6 +29,7 @@ export interface UiStoreState {
 const defaultDependencies: UiStoreDependencies = {
   petStore: usePetStore,
   pomodoroStore: usePomodoroStore,
+  settingsStore: useSettingsStore,
   now: () => new Date().toISOString(),
 };
 
@@ -40,6 +45,7 @@ export function createUiStore(
       set({ isInitializing: true, error: null });
 
       try {
+        await dependencies.settingsStore.getState().initializeSettings(now);
         await dependencies.petStore.getState().initializePet(now);
         await dependencies.petStore.getState().updateDecayOnOpen(now);
         await dependencies.pomodoroStore
@@ -57,4 +63,3 @@ export function createUiStore(
 }
 
 export const useUiStore = createUiStore();
-

@@ -12,6 +12,10 @@ interface SettingsPanelProps {
   hasInstalledShortcut: boolean;
   notificationNotice: string | null;
   notificationPermission: LocalNotificationPermission;
+  customDurationInput: string;
+  durationError: string | null;
+  onCustomDurationChange: (value: string) => void;
+  onCustomDurationCommit: (value: string) => void;
   onDurationChange: (duration: number) => void;
   onFocusNotificationsChange: (hasEnabledFocusNotifications: boolean) => void;
   onPetNameSave: (name: string) => void;
@@ -28,6 +32,10 @@ export function SettingsPanel({
   hasInstalledShortcut,
   notificationNotice,
   notificationPermission,
+  customDurationInput,
+  durationError,
+  onCustomDurationChange,
+  onCustomDurationCommit,
   onDurationChange,
   onFocusNotificationsChange,
   onPetNameSave,
@@ -110,6 +118,28 @@ export function SettingsPanel({
             );
           })}
         </div>
+        <label
+          className="block text-sm font-semibold text-slate-700"
+          htmlFor="settings-custom-duration"
+        >
+          Custom minutes
+        </label>
+        <input
+          aria-invalid={durationError !== null}
+          className="min-h-12 w-full rounded-lg border border-rose-200 bg-white px-4 text-base text-slate-900 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
+          disabled={disabled}
+          id="settings-custom-duration"
+          inputMode="numeric"
+          min={1}
+          max={180}
+          onBlur={(event) => onCustomDurationCommit(event.currentTarget.value)}
+          onChange={(event) => onCustomDurationChange(event.target.value)}
+          type="number"
+          value={customDurationInput}
+        />
+        {durationError ? (
+          <p className="text-sm leading-6 text-rose-700">{durationError}</p>
+        ) : null}
       </div>
 
       <div className="rounded-lg border border-teal-100 bg-teal-50 p-4">
@@ -166,7 +196,7 @@ export function SettingsPanel({
       <div className="rounded-lg border border-rose-100 bg-rose-50 p-4">
         <p className="text-sm font-semibold text-slate-900">Reset local data</p>
         <p className="mt-1 text-sm leading-6 text-slate-600">
-          This clears the pet, sessions, and rewards saved on this device.
+          This clears the pet, sessions, rewards, and preferences saved on this device.
         </p>
         <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
           <input

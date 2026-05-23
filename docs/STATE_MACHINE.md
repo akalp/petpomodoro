@@ -31,7 +31,7 @@ The user confirmed that they completed the focus session. The session is eligibl
 
 ### `abandoned`
 
-The user ended the session early or honestly said they did not complete it. No reward is applied.
+The user ended the session early or honestly said they did not complete it. Early cancellation gives no reward. A declined confirmation after the planned focus window may grant one small honesty reward.
 
 ## Allowed Transitions
 
@@ -39,9 +39,9 @@ The user ended the session early or honestly said they did not complete it. No r
 | --- | --- | --- | --- | --- |
 | `idle` | `running` | User starts a focus session | Create session with `startedAt`, `expectedEndAt`, `plannedDurationMinutes`, `rewardClaimedAt = null` | No reward |
 | `running` | `awaiting_confirmation` | Current local time is greater than or equal to `expectedEndAt` | Update status to `awaiting_confirmation` | No reward |
-| `running` | `abandoned` | User cancels or abandons before confirmation | Set `abandonedAt`, status `abandoned` | No reward |
+| `running` | `abandoned` | User ends a running session early | Set `abandonedAt`, `abandonmentReason = cancelled`, status `abandoned` | No reward |
 | `awaiting_confirmation` | `completed` | User selects "Yes, we did it" | Set `confirmedAt`, status `completed` | Apply reward if unclaimed |
-| `awaiting_confirmation` | `abandoned` | User selects "Not this time" | Set `abandonedAt`, status `abandoned` | No reward |
+| `awaiting_confirmation` | `abandoned` | User selects "Not this time" | Set `abandonedAt`, `abandonmentReason = honest_confirmation`, status `abandoned` | Apply one honesty reward if unclaimed |
 | `completed` | `idle` | User dismisses result or starts another session | Clear active session reference | Reward already handled |
 | `abandoned` | `idle` | User dismisses result or starts another session | Clear active session reference | No reward |
 
@@ -64,6 +64,7 @@ Rules:
 - Set `expectedEndAt = now + plannedDurationMinutes`.
 - Set `confirmedAt = null`.
 - Set `abandonedAt = null`.
+- Set `abandonmentReason = null`.
 - Set `rewardClaimedAt = null`.
 - Set status to `running`.
 
@@ -114,10 +115,11 @@ Rules:
 
 - Set session status to `abandoned`.
 - Set `abandonedAt = now`.
+- Set `abandonmentReason = cancelled` for early ending from `running`.
+- Set `abandonmentReason = honest_confirmation` for "Not this time" from `awaiting_confirmation`.
 - Leave `confirmedAt = null`.
-- Leave `rewardClaimedAt = null`.
-- Do not create a reward ledger record.
-- Do not modify pet XP or level.
+- Early cancellation leaves `rewardClaimedAt = null`, creates no ledger record, and changes no pet stats.
+- Honest declined confirmation may set `rewardClaimedAt`, create one ledger record, and apply only the documented honesty reward; it does not grant completion XP or levels.
 
 ### Return To Idle
 
@@ -133,7 +135,7 @@ Rules:
 
 ## Reward Application
 
-The MVP reward should be a fixed amount of XP per honestly completed focus session. The exact number can be defined during domain implementation, but it should be deterministic and covered by tests.
+The MVP rewards are deterministic multi-stat updates: honestly completed focus sessions grant completion rewards, and a declined confirmation grants a smaller honesty-heart reward without completion XP.
 
 Reward logic should:
 
@@ -148,7 +150,7 @@ The same session must never reward the pet twice.
 
 Protection should exist in two layers:
 
-- Domain layer: do not generate a reward when `rewardClaimedAt` is already set or the session is not eligible.
+- Domain layer: do not generate a reward when `rewardClaimedAt` is already set, a session was cancelled early, or a session is otherwise not eligible.
 - Persistence layer: enforce a unique `rewardLedger.sessionId` index in IndexedDB.
 
 The confirmation action should be safe to retry after a refresh, double tap, or transient error. If a reward ledger row already exists, the app should treat the reward as already claimed and avoid adding more XP.
@@ -163,4 +165,3 @@ When the app launches or resumes:
 - If it is already `awaiting_confirmation`, show the confirmation prompt.
 - Do not auto-complete a session without user confirmation.
 - Do not apply rewards during rehydration.
-
