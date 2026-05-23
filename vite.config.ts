@@ -9,7 +9,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["icons/apple-touch-icon.png"],
+      includeAssets: [
+        "icons/apple-touch-icon.png",
+        "icons/pwa-192.png",
+        "icons/pwa-512.png",
+      ],
       manifest: {
         name: "PetPomodoro",
         short_name: "PetPomo",
@@ -39,7 +43,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,svg,webp,woff2}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff2}"],
         navigateFallback: "/index.html",
       },
     }),
