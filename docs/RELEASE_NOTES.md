@@ -19,7 +19,7 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 - Basic settings for pet name, preferred focus duration, and resetting local data.
 - PWA manifest, app icons, service worker precaching, and offline app-shell support after first load.
 - iOS Safari install hint and Home Screen metadata.
-- Shortcut return query handling for `completedSessionId` as a convenience flow.
+- Optional iOS Shortcut launch for starting a native timer with the selected duration.
 
 ## Not Included
 
@@ -56,7 +56,7 @@ Use the preview build for browser and PWA checks. Use a real iPhone Safari sessi
 - iOS may suspend JavaScript while the app is backgrounded.
 - Installed PWA storage can be cleared by the user, browser, or operating system.
 - Offline launch works after the app shell has loaded and the service worker has installed.
-- Shortcut return handling can move an active elapsed session to confirmation, but it is not proof that a native timer completed.
+- Shortcut launch can start a native timer as a convenience, but the user must return to PetPomodoro manually for honesty confirmation.
 - This MVP has no export or backup flow for local data.
 
 ## Deployment Notes

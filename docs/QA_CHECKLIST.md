@@ -181,14 +181,13 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Landscape and portrait layouts remain readable.
 - [ ] Text does not overflow buttons or compact cards.
 
-## Shortcut Return Query Handling
+## Shortcut Timer Launch
 
+- [ ] Mark "I installed shortcut already." in Settings on the installed iOS PWA.
 - [ ] Start a running session.
-- [ ] Reopen the app with `?completedSessionId=<active-session-id>` before `expectedEndAt`.
-- [ ] The active running session moves to `awaiting_confirmation`.
-- [ ] The query parameter is removed from the URL.
-- [ ] No reward is applied automatically.
-- [ ] Reopen with an unknown `completedSessionId` and verify no unrelated session is completed.
+- [ ] Confirm the app opens the `PetPomodoro Start Timer` Shortcut with the selected duration in seconds.
+- [ ] Return to PetPomodoro manually when the native timer ends.
+- [ ] Confirm the session still uses the normal timestamp-based honesty confirmation.
 - [ ] Confirm that Shortcut support is treated as convenience only, not verification.
 
 ## Copy Review

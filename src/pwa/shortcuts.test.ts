@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  START_NATIVE_TIMER_SHORTCUT_NAME,
   START_NATIVE_TIMER_SHORTCUT_URL,
-  buildShortcutUrl,
-  clearShortcutReturn,
-  parseShortcutReturn,
+  buildStartNativeTimerShortcutUrl,
+  shouldRunStartNativeTimerShortcut,
 } from "./shortcuts";
 
 describe("Shortcut URL helpers", () => {
@@ -14,32 +14,34 @@ describe("Shortcut URL helpers", () => {
     );
   });
 
-  it("builds a return URL with the completed session id", () => {
-    const url = buildShortcutUrl({
-      baseUrl: "https://petpomodoro.local/?source=homescreen",
-      completedSessionId: "session-1",
+  it("keeps the Start Native Timer shortcut name stable", () => {
+    expect(START_NATIVE_TIMER_SHORTCUT_NAME).toBe("PetPomodoro Start Timer");
+  });
+
+  it("builds a run URL with the selected duration as seconds input", () => {
+    const url = buildStartNativeTimerShortcutUrl({
+      plannedDurationMinutes: 25,
     });
 
     expect(url).toBe(
-      "https://petpomodoro.local/?source=homescreen&completedSessionId=session-1",
+      "shortcuts://run-shortcut?name=PetPomodoro%20Start%20Timer&input=text&text=1500",
     );
   });
 
-  it("parses a Shortcut return without completing the session", () => {
+  it("only runs the native timer shortcut from an installed iOS PWA", () => {
+    const userAgent =
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile/15E148 Safari/604.1";
+
+    expect(shouldRunStartNativeTimerShortcut(userAgent, true, true)).toBe(true);
+    expect(shouldRunStartNativeTimerShortcut(userAgent, true, false)).toBe(false);
+    expect(shouldRunStartNativeTimerShortcut(userAgent, false, true)).toBe(false);
     expect(
-      parseShortcutReturn(
-        "https://petpomodoro.local/?completedSessionId=session-1",
+      shouldRunStartNativeTimerShortcut(
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 Chrome/120.0 Safari/537.36",
+        true,
+        true,
       ),
-    ).toEqual({
-      completedSessionId: "session-1",
-    });
+    ).toBe(false);
   });
 
-  it("clears Shortcut return params from the current route", () => {
-    expect(
-      clearShortcutReturn(
-        "https://petpomodoro.local/?completedSessionId=session-1&tab=home#pet",
-      ),
-    ).toBe("/?tab=home#pet");
-  });
 });

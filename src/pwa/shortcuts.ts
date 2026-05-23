@@ -1,37 +1,32 @@
-export interface ShortcutUrlInput {
-  baseUrl: string;
-  completedSessionId: string;
+export interface NativeTimerShortcutUrlInput {
+  plannedDurationMinutes: number;
 }
 
-export interface ShortcutReturn {
-  completedSessionId: string | null;
-}
-
-const COMPLETED_SESSION_PARAM = "completedSessionId";
+const SHORTCUTS_RUN_SHORTCUT_URL = "shortcuts://run-shortcut";
 
 export const START_NATIVE_TIMER_SHORTCUT_URL =
   "https://www.icloud.com/shortcuts/ebbf43762a544157a75c0804372c82f2";
+export const START_NATIVE_TIMER_SHORTCUT_NAME = "PetPomodoro Start Timer";
 
-export function buildShortcutUrl({
-  baseUrl,
-  completedSessionId,
-}: ShortcutUrlInput): string {
-  const url = new URL(baseUrl);
-  url.searchParams.set(COMPLETED_SESSION_PARAM, completedSessionId);
-  return url.toString();
+export function buildStartNativeTimerShortcutUrl({
+  plannedDurationMinutes,
+}: NativeTimerShortcutUrlInput): string {
+  const params = new URLSearchParams({
+    input: "text",
+    text: String(plannedDurationMinutes * 60),
+  });
+
+  return `${SHORTCUTS_RUN_SHORTCUT_URL}?name=${encodeURIComponent(
+    START_NATIVE_TIMER_SHORTCUT_NAME,
+  )}&${params.toString()}`;
 }
 
-export function parseShortcutReturn(url: string): ShortcutReturn {
-  const parsedUrl = new URL(url);
+export function shouldRunStartNativeTimerShortcut(
+  userAgent: string,
+  isStandalone: boolean,
+  hasInstalledShortcut: boolean,
+): boolean {
+  const isiOS = /iPad|iPhone|iPod/.test(userAgent);
 
-  return {
-    completedSessionId: parsedUrl.searchParams.get(COMPLETED_SESSION_PARAM),
-  };
-}
-
-export function clearShortcutReturn(url: string): string {
-  const parsedUrl = new URL(url);
-  parsedUrl.searchParams.delete(COMPLETED_SESSION_PARAM);
-
-  return `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+  return isiOS && isStandalone && hasInstalledShortcut;
 }

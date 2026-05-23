@@ -13,7 +13,11 @@ import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { Button } from "./components/ui/Button";
 import { Card } from "./components/ui/Card";
 import { resetLocalData } from "./db";
-import { clearShortcutReturn, parseShortcutReturn } from "./pwa/shortcuts";
+import { isStandaloneDisplayMode } from "./pwa/installHints";
+import {
+  buildStartNativeTimerShortcutUrl,
+  shouldRunStartNativeTimerShortcut,
+} from "./pwa/shortcuts";
 import { usePetStore, usePomodoroStore, useUiStore } from "./stores";
 
 let appInitialization: Promise<void> | null = null;
@@ -114,48 +118,19 @@ export function App() {
     return () => window.clearInterval(intervalId);
   }, [activeSession?.status, refreshSession]);
 
-  useEffect(() => {
-    if (!hasHydrated) {
-      return;
-    }
-
-    const { completedSessionId } = parseShortcutReturn(window.location.href);
-
-    if (!completedSessionId) {
-      return;
-    }
-
-    const refreshNow =
-      activeSession?.id === completedSessionId &&
-      activeSession.status === "running"
-        ? activeSession.expectedEndAt
-        : new Date().toISOString();
-
-    void refreshSessionStatus(refreshNow)
-      .then(() => loadRecentSessions())
-      .catch(() => undefined);
-
-    window.history.replaceState(
-      null,
-      "",
-      clearShortcutReturn(window.location.href),
-    );
-  }, [
-    activeSession?.expectedEndAt,
-    activeSession?.id,
-    activeSession?.status,
-    hasHydrated,
-    loadRecentSessions,
-    refreshSessionStatus,
-  ]);
-
   const isBusy = isInitializing || isSessionLoading;
   const error = uiError ?? petError ?? pomodoroError;
 
   const handleStart = (duration: number) => {
     setCurrentTime(Date.now());
     void startSession(duration)
-      .then(() => loadRecentSessions())
+      .then((session) => {
+        void loadRecentSessions();
+        runStartNativeTimerShortcut(
+          session.plannedDurationMinutes,
+          hasInstalledShortcut,
+        );
+      })
       .catch(() => undefined);
   };
 
@@ -311,6 +286,25 @@ function saveHasInstalledShortcut(isInstalled: boolean): void {
   } catch {
     // This only controls whether the optional Shortcut hint is shown.
   }
+}
+
+function runStartNativeTimerShortcut(
+  plannedDurationMinutes: number,
+  hasInstalledShortcut: boolean,
+): void {
+  if (
+    !shouldRunStartNativeTimerShortcut(
+      window.navigator.userAgent,
+      isStandaloneDisplayMode(),
+      hasInstalledShortcut,
+    )
+  ) {
+    return;
+  }
+
+  window.location.href = buildStartNativeTimerShortcutUrl({
+    plannedDurationMinutes,
+  });
 }
 
 function formatCountdown(expectedEndAt: string, nowMs: number): string {
