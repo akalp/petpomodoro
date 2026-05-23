@@ -180,3 +180,23 @@ Do not imply:
 - The app can monitor iOS Clock timers.
 - The app can keep running continuously in the background.
 
+## iOS Shortcut Install Hint
+
+Primary:
+
+- Install the Start Native Timer Shortcut.
+
+Supporting:
+
+- It can start an iOS timer alongside PetPomodoro.
+- Your pet will still ask you to confirm honestly when you come back.
+
+Action:
+
+- Install Shortcut
+
+Do not imply:
+
+- The Shortcut proves that focus was completed.
+- PetPomodoro can observe the native timer.
+- The confirmation step is skipped.

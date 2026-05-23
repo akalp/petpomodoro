@@ -7,9 +7,11 @@ import { Card } from "../ui/Card";
 interface SettingsPanelProps {
   disabled?: boolean;
   durations: number[];
+  hasInstalledShortcut: boolean;
   onDurationChange: (duration: number) => void;
   onPetNameSave: (name: string) => void;
   onResetLocalData: () => void;
+  onShortcutInstalledChange: (hasInstalledShortcut: boolean) => void;
   pet: PetState | null;
   selectedDuration: number;
 }
@@ -17,9 +19,11 @@ interface SettingsPanelProps {
 export function SettingsPanel({
   disabled = false,
   durations,
+  hasInstalledShortcut,
   onDurationChange,
   onPetNameSave,
   onResetLocalData,
+  onShortcutInstalledChange,
   pet,
   selectedDuration,
 }: SettingsPanelProps) {
@@ -97,6 +101,28 @@ export function SettingsPanel({
             );
           })}
         </div>
+      </div>
+
+      <div className="rounded-lg border border-teal-100 bg-teal-50 p-4">
+        <p className="text-sm font-semibold text-slate-900">
+          iOS Shortcut
+        </p>
+        <p className="mt-1 text-sm leading-6 text-slate-600">
+          This only remembers whether this device should hide the Shortcut install
+          hint.
+        </p>
+        <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
+          <input
+            checked={hasInstalledShortcut}
+            className="h-5 w-5 accent-teal-600"
+            disabled={disabled}
+            onChange={(event) =>
+              onShortcutInstalledChange(event.target.checked)
+            }
+            type="checkbox"
+          />
+          I installed shortcut already.
+        </label>
       </div>
 
       <div className="rounded-lg border border-rose-100 bg-rose-50 p-4">

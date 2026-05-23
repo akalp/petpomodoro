@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "./components/layout/AppShell";
 import { PetDashboard } from "./components/pet/PetDashboard";
 import { InstallHint } from "./components/pwa/InstallHint";
+import { ShortcutInstallHint } from "./components/pwa/ShortcutInstallHint";
 import { AwaitingConfirmationScreen } from "./components/session/AwaitingConfirmationScreen";
 import { PomodoroStartPanel } from "./components/session/PomodoroStartPanel";
 import { RewardModal } from "./components/session/RewardModal";
@@ -21,6 +22,9 @@ const FOCUS_DURATIONS = [5, 15, 25, 50];
 export function App() {
   const [selectedDuration, setSelectedDuration] = useState(() =>
     readPreferredDuration(),
+  );
+  const [hasInstalledShortcut, setHasInstalledShortcut] = useState(() =>
+    readHasInstalledShortcut(),
   );
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const pet = usePetStore((state) => state.pet);
@@ -50,6 +54,11 @@ export function App() {
   const setPreferredDuration = (duration: number) => {
     setSelectedDuration(duration);
     savePreferredDuration(duration);
+  };
+
+  const setShortcutInstalled = (isInstalled: boolean) => {
+    setHasInstalledShortcut(isInstalled);
+    saveHasInstalledShortcut(isInstalled);
   };
 
   useEffect(() => {
@@ -212,6 +221,10 @@ export function App() {
       {error ? <ErrorNotice message={error} /> : null}
       {!hasHydrated && isInitializing ? <LoadingCard /> : null}
       <InstallHint />
+      <ShortcutInstallHint
+        hasInstalledShortcut={hasInstalledShortcut}
+        onInstallShortcut={() => setShortcutInstalled(true)}
+      />
       <PetDashboard pet={pet} />
       {activeSession?.status === "running" ? (
         <RunningSessionScreen
@@ -246,9 +259,11 @@ export function App() {
       <SettingsPanel
         disabled={isBusy || !hasHydrated}
         durations={FOCUS_DURATIONS}
+        hasInstalledShortcut={hasInstalledShortcut}
         onDurationChange={setPreferredDuration}
         onPetNameSave={handlePetNameSave}
         onResetLocalData={handleResetLocalData}
+        onShortcutInstalledChange={setShortcutInstalled}
         pet={pet}
         selectedDuration={selectedDuration}
       />
@@ -257,6 +272,7 @@ export function App() {
 }
 
 const PREFERRED_DURATION_KEY = "petpomodoro.preferredDuration";
+const HAS_INSTALLED_SHORTCUT_KEY = "petpomodoro.hasInstalledShortcut";
 
 function readPreferredDuration(): number {
   try {
@@ -275,6 +291,25 @@ function savePreferredDuration(duration: number): void {
     window.localStorage.setItem(PREFERRED_DURATION_KEY, String(duration));
   } catch {
     // IndexedDB holds core app data. This preference can safely fall back to 25m.
+  }
+}
+
+function readHasInstalledShortcut(): boolean {
+  try {
+    return window.localStorage.getItem(HAS_INSTALLED_SHORTCUT_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function saveHasInstalledShortcut(isInstalled: boolean): void {
+  try {
+    window.localStorage.setItem(
+      HAS_INSTALLED_SHORTCUT_KEY,
+      String(isInstalled),
+    );
+  } catch {
+    // This only controls whether the optional Shortcut hint is shown.
   }
 }
 

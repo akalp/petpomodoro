@@ -5,6 +5,16 @@ export function shouldShowIosInstallHint(userAgent: string, isStandalone: boolea
   return isiOS && isSafari && !isStandalone;
 }
 
+export function shouldShowIosShortcutInstallHint(
+  userAgent: string,
+  isStandalone: boolean,
+  hasInstalledShortcut: boolean,
+): boolean {
+  const isiOS = /iPad|iPhone|iPod/.test(userAgent);
+
+  return isiOS && isStandalone && !hasInstalledShortcut;
+}
+
 export function isStandaloneDisplayMode(): boolean {
   return (
     window.matchMedia("(display-mode: standalone)").matches ||

@@ -9,6 +9,9 @@ export interface ShortcutReturn {
 
 const COMPLETED_SESSION_PARAM = "completedSessionId";
 
+export const START_NATIVE_TIMER_SHORTCUT_URL =
+  "https://www.icloud.com/shortcuts/ebbf43762a544157a75c0804372c82f2";
+
 export function buildShortcutUrl({
   baseUrl,
   completedSessionId,
