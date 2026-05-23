@@ -1,4 +1,5 @@
 export type PetMood = "calm" | "happy" | "sleepy";
+export type SupportedLanguage = "en" | "tr";
 
 export interface PetState {
   id: string;
@@ -45,6 +46,7 @@ export interface AppSettings {
   preferredDurationMinutes: number;
   hasInstalledShortcut: boolean;
   hasEnabledFocusNotifications: boolean;
+  language: SupportedLanguage;
   updatedAt: string;
 }
 

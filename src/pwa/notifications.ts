@@ -8,6 +8,11 @@ export const FOCUS_FINISHED_NOTIFICATION_TITLE = "Your pet is waiting.";
 export const FOCUS_FINISHED_NOTIFICATION_BODY =
   "Come back to PetPomodoro when you're ready to check in.";
 
+interface FocusFinishedNotificationCopy {
+  body: string;
+  title: string;
+}
+
 export function canUseLocalNotifications(): boolean {
   return getNotificationConstructor() !== null;
 }
@@ -37,7 +42,13 @@ export function shouldScheduleFocusNotification(
   return isEnabled && permission === "granted" && activeSession?.status === "running";
 }
 
-export function showFocusFinishedNotification(sessionId: string): void {
+export function showFocusFinishedNotification(
+  sessionId: string,
+  copy: FocusFinishedNotificationCopy = {
+    body: FOCUS_FINISHED_NOTIFICATION_BODY,
+    title: FOCUS_FINISHED_NOTIFICATION_TITLE,
+  },
+): void {
   const NotificationConstructor = getNotificationConstructor();
 
   if (!NotificationConstructor || NotificationConstructor.permission !== "granted") {
@@ -45,9 +56,9 @@ export function showFocusFinishedNotification(sessionId: string): void {
   }
 
   const notification = new NotificationConstructor(
-    FOCUS_FINISHED_NOTIFICATION_TITLE,
+    copy.title,
     {
-      body: FOCUS_FINISHED_NOTIFICATION_BODY,
+      body: copy.body,
       data: { sessionId },
       tag: `petpomodoro-focus-${sessionId}`,
     },

@@ -1,21 +1,31 @@
 import { motion } from "framer-motion";
 
 import type { FocusSession } from "../../domain";
+import { languageLocale, type SupportedLanguage, type Translator } from "../../i18n";
 import { Card } from "../ui/Card";
 
 interface SessionHistoryProps {
   isLoading?: boolean;
   sessions: FocusSession[];
+  language: SupportedLanguage;
+  t: Translator;
 }
 
-export function SessionHistory({ isLoading = false, sessions }: SessionHistoryProps) {
+export function SessionHistory({
+  isLoading = false,
+  sessions,
+  language,
+  t,
+}: SessionHistoryProps) {
   return (
     <section className="space-y-3">
       <div className="flex items-end justify-between gap-3">
-        <h2 className="text-xl font-semibold text-slate-950">Recent sessions</h2>
+        <h2 className="text-xl font-semibold text-slate-950">
+          {t("recentSessions")}
+        </h2>
         {isLoading ? (
           <span className="text-xs font-semibold uppercase text-slate-500">
-            Updating
+            {t("updating")}
           </span>
         ) : null}
       </div>
@@ -27,9 +37,9 @@ export function SessionHistory({ isLoading = false, sessions }: SessionHistoryPr
         </Card>
       ) : sessions.length === 0 ? (
         <Card className="text-sm leading-6 text-slate-600">
-          <p className="font-semibold text-slate-900">No focus sessions yet.</p>
+          <p className="font-semibold text-slate-900">{t("noSessions")}</p>
           <p className="mt-1">
-            Your session history will appear here after your first focus session.
+            {t("noSessionsSupport")}
           </p>
         </Card>
       ) : (
@@ -44,21 +54,21 @@ export function SessionHistory({ isLoading = false, sessions }: SessionHistoryPr
               <Card className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-900">
-                    {statusLabel(session.status)}
+                    {statusLabel(session.status, t)}
                   </p>
                   <p className="mt-1 text-sm text-slate-600">
-                    {formatDate(session.startedAt)}
+                    {formatDate(session.startedAt, language)}
                   </p>
                   <p className="mt-2 text-xs font-medium text-slate-500">
-                    {statusSupportLabel(session.status)}
+                    {statusSupportLabel(session.status, t)}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="text-sm font-semibold text-rose-700">
-                    {session.plannedDurationMinutes} min
+                    {t("durationMinutes", { minutes: session.plannedDurationMinutes })}
                   </p>
                   <p className="mt-2 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold uppercase text-slate-600">
-                    {statusMetaLabel(session.status)}
+                    {statusMetaLabel(session.status, t)}
                   </p>
                 </div>
               </Card>
@@ -70,48 +80,56 @@ export function SessionHistory({ isLoading = false, sessions }: SessionHistoryPr
   );
 }
 
-function statusLabel(status: FocusSession["status"]): string {
+function statusLabel(status: FocusSession["status"], t: Translator): string {
   if (status === "completed") {
-    return "Session complete";
+    return t("sessionComplete");
   }
 
   if (status === "abandoned") {
-    return "Not this time";
+    return t("abandonedChoice");
   }
 
   if (status === "awaiting_confirmation") {
-    return "Waiting for your answer";
+    return t("waitingAnswer");
   }
 
-  return "In progress";
+  return t("inProgress");
 }
 
-function statusMetaLabel(status: FocusSession["status"]): string {
+function statusMetaLabel(status: FocusSession["status"], t: Translator): string {
   if (status === "awaiting_confirmation") {
-    return "Awaiting";
+    return t("awaiting");
   }
 
-  return status;
-}
-
-function statusSupportLabel(status: FocusSession["status"]): string {
   if (status === "completed") {
-    return "That focus time counts.";
+    return t("statusCompleted");
   }
 
   if (status === "abandoned") {
-    return "No points lost. No scolding.";
+    return t("statusAbandoned");
+  }
+
+  return t("statusRunning");
+}
+
+function statusSupportLabel(status: FocusSession["status"], t: Translator): string {
+  if (status === "completed") {
+    return t("completedSupport");
+  }
+
+  if (status === "abandoned") {
+    return t("honestyRewardSupport");
   }
 
   if (status === "awaiting_confirmation") {
-    return "Your pet is ready for your answer.";
+    return t("awaitingSupport");
   }
 
-  return "Your session is underway.";
+  return t("runningHistorySupport");
 }
 
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(undefined, {
+function formatDate(value: string, language: SupportedLanguage): string {
+  return new Intl.DateTimeFormat(languageLocale(language), {
     month: "short",
     day: "numeric",
     hour: "numeric",

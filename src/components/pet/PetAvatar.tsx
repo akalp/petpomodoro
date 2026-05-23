@@ -1,9 +1,11 @@
 import { motion, useReducedMotion } from "framer-motion";
 
 import type { PetMood } from "../../domain";
+import type { Translator } from "../../i18n";
 
 interface PetAvatarProps {
   mood: PetMood;
+  t: Translator;
 }
 
 const moodFace: Record<PetMood, string> = {
@@ -12,7 +14,7 @@ const moodFace: Record<PetMood, string> = {
   sleepy: "-_-",
 };
 
-export function PetAvatar({ mood }: PetAvatarProps) {
+export function PetAvatar({ mood, t }: PetAvatarProps) {
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -25,7 +27,7 @@ export function PetAvatar({ mood }: PetAvatarProps) {
               y: mood === "sleepy" ? [0, 2, 0] : [0, -3, 0],
             }
       }
-      aria-label={`Pet mood: ${mood}`}
+      aria-label={t("petMoodAria", { mood: moodLabel(mood, t) })}
       className="relative mx-auto flex aspect-square w-40 items-center justify-center rounded-full bg-teal-100 shadow-inner shadow-teal-200"
       role="img"
       transition={{ duration: mood === "happy" ? 1.6 : 3, repeat: Infinity }}
@@ -39,4 +41,16 @@ export function PetAvatar({ mood }: PetAvatarProps) {
       </div>
     </motion.div>
   );
+}
+
+function moodLabel(mood: PetMood, t: Translator): string {
+  if (mood === "happy") {
+    return t("moodHappy");
+  }
+
+  if (mood === "sleepy") {
+    return t("moodSleepy");
+  }
+
+  return t("moodCalm");
 }

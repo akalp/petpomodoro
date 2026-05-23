@@ -290,6 +290,7 @@ describe("settings workflows", () => {
         preferredDurationMinutes: 50,
         hasInstalledShortcut: true,
         hasEnabledFocusNotifications: true,
+        language: "tr",
       }),
       clearLegacySettings: () => {
         legacyCleared = true;
@@ -299,13 +300,16 @@ describe("settings workflows", () => {
 
     const hydrated = await store.getState().initializeSettings(now);
     const updated = await store.getState().updatePreferredDuration(90, now);
+    const translated = await store.getState().setLanguage("en", now);
 
     expect(hydrated).toMatchObject({
       preferredDurationMinutes: 50,
       hasInstalledShortcut: true,
       hasEnabledFocusNotifications: true,
+      language: "tr",
     });
     expect(updated.preferredDurationMinutes).toBe(90);
+    expect(translated.language).toBe("en");
     expect(legacyCleared).toBe(true);
   });
 

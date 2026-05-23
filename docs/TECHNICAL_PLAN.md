@@ -108,6 +108,7 @@ interface AppSettings {
   preferredDurationMinutes: number;
   hasInstalledShortcut: boolean;
   hasEnabledFocusNotifications: boolean;
+  language: "en" | "tr";
   updatedAt: string;
 }
 ```
@@ -163,6 +164,7 @@ Use small stores or slices with clear responsibilities:
 - Settings state:
   - preferred duration, including custom whole-minute values from 1 to 180
   - optional Shortcut and local-reminder preferences
+  - bundled English or Türkçe interface language preference
   - one-time migration of legacy localStorage preferences into IndexedDB
 
 Store actions may be async, but all transition decisions should be delegated to pure domain functions.
@@ -247,4 +249,4 @@ The app should cache the static app shell after first load. Product data and dev
 5. Move eligible running sessions to awaiting confirmation.
 6. Render the appropriate screen.
 
-If the app is offline, all MVP flows should continue to work. If IndexedDB is unavailable or blocked, the app should show a clear local storage error rather than pretending progress is saved.
+English and Türkçe messages must be included in the static app bundle; changing or restoring language cannot depend on a network request. If the app is offline, all MVP flows should continue to work. If IndexedDB is unavailable or blocked, the app should show a clear local storage error rather than pretending progress is saved.

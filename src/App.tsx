@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AppShell } from "./components/layout/AppShell";
 import { PetDashboard } from "./components/pet/PetDashboard";
@@ -17,6 +17,12 @@ import {
   DEFAULT_FOCUS_DURATION_MINUTES,
   parseFocusDurationInput,
 } from "./domain";
+import {
+  createTranslator,
+  DEFAULT_LANGUAGE,
+  localizeErrorMessage,
+  type Translator,
+} from "./i18n";
 import { isStandaloneDisplayMode } from "./pwa/installHints";
 import {
   getNotificationPermission,
@@ -43,10 +49,12 @@ export function App() {
   const [customDurationDraft, setCustomDurationDraft] = useState<string | null>(
     null,
   );
-  const [durationError, setDurationError] = useState<string | null>(null);
+  const [isDurationInvalid, setIsDurationInvalid] = useState(false);
   const [notificationPermission, setNotificationPermission] =
     useState<LocalNotificationPermission>(() => getNotificationPermission());
-  const [notificationNotice, setNotificationNotice] = useState<string | null>(
+  const [notificationNotice, setNotificationNotice] = useState<
+    "unavailable" | "off" | null
+  >(
     null,
   );
   const [currentTime, setCurrentTime] = useState(() => Date.now());
@@ -81,6 +89,7 @@ export function App() {
   const saveFocusNotificationsEnabled = useSettingsStore(
     (state) => state.setFocusNotificationsEnabled,
   );
+  const saveLanguage = useSettingsStore((state) => state.setLanguage);
   const clearAfterLocalDataReset = useSettingsStore(
     (state) => state.clearAfterLocalDataReset,
   );
@@ -100,10 +109,21 @@ export function App() {
     settings?.hasEnabledFocusNotifications ?? false;
   const customDurationInput =
     customDurationDraft ?? String(selectedDuration);
+  const language = settings?.language ?? DEFAULT_LANGUAGE;
+  const t = createTranslator(language);
+  const durationError = isDurationInvalid ? t("durationError") : null;
+  const notificationCopy = useMemo(() => {
+    const translate = createTranslator(language);
+
+    return {
+      body: translate("notificationBody"),
+      title: translate("notificationTitle"),
+    };
+  }, [language]);
 
   const setPreferredDuration = (duration: number) => {
     setCustomDurationDraft(String(duration));
-    setDurationError(null);
+    setIsDurationInvalid(false);
     void updatePreferredDuration(duration).catch(() => undefined);
   };
 
@@ -131,9 +151,7 @@ export function App() {
 
     await saveFocusNotificationsEnabled(false);
     setNotificationNotice(
-      nextPermission === "unsupported"
-        ? "Notifications are not available on this device."
-        : "Notifications are off for this device.",
+      nextPermission === "unsupported" ? "unavailable" : "off",
     );
   };
 
@@ -142,11 +160,11 @@ export function App() {
     const duration = parseFocusDurationInput(value);
 
     if (duration === null) {
-      setDurationError("Enter a whole number from 1 to 180 minutes.");
+      setIsDurationInvalid(true);
       return;
     }
 
-    setDurationError(null);
+    setIsDurationInvalid(false);
   };
 
   const commitCustomDuration = (value: string) => {
@@ -164,6 +182,10 @@ export function App() {
       .then(() => loadRecentSessions())
       .catch(() => undefined);
   }, [initializeApp, loadRecentSessions]);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const refreshSession = useCallback(() => {
     void refreshSessionStatus()
@@ -246,7 +268,7 @@ export function App() {
       void refreshSessionStatus(scheduledSession.expectedEndAt)
         .then(() => loadRecentSessions())
         .catch(() => undefined);
-      showFocusFinishedNotification(scheduledSession.id);
+      showFocusFinishedNotification(scheduledSession.id, notificationCopy);
     }, notificationDelayMs);
 
     return () => window.clearTimeout(timeoutId);
@@ -255,6 +277,7 @@ export function App() {
     hasEnabledFocusNotifications,
     loadRecentSessions,
     notificationPermission,
+    notificationCopy,
     refreshSessionStatus,
   ]);
 
@@ -299,7 +322,7 @@ export function App() {
 
   const handleResetLocalData = () => {
     const shouldReset = window.confirm(
-      "Reset the pet, sessions, and rewards saved on this device?",
+      t("resetConfirmation"),
     );
 
     if (!shouldReset) {
@@ -323,7 +346,7 @@ export function App() {
         });
         clearAfterLocalDataReset();
         setCustomDurationDraft(null);
-        setDurationError(null);
+        setIsDurationInvalid(false);
         setNotificationNotice(null);
         useUiStore.setState({
           error: null,
@@ -338,20 +361,23 @@ export function App() {
 
   return (
     <AppShell>
-      {error ? <ErrorNotice message={error} /> : null}
-      {!hasHydrated && isInitializing ? <LoadingCard /> : null}
-      <InstallHint />
+      {error ? <ErrorNotice message={localizeErrorMessage(error, t)} t={t} /> : null}
+      {!hasHydrated && isInitializing ? <LoadingCard t={t} /> : null}
+      <InstallHint t={t} />
       <ShortcutInstallHint
         hasInstalledShortcut={hasInstalledShortcut}
         onInstallShortcut={() => setShortcutInstalled(true)}
+        t={t}
       />
-      <PetDashboard pet={pet} />
+      <PetDashboard pet={pet} t={t} />
       {activeSession?.status === "running" ? (
         <RunningSessionScreen
           countdownLabel={formatCountdown(activeSession.expectedEndAt, currentTime)}
           disabled={isBusy}
+          language={language}
           onEnd={handleEnd}
           session={activeSession}
+          t={t}
         />
       ) : activeSession?.status === "awaiting_confirmation" ? (
         <AwaitingConfirmationScreen
@@ -359,6 +385,7 @@ export function App() {
           onAbandoned={handleAbandoned}
           onCompleted={handleCompleted}
           session={activeSession}
+          t={t}
         />
       ) : (
         <PomodoroStartPanel
@@ -371,15 +398,22 @@ export function App() {
           onDurationChange={setPreferredDuration}
           onStart={handleStart}
           selectedDuration={selectedDuration}
+          t={t}
         />
       )}
       {lastRewardSummary ? (
         <RewardModal
           onClose={clearLastRewardSummary}
           summary={lastRewardSummary}
+          t={t}
         />
       ) : null}
-      <SessionHistory isLoading={isBusy && hasHydrated} sessions={recentSessions} />
+      <SessionHistory
+        isLoading={isBusy && hasHydrated}
+        language={language}
+        sessions={recentSessions}
+        t={t}
+      />
       <SettingsPanel
         disabled={isBusy || !hasHydrated}
         customDurationInput={customDurationInput}
@@ -389,17 +423,22 @@ export function App() {
         hasInstalledShortcut={hasInstalledShortcut}
         notificationNotice={notificationNotice}
         notificationPermission={notificationPermission}
+        language={language}
         onCustomDurationChange={handleCustomDurationChange}
         onCustomDurationCommit={commitCustomDuration}
         onDurationChange={setPreferredDuration}
         onFocusNotificationsChange={(isEnabled) => {
           void setFocusNotificationsEnabled(isEnabled).catch(() => undefined);
         }}
+        onLanguageChange={(nextLanguage) => {
+          void saveLanguage(nextLanguage).catch(() => undefined);
+        }}
         onPetNameSave={handlePetNameSave}
         onResetLocalData={handleResetLocalData}
         onShortcutInstalledChange={setShortcutInstalled}
         pet={pet}
         selectedDuration={selectedDuration}
+        t={t}
       />
     </AppShell>
   );
@@ -435,18 +474,18 @@ function formatCountdown(expectedEndAt: string, nowMs: number): string {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-function LoadingCard() {
+function LoadingCard({ t }: { t: Translator }) {
   return (
     <Card className="space-y-3 text-sm leading-6 text-slate-600">
       <div className="h-3 w-24 animate-pulse rounded-full bg-rose-100" />
       <div className="h-3 w-full animate-pulse rounded-full bg-rose-100" />
       <div className="h-3 w-2/3 animate-pulse rounded-full bg-rose-100" />
-      <p>Your cozy focus companion is getting ready.</p>
+      <p>{t("loading")}</p>
     </Card>
   );
 }
 
-function ErrorNotice({ message }: { message: string }) {
+function ErrorNotice({ message, t }: { message: string; t: Translator }) {
   const clearUiError = useUiStore((state) => state.clearError);
   const clearPetError = usePetStore((state) => state.clearError);
   const clearPomodoroError = usePomodoroStore((state) => state.clearError);
@@ -462,15 +501,14 @@ function ErrorNotice({ message }: { message: string }) {
   return (
     <Card className="border-rose-200 bg-rose-100">
       <p className="text-sm font-semibold text-rose-900">
-        Something got in the way.
+        {t("errorTitle")}
       </p>
       <p className="mt-2 text-sm leading-6 text-rose-900">{message}</p>
       <p className="mt-2 text-sm leading-6 text-rose-900">
-        If local storage is blocked or full, PetPomodoro cannot safely save
-        progress. Nothing is sent to a server.
+        {t("errorStorageSupport")}
       </p>
       <Button className="mt-4" onClick={clearErrors} variant="secondary">
-        Continue
+        {t("continue")}
       </Button>
     </Card>
   );

@@ -2,17 +2,20 @@ import {
   isStandaloneDisplayMode,
   shouldShowIosShortcutInstallHint,
 } from "../../pwa/installHints";
+import type { Translator } from "../../i18n";
 import { START_NATIVE_TIMER_SHORTCUT_URL } from "../../pwa/shortcuts";
 import { Card } from "../ui/Card";
 
 interface ShortcutInstallHintProps {
   hasInstalledShortcut: boolean;
   onInstallShortcut: () => void;
+  t: Translator;
 }
 
 export function ShortcutInstallHint({
   hasInstalledShortcut,
   onInstallShortcut,
+  t,
 }: ShortcutInstallHintProps) {
   const shouldShow =
     typeof window === "undefined"
@@ -30,11 +33,10 @@ export function ShortcutInstallHint({
   return (
     <Card className="border-teal-200 bg-teal-50">
       <p className="text-sm font-semibold text-teal-950">
-        Install the Start Native Timer Shortcut.
+        {t("shortcutInstallTitle")}
       </p>
       <p className="mt-2 text-sm leading-6 text-teal-950">
-        It can start an iOS timer alongside PetPomodoro. Your pet will still ask
-        you to confirm honestly when you come back.
+        {t("shortcutInstallBody")}
       </p>
       <a
         className={[
@@ -47,7 +49,7 @@ export function ShortcutInstallHint({
         rel="noreferrer"
         target="_blank"
       >
-        Install Shortcut
+        {t("installShortcut")}
       </a>
     </Card>
   );

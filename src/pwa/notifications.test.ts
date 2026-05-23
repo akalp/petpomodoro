@@ -88,4 +88,25 @@ describe("local notification helpers", () => {
       }),
     );
   });
+
+  it("uses provided localized reminder copy", () => {
+    const NotificationMock = vi.fn(function NotificationMock() {
+      return { close: vi.fn(), onclick: null };
+    });
+    Object.assign(NotificationMock, {
+      permission: "granted",
+      requestPermission: vi.fn(),
+    });
+    vi.stubGlobal("Notification", NotificationMock);
+
+    showFocusFinishedNotification("session-1", {
+      title: "Dostun seni bekliyor.",
+      body: "Hazır olduğunda geri dön.",
+    });
+
+    expect(NotificationMock).toHaveBeenCalledWith(
+      "Dostun seni bekliyor.",
+      expect.objectContaining({ body: "Hazır olduğunda geri dön." }),
+    );
+  });
 });

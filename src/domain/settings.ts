@@ -39,6 +39,7 @@ export function createDefaultSettings(now: string): AppSettings {
     preferredDurationMinutes: DEFAULT_FOCUS_DURATION_MINUTES,
     hasInstalledShortcut: false,
     hasEnabledFocusNotifications: false,
+    language: "en",
     updatedAt: now,
   };
 }

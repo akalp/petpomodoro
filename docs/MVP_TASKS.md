@@ -105,6 +105,7 @@ Each task should be small enough to review and commit separately. Keep app imple
 - Refine cozy visual style without reducing readability.
 - Review all copy for trust-based language.
 - Add small loading and error states.
+- Add bundled English and Türkçe copy with a locally persisted language choice.
 - Polish mobile spacing, safe areas, and viewport behavior.
 - Verify text fits inside buttons and compact UI containers.
 - Check color contrast for primary actions and status text.
@@ -123,5 +124,6 @@ Each task should be small enough to review and commit separately. Keep app imple
 - Test refreshing on awaiting confirmation.
 - Test session history after completion and abandonment.
 - Test offline launch after first load.
+- Test switching between English and Türkçe while offline and after reopen.
 - Test installed iOS Home Screen behavior.
 - Test that no UI copy claims native timer verification.

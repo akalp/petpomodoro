@@ -4,8 +4,10 @@ import {
   parseFocusDurationInput,
   validateFocusDurationMinutes,
   type AppSettings,
+  type SupportedLanguage,
 } from "../domain";
 import { loadOrCreateSettings, updateSettings } from "../db";
+import { normalizeLanguage } from "../i18n";
 
 import { errorMessage } from "./errors";
 
@@ -13,6 +15,7 @@ const PREFERRED_DURATION_KEY = "petpomodoro.preferredDuration";
 const HAS_INSTALLED_SHORTCUT_KEY = "petpomodoro.hasInstalledShortcut";
 const HAS_ENABLED_FOCUS_NOTIFICATIONS_KEY =
   "petpomodoro.hasEnabledFocusNotifications";
+const LANGUAGE_KEY = "petpomodoro.language";
 
 export interface SettingsStoreDependencies {
   loadOrCreateSettings: typeof loadOrCreateSettings;
@@ -21,6 +24,7 @@ export interface SettingsStoreDependencies {
     preferredDurationMinutes?: number;
     hasInstalledShortcut?: boolean;
     hasEnabledFocusNotifications?: boolean;
+    language?: SupportedLanguage;
   };
   clearLegacySettings: () => void;
   now: () => string;
@@ -37,6 +41,7 @@ export interface SettingsStoreState {
     isEnabled: boolean,
     now?: string,
   ) => Promise<AppSettings>;
+  setLanguage: (language: SupportedLanguage, now?: string) => Promise<AppSettings>;
   clearAfterLocalDataReset: () => void;
   clearError: () => void;
 }
@@ -107,6 +112,19 @@ export function createSettingsStore(
         now,
       ),
 
+    setLanguage: async (language, now = dependencies.now()) =>
+      persistSettings(
+        get,
+        set,
+        dependencies,
+        (settings) => ({
+          ...settings,
+          language,
+          updatedAt: now,
+        }),
+        now,
+      ),
+
     clearAfterLocalDataReset: () => {
       dependencies.clearLegacySettings();
       set({ settings: null, error: null, isLoading: false });
@@ -147,6 +165,7 @@ function readLegacySettings() {
     const savedNotifications = window.localStorage.getItem(
       HAS_ENABLED_FOCUS_NOTIFICATIONS_KEY,
     );
+    const savedLanguage = window.localStorage.getItem(LANGUAGE_KEY);
 
     return {
       preferredDurationMinutes:
@@ -157,6 +176,7 @@ function readLegacySettings() {
         savedShortcut === null ? undefined : savedShortcut === "true",
       hasEnabledFocusNotifications:
         savedNotifications === null ? undefined : savedNotifications === "true",
+      language: normalizeLanguage(savedLanguage ?? window.navigator.language),
     };
   } catch {
     return {};
@@ -172,6 +192,7 @@ function clearLegacySettings(): void {
     window.localStorage.removeItem(PREFERRED_DURATION_KEY);
     window.localStorage.removeItem(HAS_INSTALLED_SHORTCUT_KEY);
     window.localStorage.removeItem(HAS_ENABLED_FOCUS_NOTIFICATIONS_KEY);
+    window.localStorage.removeItem(LANGUAGE_KEY);
   } catch {
     // Settings already live in IndexedDB; blocked legacy storage does not block use.
   }

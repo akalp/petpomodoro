@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 
 import type { RewardSummary } from "../../domain";
+import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { StatRow } from "../ui/StatRow";
@@ -8,9 +9,10 @@ import { StatRow } from "../ui/StatRow";
 interface RewardModalProps {
   onClose: () => void;
   summary: RewardSummary;
+  t: Translator;
 }
 
-export function RewardModal({ onClose, summary }: RewardModalProps) {
+export function RewardModal({ onClose, summary, t }: RewardModalProps) {
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -34,20 +36,20 @@ export function RewardModal({ onClose, summary }: RewardModalProps) {
         <div>
           <p className="text-sm font-semibold uppercase text-rose-700">
             {summary.rewardType === "focus_completed"
-              ? "Session complete"
-              : "Honesty reward"}
+              ? t("sessionComplete")
+              : t("honestyReward")}
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-slate-950">
             {summary.rewardType === "focus_completed"
-              ? "You showed up. Your pet noticed."
-              : "Thanks for being honest. Trust keeps your pet happy."}
+              ? t("completedRewardTitle")
+              : t("honestyRewardTitle")}
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             {summary.leveledUp
-              ? "Your pet grew a little stronger."
+              ? t("levelUpReward")
               : summary.rewardType === "focus_completed"
-                ? "A little care goes a long way."
-                : "No points lost. No scolding."}
+                ? t("completedRewardSupport")
+                : t("honestyRewardSupport")}
           </p>
         </div>
 
@@ -57,26 +59,26 @@ export function RewardModal({ onClose, summary }: RewardModalProps) {
             className="rounded-lg bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-900"
             transition={{ duration: 0.45 }}
           >
-            Level up! Your care is adding up.
+            {t("levelUpSupport")}
           </motion.div>
         ) : null}
 
         <div className="grid gap-3">
           {summary.xpAwarded > 0 ? (
-            <StatRow label="XP gained" value={`+${summary.xpAwarded}`} />
+            <StatRow label={t("xpGained")} value={`+${summary.xpAwarded}`} />
           ) : null}
           {summary.coinsAwarded > 0 ? (
-            <StatRow label="Coins" value={`+${summary.coinsAwarded}`} />
+            <StatRow label={t("coins")} value={`+${summary.coinsAwarded}`} />
           ) : null}
           {summary.happinessAwarded > 0 ? (
-            <StatRow label="Happiness" value={`+${summary.happinessAwarded}`} />
+            <StatRow label={t("happiness")} value={`+${summary.happinessAwarded}`} />
           ) : null}
           {summary.hungerAwarded > 0 ? (
-            <StatRow label="Hunger" value={`+${summary.hungerAwarded}`} />
+            <StatRow label={t("hunger")} value={`+${summary.hungerAwarded}`} />
           ) : null}
           {summary.energyAwarded !== 0 ? (
             <StatRow
-              label="Energy"
+              label={t("energy")}
               value={
                 summary.energyAwarded > 0
                   ? `+${summary.energyAwarded}`
@@ -85,21 +87,21 @@ export function RewardModal({ onClose, summary }: RewardModalProps) {
             />
           ) : null}
           {summary.streakAwarded > 0 ? (
-            <StatRow label="Streak" value={`+${summary.streakAwarded}`} />
+            <StatRow label={t("streak")} value={`+${summary.streakAwarded}`} />
           ) : null}
           {summary.honestyHeartsAwarded > 0 ? (
             <StatRow
-              label="Honesty hearts"
+              label={t("honestyHearts")}
               value={`+${summary.honestyHeartsAwarded}`}
             />
           ) : null}
           {summary.leveledUp ? (
-            <StatRow label="New level" value={summary.newLevel} />
+            <StatRow label={t("newLevel")} value={summary.newLevel} />
           ) : null}
         </div>
 
         <Button className="w-full" onClick={onClose}>
-          Continue
+          {t("continue")}
         </Button>
         </Card>
       </motion.div>

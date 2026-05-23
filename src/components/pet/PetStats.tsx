@@ -1,42 +1,44 @@
 import { XP_PER_LEVEL, type PetState } from "../../domain";
+import type { Translator } from "../../i18n";
 import { ProgressBar } from "../ui/ProgressBar";
 import { StatRow } from "../ui/StatRow";
 
 interface PetStatsProps {
   pet: PetState;
+  t: Translator;
 }
 
-export function PetStats({ pet }: PetStatsProps) {
+export function PetStats({ pet, t }: PetStatsProps) {
   const levelXp = pet.xp % XP_PER_LEVEL;
 
   return (
     <div className="space-y-3">
-      <ProgressBar label="XP progress" max={XP_PER_LEVEL} value={levelXp} />
+      <ProgressBar label={t("xpProgress")} max={XP_PER_LEVEL} value={levelXp} />
       <div className="grid grid-cols-2 gap-3">
-        <StatRow label="Level" value={pet.level} />
-        <StatRow label="Mood" value={moodLabel(pet.mood)} />
+        <StatRow label={t("level")} value={pet.level} />
+        <StatRow label={t("mood")} value={moodLabel(pet.mood, t)} />
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <StatRow label="Coins" value={pet.coins} />
-        <StatRow label="Streak" value={pet.streak} />
+        <StatRow label={t("coins")} value={pet.coins} />
+        <StatRow label={t("streak")} value={pet.streak} />
       </div>
-      <ProgressBar label="Happiness" max={100} value={pet.happiness} />
-      <ProgressBar label="Hunger" max={100} value={pet.hunger} />
-      <ProgressBar label="Energy" max={100} value={pet.energy} />
-      <StatRow label="Total XP" value={pet.xp} />
-      <StatRow label="Honesty hearts" value={pet.honestyHearts} />
+      <ProgressBar label={t("happiness")} max={100} value={pet.happiness} />
+      <ProgressBar label={t("hunger")} max={100} value={pet.hunger} />
+      <ProgressBar label={t("energy")} max={100} value={pet.energy} />
+      <StatRow label={t("totalXp")} value={pet.xp} />
+      <StatRow label={t("honestyHearts")} value={pet.honestyHearts} />
     </div>
   );
 }
 
-function moodLabel(mood: PetState["mood"]): string {
+function moodLabel(mood: PetState["mood"], t: Translator): string {
   if (mood === "happy") {
-    return "Happy";
+    return t("moodHappy");
   }
 
   if (mood === "sleepy") {
-    return "Sleepy";
+    return t("moodSleepy");
   }
 
-  return "Calm";
+  return t("moodCalm");
 }

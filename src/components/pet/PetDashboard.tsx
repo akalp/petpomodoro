@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 
 import type { PetState } from "../../domain";
+import type { Translator } from "../../i18n";
 import { Badge } from "../ui/Badge";
 import { Card } from "../ui/Card";
 
@@ -9,18 +10,19 @@ import { PetStats } from "./PetStats";
 
 interface PetDashboardProps {
   pet: PetState | null;
+  t: Translator;
 }
 
-export function PetDashboard({ pet }: PetDashboardProps) {
+export function PetDashboard({ pet, t }: PetDashboardProps) {
   if (!pet) {
     return (
       <Card className="text-center">
         <div className="mx-auto h-32 w-32 animate-pulse rounded-full bg-rose-100" />
         <p className="mt-5 text-lg font-semibold text-slate-900">
-          Meet your focus friend.
+          {t("meetPet")}
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Start with one small session.
+          {t("startSmallSession")}
         </p>
       </Card>
     );
@@ -40,10 +42,10 @@ export function PetDashboard({ pet }: PetDashboardProps) {
               {pet.name}
             </h1>
           </div>
-          <Badge>Level {pet.level}</Badge>
+          <Badge>{t("levelValue", { level: pet.level })}</Badge>
         </div>
-        <PetAvatar mood={pet.mood} />
-        <PetStats pet={pet} />
+        <PetAvatar mood={pet.mood} t={t} />
+        <PetStats pet={pet} t={t} />
       </Card>
     </motion.div>
   );

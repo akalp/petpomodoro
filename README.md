@@ -126,6 +126,7 @@ The MVP should include:
 - Idempotent rewards so the same session cannot reward the pet twice.
 - Local session history.
 - Offline support after first load.
+- Bundled English and Türkçe interface languages with an on-device saved preference.
 - Mobile-first UI optimized for iOS Home Screen usage.
 - Optional native-timer Shortcut launch and best-effort local reminders as convenience features only.
 
@@ -133,7 +134,7 @@ The MVP should not include backend services, auth, cloud sync, social features, 
 
 ## Deployment
 
-PetPomodoro builds to static files. To deploy:
+PetPomodoro builds to static files, including both interface language bundles. To deploy:
 
 1. Run `npm test`.
 2. Run `npm run build`.

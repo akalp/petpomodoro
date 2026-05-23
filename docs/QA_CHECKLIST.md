@@ -153,7 +153,15 @@ Use this checklist before the first MVP deployment and again after every release
 
 - [ ] Seed legacy browser preferences, then load the upgraded app.
 - [ ] Preferences appear in the UI after being migrated into IndexedDB once.
+- [ ] Existing settings without a language preference load in English and save the added preference.
 - [ ] Existing session and reward history remains unchanged after the schema upgrade.
+
+## Language Selection
+
+- [ ] Choose `Türkçe` in Settings and confirm the focus flow, pet stats, history, reminder settings, and reset confirmation render in Turkish.
+- [ ] Dates and expected finish times use the selected locale.
+- [ ] Reload the app and confirm the saved language remains selected.
+- [ ] Choose `English` and confirm the interface returns to English without losing pet or session data.
 
 ## Offline Reload After First Load
 
@@ -167,6 +175,7 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Reload the app.
 - [ ] The app shell opens offline.
 - [ ] Existing local pet and session data remain available.
+- [ ] Switch between English and Türkçe while offline, reload, and confirm the selected language remains available.
 - [ ] No copy suggests offline support changes native timer behavior.
 
 ## iOS Add To Home Screen

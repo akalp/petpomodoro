@@ -2,6 +2,7 @@ import "fake-indexeddb/auto";
 
 import { afterEach, describe, expect, it } from "vitest";
 
+import type { AppSettings } from "../domain";
 import { makePet, makeReward, makeSession } from "../test/factories";
 import { PetPomodoroDatabase } from "./database";
 import { claimStoredSessionReward } from "./rewardsRepository";
@@ -32,6 +33,7 @@ describe("Dexie repositories", () => {
       preferredDurationMinutes: 90,
       hasInstalledShortcut: true,
       hasEnabledFocusNotifications: true,
+      language: "en",
     });
 
     const updated = await updateSettings(
@@ -39,6 +41,25 @@ describe("Dexie repositories", () => {
       database,
     );
     await expect(database.settings.get("local-settings")).resolves.toEqual(updated);
+  });
+
+  it("adds a default language when loading settings saved before i18n", async () => {
+    const database = makeDatabase("legacy-settings-language");
+    const legacySettings: Omit<AppSettings, "language"> = {
+      id: "local-settings",
+      preferredDurationMinutes: 25,
+      hasInstalledShortcut: false,
+      hasEnabledFocusNotifications: false,
+      updatedAt: now,
+    };
+    await database.settings.add(legacySettings as AppSettings);
+
+    const upgraded = await loadOrCreateSettings(now, {}, database);
+
+    expect(upgraded.language).toBe("en");
+    await expect(database.settings.get("local-settings")).resolves.toMatchObject({
+      language: "en",
+    });
   });
 
   it("enforces one reward ledger record per session", async () => {

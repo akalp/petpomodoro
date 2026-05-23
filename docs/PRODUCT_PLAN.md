@@ -49,6 +49,7 @@ Ending a running session before it reaches confirmation abandons it without any 
 - Hunger decay based on locally stored timestamps.
 - Local session history for recent completed and abandoned sessions.
 - Offline-capable installed PWA after first load.
+- English and Türkçe interface copy bundled in the app, with language choice stored locally.
 - Cozy mobile-first interface and copy.
 - Optional iOS Shortcut launch and best-effort local reminder notifications.
 

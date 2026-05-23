@@ -2,7 +2,9 @@ import {
   createDefaultSettings,
   validateFocusDurationMinutes,
   type AppSettings,
+  type SupportedLanguage,
 } from "../domain";
+import { normalizeLanguage } from "../i18n";
 
 import { db as defaultDb, type PetPomodoroDatabase } from "./database";
 
@@ -10,6 +12,7 @@ export interface InitialSettingsValues {
   preferredDurationMinutes?: number;
   hasInstalledShortcut?: boolean;
   hasEnabledFocusNotifications?: boolean;
+  language?: SupportedLanguage;
 }
 
 export async function getSettings(
@@ -26,6 +29,14 @@ export async function loadOrCreateSettings(
   const settings = await getSettings(database);
 
   if (settings) {
+    const language = normalizeLanguage(settings.language);
+
+    if (settings.language !== language) {
+      const upgradedSettings = { ...settings, language };
+      await database.settings.put(upgradedSettings);
+      return upgradedSettings;
+    }
+
     return settings;
   }
 
@@ -42,6 +53,7 @@ export async function loadOrCreateSettings(
     hasEnabledFocusNotifications:
       initialValues.hasEnabledFocusNotifications ??
       defaults.hasEnabledFocusNotifications,
+    language: initialValues.language ?? defaults.language,
   };
 
   await database.settings.add(created);
@@ -53,6 +65,10 @@ export async function updateSettings(
   database: PetPomodoroDatabase = defaultDb,
 ): Promise<AppSettings> {
   validateFocusDurationMinutes(settings.preferredDurationMinutes);
-  await database.settings.put(settings);
-  return settings;
+  const normalizedSettings = {
+    ...settings,
+    language: normalizeLanguage(settings.language),
+  };
+  await database.settings.put(normalizedSettings);
+  return normalizedSettings;
 }

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 
 import type { FocusSession } from "../../domain";
+import { languageLocale, type SupportedLanguage, type Translator } from "../../i18n";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { StatRow } from "../ui/StatRow";
@@ -10,6 +11,8 @@ interface RunningSessionScreenProps {
   disabled?: boolean;
   onEnd?: () => void;
   session: FocusSession;
+  language: SupportedLanguage;
+  t: Translator;
 }
 
 export function RunningSessionScreen({
@@ -17,6 +20,8 @@ export function RunningSessionScreen({
   disabled = false,
   onEnd,
   session,
+  language,
+  t,
 }: RunningSessionScreenProps) {
   return (
     <motion.div
@@ -26,18 +31,20 @@ export function RunningSessionScreen({
     >
       <Card className="space-y-4">
       <div>
-        <p className="text-sm font-semibold uppercase text-teal-700">In progress</p>
+        <p className="text-sm font-semibold uppercase text-teal-700">
+          {t("inProgress")}
+        </p>
         <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-          Your pet is keeping you company while you focus.
+          {t("runningTitle")}
         </h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Come back when your focus time is done.
+          {t("runningSupport")}
         </p>
       </div>
       <div className="space-y-3">
         <div className="rounded-lg bg-teal-50 px-4 py-5 text-center shadow-inner shadow-teal-100">
           <p className="text-sm font-semibold uppercase text-teal-700">
-            Time remaining
+            {t("timeRemaining")}
           </p>
           <motion.p
             animate={{ opacity: 1, scale: 1 }}
@@ -50,10 +57,13 @@ export function RunningSessionScreen({
           </motion.p>
         </div>
         <StatRow
-          label="Focus time"
-          value={`${session.plannedDurationMinutes} min`}
+          label={t("focusTime")}
+          value={t("durationMinutes", { minutes: session.plannedDurationMinutes })}
         />
-        <StatRow label="Expected finish" value={formatTime(session.expectedEndAt)} />
+        <StatRow
+          label={t("expectedFinish")}
+          value={formatTime(session.expectedEndAt, language)}
+        />
       </div>
       {onEnd ? (
         <Button
@@ -62,7 +72,7 @@ export function RunningSessionScreen({
           onClick={onEnd}
           variant="secondary"
         >
-          End this session
+          {t("endSession")}
         </Button>
       ) : null}
       </Card>
@@ -70,8 +80,8 @@ export function RunningSessionScreen({
   );
 }
 
-function formatTime(value: string): string {
-  return new Intl.DateTimeFormat(undefined, {
+function formatTime(value: string, language: SupportedLanguage): string {
+  return new Intl.DateTimeFormat(languageLocale(language), {
     hour: "numeric",
     minute: "2-digit",
   }).format(new Date(value));

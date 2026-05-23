@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 
+import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 
@@ -13,6 +14,7 @@ interface PomodoroStartPanelProps {
   customDurationInput: string;
   durationError: string | null;
   selectedDuration: number;
+  t: Translator;
 }
 
 export function PomodoroStartPanel({
@@ -25,6 +27,7 @@ export function PomodoroStartPanel({
   customDurationInput,
   durationError,
   selectedDuration,
+  t,
 }: PomodoroStartPanelProps) {
   return (
     <motion.div
@@ -35,17 +38,17 @@ export function PomodoroStartPanel({
       <Card className="space-y-4">
       <div>
         <h2 className="text-2xl font-semibold text-slate-950">
-          Ready to focus together?
+          {t("startTitle")}
         </h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Choose a focus session and begin when you are ready.
+          {t("startInstructions")}
         </p>
       </div>
       <p className="text-sm leading-6 text-slate-600">
-        Your pet will wait while you spend a little time with your task.
+        {t("startSupport")}
       </p>
       <div
-        aria-label="Focus duration"
+        aria-label={t("focusDuration")}
         className="grid grid-cols-4 gap-2"
         role="group"
       >
@@ -67,14 +70,14 @@ export function PomodoroStartPanel({
               onClick={() => onDurationChange(duration)}
               type="button"
             >
-              {duration}m
+              {t("durationShort", { minutes: duration })}
             </button>
           );
         })}
       </div>
       <div className="space-y-2">
         <label className="text-sm font-semibold text-slate-700" htmlFor="custom-duration">
-          Custom minutes
+          {t("customMinutes")}
         </label>
         <input
           aria-invalid={durationError !== null}
@@ -98,7 +101,7 @@ export function PomodoroStartPanel({
         disabled={disabled || durationError !== null}
         onClick={() => onStart(selectedDuration)}
       >
-        Start focus
+        {t("startFocus")}
       </Button>
       </Card>
     </motion.div>

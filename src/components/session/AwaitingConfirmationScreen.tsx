@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 
 import type { FocusSession } from "../../domain";
+import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { StatRow } from "../ui/StatRow";
@@ -10,6 +11,7 @@ interface AwaitingConfirmationScreenProps {
   onCompleted?: () => void;
   onAbandoned?: () => void;
   session: FocusSession;
+  t: Translator;
 }
 
 export function AwaitingConfirmationScreen({
@@ -17,6 +19,7 @@ export function AwaitingConfirmationScreen({
   onCompleted,
   onAbandoned,
   session,
+  t,
 }: AwaitingConfirmationScreenProps) {
   return (
     <motion.div
@@ -27,26 +30,29 @@ export function AwaitingConfirmationScreen({
       <Card className="space-y-4 border-rose-200">
       <div>
         <p className="text-sm font-semibold uppercase text-rose-700">
-          Ready for your answer
+          {t("confirmationStatus")}
         </p>
         <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-          Your pet waited for you. Did you really finish this focus session?
+          {t("confirmationTitle")}
         </h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          No pressure. Just answer honestly. Trust keeps this little ritual meaningful.
+          {t("confirmationSupport")}
         </p>
       </div>
-      <StatRow label="Focus time" value={`${session.plannedDurationMinutes} min`} />
+      <StatRow
+        label={t("focusTime")}
+        value={t("durationMinutes", { minutes: session.plannedDurationMinutes })}
+      />
       <div className="grid gap-3">
         <Button disabled={disabled || !onCompleted} onClick={onCompleted}>
-          Yes, we did it
+          {t("completedChoice")}
         </Button>
         <Button
           disabled={disabled || !onAbandoned}
           onClick={onAbandoned}
           variant="secondary"
         >
-          Not this time
+          {t("abandonedChoice")}
         </Button>
       </div>
       </Card>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import type { PetState } from "../../domain";
+import type { PetState, SupportedLanguage } from "../../domain";
+import type { Translator } from "../../i18n";
 import type { LocalNotificationPermission } from "../../pwa/notifications";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
@@ -10,7 +11,7 @@ interface SettingsPanelProps {
   durations: number[];
   hasEnabledFocusNotifications: boolean;
   hasInstalledShortcut: boolean;
-  notificationNotice: string | null;
+  notificationNotice: "unavailable" | "off" | null;
   notificationPermission: LocalNotificationPermission;
   customDurationInput: string;
   durationError: string | null;
@@ -18,11 +19,14 @@ interface SettingsPanelProps {
   onCustomDurationCommit: (value: string) => void;
   onDurationChange: (duration: number) => void;
   onFocusNotificationsChange: (hasEnabledFocusNotifications: boolean) => void;
+  onLanguageChange: (language: SupportedLanguage) => void;
   onPetNameSave: (name: string) => void;
   onResetLocalData: () => void;
   onShortcutInstalledChange: (hasInstalledShortcut: boolean) => void;
   pet: PetState | null;
   selectedDuration: number;
+  language: SupportedLanguage;
+  t: Translator;
 }
 
 export function SettingsPanel({
@@ -38,21 +42,46 @@ export function SettingsPanel({
   onCustomDurationCommit,
   onDurationChange,
   onFocusNotificationsChange,
+  onLanguageChange,
   onPetNameSave,
   onResetLocalData,
   onShortcutInstalledChange,
   pet,
   selectedDuration,
+  language,
+  t,
 }: SettingsPanelProps) {
   const [resetArmed, setResetArmed] = useState(false);
 
   return (
     <Card className="space-y-5">
       <div>
-        <h2 className="text-xl font-semibold text-slate-950">Settings</h2>
+        <h2 className="text-xl font-semibold text-slate-950">{t("settings")}</h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">
-          Gentle preferences for this device.
+          {t("settingsSupport")}
         </p>
+      </div>
+
+      <div className="space-y-2">
+        <label
+          className="block text-sm font-semibold text-slate-700"
+          htmlFor="language"
+        >
+          {t("language")}
+        </label>
+        <p className="text-sm leading-6 text-slate-600">{t("languageSupport")}</p>
+        <select
+          className="min-h-12 w-full rounded-lg border border-rose-200 bg-white px-4 text-base text-slate-900 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
+          disabled={disabled}
+          id="language"
+          onChange={(event) =>
+            onLanguageChange(event.target.value as SupportedLanguage)
+          }
+          value={language}
+        >
+          <option value="en">{t("english")}</option>
+          <option value="tr">{t("turkish")}</option>
+        </select>
       </div>
 
       <form
@@ -67,7 +96,7 @@ export function SettingsPanel({
           className="text-sm font-semibold text-slate-700"
           htmlFor="pet-name"
         >
-          Pet name
+          {t("petName")}
         </label>
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
           <input
@@ -81,17 +110,17 @@ export function SettingsPanel({
             defaultValue={pet?.name ?? ""}
           />
           <Button disabled={disabled || !pet} type="submit" variant="secondary">
-            Save
+            {t("save")}
           </Button>
         </div>
       </form>
 
       <div className="space-y-3">
         <p className="text-sm font-semibold text-slate-700">
-          Preferred focus time
+          {t("preferredFocusTime")}
         </p>
         <div
-          aria-label="Preferred Pomodoro duration"
+          aria-label={t("preferredDurationAria")}
           className="grid grid-cols-4 gap-2"
           role="group"
         >
@@ -113,7 +142,7 @@ export function SettingsPanel({
                 onClick={() => onDurationChange(duration)}
                 type="button"
               >
-                {duration}m
+                {t("durationShort", { minutes: duration })}
               </button>
             );
           })}
@@ -122,7 +151,7 @@ export function SettingsPanel({
           className="block text-sm font-semibold text-slate-700"
           htmlFor="settings-custom-duration"
         >
-          Custom minutes
+          {t("customMinutes")}
         </label>
         <input
           aria-invalid={durationError !== null}
@@ -144,11 +173,10 @@ export function SettingsPanel({
 
       <div className="rounded-lg border border-teal-100 bg-teal-50 p-4">
         <p className="text-sm font-semibold text-slate-900">
-          iOS Shortcut
+          {t("shortcutTitle")}
         </p>
         <p className="mt-1 text-sm leading-6 text-slate-600">
-          This only remembers whether this device should hide the Shortcut install
-          hint.
+          {t("shortcutSettingsSupport")}
         </p>
         <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
           <input
@@ -160,15 +188,14 @@ export function SettingsPanel({
             }
             type="checkbox"
           />
-          I installed shortcut already.
+          {t("installedShortcut")}
         </label>
       </div>
 
       <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
-        <p className="text-sm font-semibold text-slate-900">Local reminders</p>
+        <p className="text-sm font-semibold text-slate-900">{t("remindersTitle")}</p>
         <p className="mt-1 text-sm leading-6 text-slate-600">
-          PetPomodoro can send a local reminder if this app is still allowed to
-          run when focus time ends.
+          {t("remindersSupport")}
         </p>
         <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
           <input
@@ -180,23 +207,25 @@ export function SettingsPanel({
             }
             type="checkbox"
           />
-          Notify me when focus time is done.
+          {t("notifyAtEnd")}
         </label>
         {notificationNotice ? (
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            {notificationNotice}
+            {notificationNotice === "unavailable"
+              ? t("notificationsUnavailable")
+              : t("notificationsOff")}
           </p>
         ) : hasEnabledFocusNotifications && notificationPermission === "granted" ? (
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Local reminders are on for this device.
+            {t("remindersOn")}
           </p>
         ) : null}
       </div>
 
       <div className="rounded-lg border border-rose-100 bg-rose-50 p-4">
-        <p className="text-sm font-semibold text-slate-900">Reset local data</p>
+        <p className="text-sm font-semibold text-slate-900">{t("resetTitle")}</p>
         <p className="mt-1 text-sm leading-6 text-slate-600">
-          This clears the pet, sessions, rewards, and preferences saved on this device.
+          {t("resetSupport")}
         </p>
         <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
           <input
@@ -206,7 +235,7 @@ export function SettingsPanel({
             onChange={(event) => setResetArmed(event.target.checked)}
             type="checkbox"
           />
-          I understand this clears local progress.
+          {t("resetAcknowledgment")}
         </label>
         <Button
           className="mt-3 w-full"
@@ -214,7 +243,7 @@ export function SettingsPanel({
           onClick={onResetLocalData}
           variant="secondary"
         >
-          Reset this device
+          {t("resetDevice")}
         </Button>
       </div>
     </Card>

@@ -8,6 +8,12 @@
 - No shame: abandoned sessions are neutral.
 - No fake verification: never claim the app detected or verified a native timer.
 
+## Languages
+
+- The MVP interface supports English and Türkçe.
+- Both languages must keep the same trust-based, shame-free meaning.
+- Language selection is saved locally on the device and must continue to work offline.
+
 ## Starting A Focus Session
 
 Primary:
