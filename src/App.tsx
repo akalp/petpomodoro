@@ -15,6 +15,7 @@ import { Card } from "./components/ui/Card";
 import { resetLocalData } from "./db";
 import {
   DEFAULT_FOCUS_DURATION_MINUTES,
+  displayMoodForSession,
   parseFocusDurationInput,
 } from "./domain";
 import {
@@ -120,6 +121,9 @@ export function App() {
       title: translate("notificationTitle"),
     };
   }, [language]);
+  const displayMood = pet
+    ? displayMoodForSession(pet.mood, activeSession?.status ?? null)
+    : null;
 
   const setPreferredDuration = (duration: number) => {
     setCustomDurationDraft(String(duration));
@@ -369,7 +373,7 @@ export function App() {
         onInstallShortcut={() => setShortcutInstalled(true)}
         t={t}
       />
-      <PetDashboard pet={pet} t={t} />
+      <PetDashboard displayMood={displayMood} pet={pet} t={t} />
       {activeSession?.status === "running" ? (
         <RunningSessionScreen
           countdownLabel={formatCountdown(activeSession.expectedEndAt, currentTime)}

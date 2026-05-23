@@ -39,6 +39,7 @@ const englishMessages = {
   moodHappy: "Happy",
   moodSleepy: "Sleepy",
   moodCalm: "Calm",
+  moodWorking: "Working",
   startTitle: "Ready to focus together?",
   startInstructions: "Choose a focus session and begin when you are ready.",
   startSupport:
@@ -160,6 +161,7 @@ const turkishMessages: Record<MessageKey, string> = {
   moodHappy: "Mutlu",
   moodSleepy: "Uykulu",
   moodCalm: "Sakin",
+  moodWorking: "Odaklanıyor",
   startTitle: "Birlikte odaklanmaya hazır mısın?",
   startInstructions: "Bir odak oturumu seç ve hazır olduğunda başla.",
   startSupport: "Sen işine biraz zaman ayırırken dostun seni bekleyecek.",

@@ -1,4 +1,5 @@
 export type PetMood = "calm" | "happy" | "sleepy";
+export type PetDisplayMood = PetMood | "working";
 export type SupportedLanguage = "en" | "tr";
 
 export interface PetState {

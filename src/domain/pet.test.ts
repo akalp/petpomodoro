@@ -4,6 +4,7 @@ import {
   applyHungerDecay,
   calculateLevel,
   DEFAULT_HUNGER_DECAY_PER_HOUR,
+  displayMoodForSession,
 } from "./pet";
 import { makePet } from "../test/factories";
 
@@ -52,5 +53,11 @@ describe("pet domain logic", () => {
     const pet = makePet({ hunger: 80 });
 
     expect(applyHungerDecay(pet, "2026-05-22T11:59:00.000Z")).toBe(pet);
+  });
+
+  it("shows a working mood only while a focus session is running", () => {
+    expect(displayMoodForSession("happy", "running")).toBe("working");
+    expect(displayMoodForSession("happy", "awaiting_confirmation")).toBe("happy");
+    expect(displayMoodForSession("sleepy", null)).toBe("sleepy");
   });
 });

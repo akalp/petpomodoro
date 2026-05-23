@@ -1,4 +1,4 @@
-import type { PetMood, PetState } from "./types";
+import type { FocusSessionStatus, PetDisplayMood, PetMood, PetState } from "./types";
 
 export const XP_PER_LEVEL = 100;
 export const MAX_PET_STAT = 100;
@@ -78,6 +78,13 @@ export function applyHungerDecay(
 
 export function moodForHunger(hunger: number): PetMood {
   return moodForStats({ happiness: 50, hunger, energy: 50 });
+}
+
+export function displayMoodForSession(
+  mood: PetMood,
+  sessionStatus: FocusSessionStatus | null,
+): PetDisplayMood {
+  return sessionStatus === "running" ? "working" : mood;
 }
 
 export function moodForStats({

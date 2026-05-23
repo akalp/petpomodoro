@@ -1,14 +1,15 @@
-import { XP_PER_LEVEL, type PetState } from "../../domain";
+import { XP_PER_LEVEL, type PetDisplayMood, type PetState } from "../../domain";
 import type { Translator } from "../../i18n";
 import { ProgressBar } from "../ui/ProgressBar";
 import { StatRow } from "../ui/StatRow";
 
 interface PetStatsProps {
+  displayMood: PetDisplayMood;
   pet: PetState;
   t: Translator;
 }
 
-export function PetStats({ pet, t }: PetStatsProps) {
+export function PetStats({ displayMood, pet, t }: PetStatsProps) {
   const levelXp = pet.xp % XP_PER_LEVEL;
 
   return (
@@ -16,7 +17,7 @@ export function PetStats({ pet, t }: PetStatsProps) {
       <ProgressBar label={t("xpProgress")} max={XP_PER_LEVEL} value={levelXp} />
       <div className="grid grid-cols-2 gap-3">
         <StatRow label={t("level")} value={pet.level} />
-        <StatRow label={t("mood")} value={moodLabel(pet.mood, t)} />
+        <StatRow label={t("mood")} value={moodLabel(displayMood, t)} />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <StatRow label={t("coins")} value={pet.coins} />
@@ -31,7 +32,11 @@ export function PetStats({ pet, t }: PetStatsProps) {
   );
 }
 
-function moodLabel(mood: PetState["mood"], t: Translator): string {
+function moodLabel(mood: PetDisplayMood, t: Translator): string {
+  if (mood === "working") {
+    return t("moodWorking");
+  }
+
   if (mood === "happy") {
     return t("moodHappy");
   }

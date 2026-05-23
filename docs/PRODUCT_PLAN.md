@@ -38,6 +38,7 @@ Ending a running session before it reaches confirmation abandons it without any 
 ## MVP Features
 
 - Single local pet with name, level, XP, mood, coins, care stats, streak, honesty hearts, and timestamps.
+- Working display mood and focused face while an active session is running, without changing the saved care mood.
 - Pomodoro session creation with preset durations and custom whole-minute durations from 1 to 180 minutes.
 - Session states: idle, running, awaiting confirmation, completed, abandoned.
 - Local time-based transition from running to awaiting confirmation.

@@ -21,6 +21,7 @@ describe("offline translations", () => {
     expect(t("startTitle")).toBe("Birlikte odaklanmaya hazır mısın?");
     expect(t("durationMinutes", { minutes: 25 })).toBe("25 dk");
     expect(t("confirmationTitle")).toContain("gerçekten tamamladın mı");
+    expect(t("moodWorking")).toBe("Odaklanıyor");
   });
 
   it("localizes known persisted store error messages", () => {

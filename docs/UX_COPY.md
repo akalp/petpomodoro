@@ -53,6 +53,11 @@ Status labels:
 - Focus time
 - Expected finish
 - In progress
+- Mood: Working / Odaklanıyor
+
+Pet reaction:
+
+- Show a focused working face only while the session status is `running`.
 
 Action:
 

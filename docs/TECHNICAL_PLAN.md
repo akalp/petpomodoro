@@ -51,6 +51,7 @@ Planned TypeScript model shapes:
 
 ```ts
 type PetMood = "calm" | "happy" | "sleepy";
+type PetDisplayMood = PetMood | "working";
 
 interface Pet {
   id: string;
@@ -112,6 +113,8 @@ interface AppSettings {
   updatedAt: string;
 }
 ```
+
+`PetDisplayMood` is derived for rendering only: a `running` session displays `working`, while the persisted `Pet.mood` remains derived from care stats.
 
 Implementation should store dates as ISO strings for IndexedDB portability and straightforward test assertions.
 

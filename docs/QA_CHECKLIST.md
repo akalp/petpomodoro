@@ -42,6 +42,8 @@ Use this checklist before the first MVP deployment and again after every release
 ## Countdown Behavior
 
 - [ ] Running sessions show `In progress`.
+- [ ] While a session is `running`, the pet shows its focused working face and `Working` / `Odaklanıyor` mood label.
+- [ ] After a running session ends or awaits confirmation, the pet returns to its persisted care-derived mood.
 - [ ] The countdown decreases while the app is open.
 - [ ] The expected finish time matches the selected duration.
 - [ ] Refreshing before `expectedEndAt` keeps the session running.
