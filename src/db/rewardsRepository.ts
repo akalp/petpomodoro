@@ -4,6 +4,7 @@ import {
   type ClaimFocusRewardResult,
   type RewardLedger,
 } from "../domain";
+import { createLocalId } from "../id";
 
 import { db as defaultDb, type PetPomodoroDatabase } from "./database";
 import { RepositoryError } from "./errors";
@@ -28,7 +29,7 @@ export async function claimStoredFocusReward(
     petId,
     sessionId,
     now,
-    rewardId = crypto.randomUUID(),
+    rewardId = createLocalId(),
     xpAwarded = FOCUS_SESSION_XP_REWARD,
   }: ClaimStoredFocusRewardInput,
   database: PetPomodoroDatabase = defaultDb,

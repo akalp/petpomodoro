@@ -14,6 +14,7 @@ import {
   listRecentFocusSessions,
   updateFocusSession,
 } from "../db";
+import { createLocalId } from "../id";
 
 import { errorMessage } from "./errors";
 import { usePetStore, type PetStoreState } from "./petStore";
@@ -54,7 +55,7 @@ const defaultDependencies: PomodoroStoreDependencies = {
   updateFocusSession,
   petStore: usePetStore,
   now: () => new Date().toISOString(),
-  createId: () => crypto.randomUUID(),
+  createId: createLocalId,
 };
 
 export function createPomodoroStore(
