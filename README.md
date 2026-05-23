@@ -74,6 +74,12 @@ npm run preview
 
 Open the preview URL printed by Vite, usually `http://localhost:4173/`. Use preview mode for PWA and service-worker checks because the development server does not represent the final cached app shell.
 
+Service workers require a secure origin. `http://localhost` is sufficient when
+testing in a browser on the same computer, but an iPhone opening
+`http://<computer-lan-ip>:<port>` cannot install the service worker. For iPhone
+offline and Home Screen testing, use a deployed HTTPS URL or a local HTTPS URL
+whose certificate is trusted on the device.
+
 ## Available Scripts
 
 - `npm run dev`: Start the local Vite dev server.
@@ -141,7 +147,10 @@ Suitable hosts include any static host that supports HTTPS and SPA fallback beha
 
 Use Safari on a real iPhone for final checks:
 
-- Load the deployed HTTPS URL once while online.
+- Load a deployed HTTPS URL, or another HTTPS URL trusted by the iPhone, once
+  while online. A plain HTTP LAN URL such as
+  `http://<computer-lan-ip>:8080` cannot install the service worker and will
+  fail this offline-launch check.
 - Confirm the Safari install hint appears only in Safari browser mode.
 - Use Share > Add to Home Screen.
 - Launch PetPomodoro from the Home Screen icon.

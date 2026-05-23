@@ -157,7 +157,10 @@ Use this checklist before the first MVP deployment and again after every release
 
 ## Offline Reload After First Load
 
-- [ ] Build and preview the production app.
+- [ ] Build the production app.
+- [ ] Use `http://localhost` only for desktop offline tests; for iPhone testing,
+      open a deployed HTTPS URL or a local HTTPS URL trusted by the device.
+      Plain HTTP on a computer LAN IP cannot install the service worker.
 - [ ] Load the app once online so the service worker installs.
 - [ ] Confirm static assets are precached.
 - [ ] Switch the browser or device offline.
