@@ -35,16 +35,29 @@ Dependencies should not be installed until the project setup phase begins.
 
 ## Local Development
 
+Prerequisites:
+
+- Node.js compatible with the Vite version in `package.json`.
+- npm, using the committed `package-lock.json`.
+
 Install dependencies:
 
 ```sh
 npm install
 ```
 
-Start the Vite dev server:
+Start the Vite development server:
 
 ```sh
 npm run dev
+```
+
+Open the local URL printed by Vite, usually `http://localhost:5173/`.
+
+Run tests:
+
+```sh
+npm test
 ```
 
 Run a production build:
@@ -53,17 +66,29 @@ Run a production build:
 npm run build
 ```
 
-Run tests:
+Preview the production build locally:
 
 ```sh
-npm test
+npm run preview
 ```
+
+Open the preview URL printed by Vite, usually `http://localhost:4173/`. Use preview mode for PWA and service-worker checks because the development server does not represent the final cached app shell.
+
+## Available Scripts
+
+- `npm run dev`: Start the local Vite dev server.
+- `npm test`: Run the Vitest suite once.
+- `npm run build`: Type-check and build the static production bundle into `dist/`.
+- `npm run preview`: Serve the built `dist/` output for local release checks.
+- `npm run lint`: Run ESLint.
 
 ## Local-First Architecture
 
 PetPomodoro will store all product data in IndexedDB on the user's device. React components should remain UI-focused. Business logic should live in pure functions under `src/domain` later, persistence should be isolated under `src/db`, and Zustand stores should coordinate UI state, domain actions, and database reads or writes.
 
 The app shell should be cached by the service worker so the installed PWA can open offline after first load. Local data should remain available without any network request.
+
+If IndexedDB is unavailable or blocked, the app should show a local-storage error instead of pretending progress is saved. There is no remote recovery path in the MVP.
 
 ## Development Approach
 
@@ -97,3 +122,31 @@ The MVP should include:
 - Mobile-first UI optimized for iOS Home Screen usage.
 
 The MVP should not include backend services, auth, cloud sync, social features, cross-device recovery, or any claim that PetPomodoro can verify a native iOS timer.
+
+## Deployment
+
+PetPomodoro builds to static files. To deploy:
+
+1. Run `npm test`.
+2. Run `npm run build`.
+3. Deploy the generated `dist/` directory to static hosting over HTTPS.
+4. Configure the host to serve `index.html` as the navigation fallback for app routes and PWA launches.
+5. Confirm `manifest.webmanifest`, `sw.js`, icons, JavaScript, and CSS files are served with normal static asset caching.
+
+Suitable hosts include any static host that supports HTTPS and SPA fallback behavior. No backend, server runtime, database service, auth provider, or cloud sync service is required.
+
+## iOS PWA Testing
+
+Use Safari on a real iPhone for final checks:
+
+- Load the deployed HTTPS URL once while online.
+- Confirm the Safari install hint appears only in Safari browser mode.
+- Use Share > Add to Home Screen.
+- Launch PetPomodoro from the Home Screen icon.
+- Confirm it opens in standalone display mode.
+- Confirm the safe-area layout is not obscured by the status area or home indicator.
+- Start a session, close the app, reopen before and after `expectedEndAt`, and confirm the timestamp-based state restoration.
+- Confirm completion still asks the trust-based question and never claims native timer verification.
+- After the first successful load, switch offline and reopen the installed app to verify the cached app shell.
+
+For the full release pass, use [docs/QA_CHECKLIST.md](docs/QA_CHECKLIST.md). MVP release details are in [docs/RELEASE_NOTES.md](docs/RELEASE_NOTES.md).

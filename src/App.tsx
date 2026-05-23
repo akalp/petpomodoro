@@ -49,7 +49,7 @@ export function App() {
 
   const setPreferredDuration = (duration: number) => {
     setSelectedDuration(duration);
-    window.localStorage.setItem(PREFERRED_DURATION_KEY, String(duration));
+    savePreferredDuration(duration);
   };
 
   useEffect(() => {
@@ -259,9 +259,23 @@ export function App() {
 const PREFERRED_DURATION_KEY = "petpomodoro.preferredDuration";
 
 function readPreferredDuration(): number {
-  const savedDuration = Number(window.localStorage.getItem(PREFERRED_DURATION_KEY));
+  try {
+    const savedDuration = Number(
+      window.localStorage.getItem(PREFERRED_DURATION_KEY),
+    );
 
-  return FOCUS_DURATIONS.includes(savedDuration) ? savedDuration : 25;
+    return FOCUS_DURATIONS.includes(savedDuration) ? savedDuration : 25;
+  } catch {
+    return 25;
+  }
+}
+
+function savePreferredDuration(duration: number): void {
+  try {
+    window.localStorage.setItem(PREFERRED_DURATION_KEY, String(duration));
+  } catch {
+    // IndexedDB holds core app data. This preference can safely fall back to 25m.
+  }
 }
 
 function formatCountdown(expectedEndAt: string, nowMs: number): string {
