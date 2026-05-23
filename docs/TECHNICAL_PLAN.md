@@ -6,7 +6,7 @@ PetPomodoro should use a local-first frontend architecture:
 
 - React renders the UI and handles interaction events.
 - Zustand stores coordinate app state, hydration, and async workflows.
-- Domain functions in `src/domain` implement session transitions, pet care stats, XP, level logic, hunger decay, and reward idempotency checks.
+- Domain functions in `src/domain` implement session transitions, pet care stats, XP, level logic, hunger decay, feeding purchases, and reward idempotency checks.
 - Dexie repositories in `src/db` isolate IndexedDB reads, writes, transactions, and schema versioning.
 - PWA configuration handles app shell caching, install metadata, and offline fallback.
 
@@ -115,6 +115,18 @@ interface AppSettings {
   language: "en" | "tr";
   updatedAt: string;
 }
+
+type ShopItemCategory = "food";
+type FoodItemId = "berry-bowl" | "warm-soup" | "honey-toast" | "moon-milk";
+
+interface FoodItem {
+  id: FoodItemId;
+  category: ShopItemCategory;
+  cost: number;
+  hunger: number;
+  happiness: number;
+  energy: number;
+}
 ```
 
 `PetDisplayMood` is derived for rendering only: a `running` session displays `working`, while the persisted `Pet.mood` remains derived from care stats.
@@ -135,6 +147,8 @@ Initial schema:
 The unique `rewardLedger.sessionId` index is required. It is the persistence-level guard that prevents one Pomodoro session from rewarding the pet more than once, for completion or honest declined confirmation.
 
 Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`.
+
+The feeding shop v1 uses a bundled static food catalog and does not need a new IndexedDB table. Buying food runs in a Dexie transaction that reads the current pet, applies the pure purchase function, and writes the updated pet. Failed purchases, such as insufficient coins or an unknown food id, must leave the stored pet unchanged.
 
 Reward application should happen in a Dexie transaction that:
 
@@ -159,6 +173,7 @@ Use small stores or slices with clear responsibilities:
   - current pet
   - pet creation for first launch
   - pet updates after rewards
+  - immediate food purchases and the latest purchase summary
 - Session state:
   - active session
   - session history summary

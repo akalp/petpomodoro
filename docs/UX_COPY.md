@@ -176,6 +176,43 @@ Short labels:
 - Growing well
 - Pet progress
 
+## Feeding Shop
+
+Primary:
+
+- Pet snack shop
+
+Supporting:
+
+- Spend focus coins on a small bite for your pet.
+- Snacks wait until this focus session is finished.
+
+Food:
+
+- Berry bowl
+- Warm soup
+- Honey toast
+- Moon milk
+
+Actions and labels:
+
+- Feed
+- Need more coins
+- {coins} coins
+- {food} was enjoyed.
+- Care changed by hunger {hunger}, happiness {happiness}, energy {energy}.
+
+Turkish:
+
+- Dost atıştırmalıkları
+- Odak jetonlarını dostun için küçük bir lokmaya harca.
+- Atıştırmalıklar bu odak oturumu bitene kadar bekler.
+- Besle
+- Daha çok jeton gerekli
+- {coins} jeton
+- {food} keyifle yendi.
+- Bakım değişimi: tokluk {hunger}, mutluluk {happiness}, enerji {energy}.
+
 ## Empty States
 
 No sessions:

@@ -38,8 +38,7 @@ export function PetDashboard({ displayMood, pet, t }: PetDashboardProps) {
       <Card className="space-y-5 text-center">
         <div className="flex items-center justify-between gap-3 text-left">
           <div>
-            <p className="text-sm font-medium text-rose-700">PetPomodoro</p>
-            <h1 className="mt-1 text-3xl font-semibold text-slate-950">
+            <h1 className="text-3xl font-semibold text-slate-950">
               {pet.name}
             </h1>
           </div>

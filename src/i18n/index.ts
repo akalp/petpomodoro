@@ -1,4 +1,8 @@
-import type { SupportedLanguage } from "../domain/types";
+import {
+  FOOD_NOT_FOUND_ERROR,
+  INSUFFICIENT_COINS_ERROR,
+  type SupportedLanguage,
+} from "../domain";
 
 export type { SupportedLanguage };
 
@@ -14,6 +18,9 @@ const englishMessages = {
   errorGeneric: "Something went wrong.",
   errorPetName: "Your pet needs a small name to answer to.",
   continue: "Continue",
+  close: "Close",
+  store: "Store",
+  topBarSupport: "Focus and care, saved on this device.",
   installTitle:
     "For the coziest experience, add PetPomodoro to your Home Screen from Safari.",
   installBody:
@@ -36,6 +43,25 @@ const englishMessages = {
   energy: "Energy",
   totalXp: "Total XP",
   honestyHearts: "Honesty hearts",
+  shopTitle: "Pet snack shop",
+  shopSupport: "Spend focus coins on a small bite for your pet.",
+  shopCoinBalance: "Coins: {coins}",
+  feedPet: "Feed",
+  foodCost: "{coins} coins",
+  foodNotEnoughCoins: "Need more coins",
+  foodBought: "{food} was enjoyed.",
+  foodBoughtSupport:
+    "Care changed by hunger {hunger}, happiness {happiness}, energy {energy}.",
+  foodBerryBowl: "Berry bowl",
+  foodBerryBowlDescription: "A bright snack for hunger and a little joy.",
+  foodWarmSoup: "Warm soup",
+  foodWarmSoupDescription: "A gentle bowl when your pet needs a filling meal.",
+  foodHoneyToast: "Honey toast",
+  foodHoneyToastDescription: "Sweet, cozy, and a bit energizing.",
+  foodMoonMilk: "Moon milk",
+  foodMoonMilkDescription: "A soft drink for tired focus friends.",
+  shopUnavailableDuringFocus:
+    "Snacks wait until this focus session is finished.",
   moodHappy: "Happy",
   moodHungry: "Hungry",
   moodTired: "Tired",
@@ -138,6 +164,9 @@ const turkishMessages: Record<MessageKey, string> = {
   errorGeneric: "Bir şeyler ters gitti.",
   errorPetName: "Dostunun seslenebileceğin küçük bir isme ihtiyacı var.",
   continue: "Devam et",
+  close: "Kapat",
+  store: "Dükkan",
+  topBarSupport: "Odak ve bakım bu cihazda kaydedilir.",
   installTitle:
     "En sıcak deneyim için PetPomodoro'yu Safari'den Ana Ekranına ekle.",
   installBody:
@@ -160,6 +189,26 @@ const turkishMessages: Record<MessageKey, string> = {
   energy: "Enerji",
   totalXp: "Toplam XP",
   honestyHearts: "Dürüstlük kalpleri",
+  shopTitle: "Dost atıştırmalıkları",
+  shopSupport: "Odak jetonlarını dostun için küçük bir lokmaya harca.",
+  shopCoinBalance: "Jeton: {coins}",
+  feedPet: "Besle",
+  foodCost: "{coins} jeton",
+  foodNotEnoughCoins: "Daha çok jeton gerekli",
+  foodBought: "{food} keyifle yendi.",
+  foodBoughtSupport:
+    "Bakım değişimi: tokluk {hunger}, mutluluk {happiness}, enerji {energy}.",
+  foodBerryBowl: "Orman meyvesi kasesi",
+  foodBerryBowlDescription: "Tokluk ve biraz neşe için parlak bir atıştırmalık.",
+  foodWarmSoup: "Ilık çorba",
+  foodWarmSoupDescription:
+    "Dostunun doyurucu bir öğüne ihtiyacı olduğunda nazik bir kase.",
+  foodHoneyToast: "Ballı tost",
+  foodHoneyToastDescription: "Tatlı, sıcak ve biraz enerji veren bir lokma.",
+  foodMoonMilk: "Ay sütü",
+  foodMoonMilkDescription: "Yorgun odak dostları için yumuşak bir içecek.",
+  shopUnavailableDuringFocus:
+    "Atıştırmalıklar bu odak oturumu bitene kadar bekler.",
   moodHappy: "Mutlu",
   moodHungry: "Aç",
   moodTired: "Yorgun",
@@ -279,6 +328,14 @@ export function localizeErrorMessage(message: string, t: Translator): string {
 
   if (message === englishMessages.errorPetName) {
     return t("errorPetName");
+  }
+
+  if (message === INSUFFICIENT_COINS_ERROR) {
+    return t("foodNotEnoughCoins");
+  }
+
+  if (message === FOOD_NOT_FOUND_ERROR) {
+    return t("errorGeneric");
   }
 
   return message;

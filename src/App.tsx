@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AppShell } from "./components/layout/AppShell";
+import { AppTopBar } from "./components/layout/AppTopBar";
 import { PetDashboard } from "./components/pet/PetDashboard";
+import { PetShop } from "./components/pet/PetShop";
 import { InstallHint } from "./components/pwa/InstallHint";
 import { ShortcutInstallHint } from "./components/pwa/ShortcutInstallHint";
 import { AwaitingConfirmationScreen } from "./components/session/AwaitingConfirmationScreen";
@@ -12,6 +14,7 @@ import { SessionHistory } from "./components/session/SessionHistory";
 import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { Button } from "./components/ui/Button";
 import { Card } from "./components/ui/Card";
+import { Modal } from "./components/ui/Modal";
 import { resetLocalData } from "./db";
 import {
   DEFAULT_FOCUS_DURATION_MINUTES,
@@ -45,8 +48,10 @@ import {
 
 let appInitialization: Promise<void> | null = null;
 const FOCUS_DURATIONS = [5, 15, 25, 50];
+type AppDialog = "store" | "settings" | null;
 
 export function App() {
+  const [activeDialog, setActiveDialog] = useState<AppDialog>(null);
   const [customDurationDraft, setCustomDurationDraft] = useState<string | null>(
     null,
   );
@@ -63,9 +68,14 @@ export function App() {
   const pet = usePetStore((state) => state.pet);
   const petError = usePetStore((state) => state.error);
   const lastRewardSummary = usePetStore((state) => state.lastRewardSummary);
+  const lastFoodPurchase = usePetStore((state) => state.lastFoodPurchase);
   const clearLastRewardSummary = usePetStore(
     (state) => state.clearLastRewardSummary,
   );
+  const clearLastFoodPurchase = usePetStore(
+    (state) => state.clearLastFoodPurchase,
+  );
+  const buyFood = usePetStore((state) => state.buyFood);
   const renamePet = usePetStore((state) => state.renamePet);
   const updateAppOpenDecay = usePetStore((state) => state.updateAppOpenDecay);
   const activeSession = usePomodoroStore((state) => state.activeSession);
@@ -125,6 +135,13 @@ export function App() {
   const displayMood = pet
     ? displayMoodForSession(pet.mood, activeSession?.status ?? null)
     : null;
+  const isFocusActive =
+    activeSession?.status === "running" ||
+    activeSession?.status === "awaiting_confirmation";
+  const isStoreDisabled = !pet || !hasHydrated || isFocusActive;
+  const storeDisabledReason = isFocusActive
+    ? t("shopUnavailableDuringFocus")
+    : undefined;
 
   const setPreferredDuration = (duration: number) => {
     setCustomDurationDraft(String(duration));
@@ -331,6 +348,24 @@ export function App() {
     void renamePet(name).catch(() => undefined);
   };
 
+  const handleBuyFood = (foodId: Parameters<typeof buyFood>[0]) => {
+    void buyFood(foodId).catch(() => undefined);
+  };
+
+  const openStore = () => {
+    if (!isStoreDisabled) {
+      setActiveDialog("store");
+    }
+  };
+
+  const openSettings = () => {
+    if (hasHydrated) {
+      setActiveDialog("settings");
+    }
+  };
+
+  const closeDialog = () => setActiveDialog(null);
+
   const handleResetLocalData = () => {
     const shouldReset = window.confirm(
       t("resetConfirmation"),
@@ -346,6 +381,7 @@ export function App() {
         usePetStore.setState({
           error: null,
           isLoading: false,
+          lastFoodPurchase: null,
           lastRewardSummary: null,
           pet: null,
         });
@@ -372,6 +408,14 @@ export function App() {
 
   return (
     <AppShell>
+      <AppTopBar
+        isSettingsDisabled={!hasHydrated}
+        isStoreDisabled={isStoreDisabled}
+        onOpenSettings={openSettings}
+        onOpenStore={openStore}
+        storeDisabledReason={storeDisabledReason}
+        t={t}
+      />
       {error ? <ErrorNotice message={localizeErrorMessage(error, t)} t={t} /> : null}
       {!hasHydrated && isInitializing ? <LoadingCard t={t} /> : null}
       <InstallHint t={t} />
@@ -425,32 +469,62 @@ export function App() {
         sessions={recentSessions}
         t={t}
       />
-      <SettingsPanel
-        disabled={isBusy || !hasHydrated}
-        customDurationInput={customDurationInput}
-        durationError={durationError}
-        durations={FOCUS_DURATIONS}
-        hasEnabledFocusNotifications={hasEnabledFocusNotifications}
-        hasInstalledShortcut={hasInstalledShortcut}
-        notificationNotice={notificationNotice}
-        notificationPermission={notificationPermission}
-        language={language}
-        onCustomDurationChange={handleCustomDurationChange}
-        onCustomDurationCommit={commitCustomDuration}
-        onDurationChange={setPreferredDuration}
-        onFocusNotificationsChange={(isEnabled) => {
-          void setFocusNotificationsEnabled(isEnabled).catch(() => undefined);
-        }}
-        onLanguageChange={(nextLanguage) => {
-          void saveLanguage(nextLanguage).catch(() => undefined);
-        }}
-        onPetNameSave={handlePetNameSave}
-        onResetLocalData={handleResetLocalData}
-        onShortcutInstalledChange={setShortcutInstalled}
-        pet={pet}
-        selectedDuration={selectedDuration}
-        t={t}
-      />
+      <Modal
+        closeLabel={t("close")}
+        description={t("shopSupport")}
+        isOpen={activeDialog === "store" && Boolean(pet)}
+        onClose={closeDialog}
+        title={t("shopTitle")}
+      >
+        {pet ? (
+          <PetShop
+            disabled={isBusy || !hasHydrated}
+            framed={false}
+            lastFoodPurchase={lastFoodPurchase}
+            onBuyFood={handleBuyFood}
+            onClearPurchase={clearLastFoodPurchase}
+            pet={pet}
+            showHeader={false}
+            t={t}
+          />
+        ) : null}
+      </Modal>
+      <Modal
+        closeLabel={t("close")}
+        description={t("settingsSupport")}
+        isOpen={activeDialog === "settings"}
+        onClose={closeDialog}
+        title={t("settings")}
+      >
+        <SettingsPanel
+          disabled={isBusy || !hasHydrated}
+          framed={false}
+          customDurationInput={customDurationInput}
+          durationError={durationError}
+          durations={FOCUS_DURATIONS}
+          hasEnabledFocusNotifications={hasEnabledFocusNotifications}
+          hasInstalledShortcut={hasInstalledShortcut}
+          notificationNotice={notificationNotice}
+          notificationPermission={notificationPermission}
+          language={language}
+          onCustomDurationChange={handleCustomDurationChange}
+          onCustomDurationCommit={commitCustomDuration}
+          onDurationChange={setPreferredDuration}
+          onFocusNotificationsChange={(isEnabled) => {
+            void setFocusNotificationsEnabled(isEnabled).catch(() => undefined);
+          }}
+          onLanguageChange={(nextLanguage) => {
+            void saveLanguage(nextLanguage).catch(() => undefined);
+          }}
+          onPetNameSave={handlePetNameSave}
+          onResetLocalData={handleResetLocalData}
+          onShortcutInstalledChange={setShortcutInstalled}
+          pet={pet}
+          selectedDuration={selectedDuration}
+          showHeader={false}
+          t={t}
+        />
+      </Modal>
     </AppShell>
   );
 }

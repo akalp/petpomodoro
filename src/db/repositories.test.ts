@@ -7,6 +7,7 @@ import { makePet, makeReward, makeSession } from "../test/factories";
 import { PetPomodoroDatabase } from "./database";
 import { claimStoredSessionReward } from "./rewardsRepository";
 import { loadOrCreateSettings, updateSettings } from "./settingsRepository";
+import { buyFoodForStoredPet } from "./shopRepository";
 
 const databases: PetPomodoroDatabase[] = [];
 const now = "2026-05-22T12:31:00.000Z";
@@ -147,6 +148,48 @@ describe("Dexie repositories", () => {
     await expect(database.pets.get("pet-1")).resolves.toMatchObject({ xp: 0 });
     await expect(database.sessions.get("session-1")).resolves.toMatchObject({
       rewardClaimedAt: null,
+    });
+  });
+
+  it("persists food purchases in a pet transaction", async () => {
+    const database = makeDatabase("food-purchase");
+    await database.pets.add(
+      makePet({ coins: 10, hunger: 40, happiness: 30, energy: 20 }),
+    );
+
+    const result = await buyFoodForStoredPet(
+      { petId: "pet-1", foodId: "honey-toast", now },
+      database,
+    );
+
+    expect(result.pet).toMatchObject({
+      coins: 4,
+      hunger: 54,
+      happiness: 40,
+      energy: 24,
+    });
+    await expect(database.pets.get("pet-1")).resolves.toMatchObject({
+      coins: 4,
+      hunger: 54,
+      happiness: 40,
+      energy: 24,
+    });
+  });
+
+  it("leaves the saved pet unchanged when food coins are insufficient", async () => {
+    const database = makeDatabase("food-rollback");
+    await database.pets.add(makePet({ coins: 2, hunger: 40 }));
+
+    await expect(
+      buyFoodForStoredPet(
+        { petId: "pet-1", foodId: "warm-soup", now },
+        database,
+      ),
+    ).rejects.toThrow("Not enough coins");
+
+    await expect(database.pets.get("pet-1")).resolves.toMatchObject({
+      coins: 2,
+      hunger: 40,
     });
   });
 });

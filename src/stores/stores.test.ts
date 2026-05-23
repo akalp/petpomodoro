@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyFocusSessionImpact,
   applyIdlePetDecay,
+  buyFoodForPet,
   claimSessionReward,
   createDefaultSettings,
   type AppSettings,
@@ -322,6 +323,50 @@ describe("store workflows", () => {
     expect(repo.pet?.coins).toBe(15);
     expect(repo.rewardLedger.size).toBe(1);
   });
+
+  it("buys food through the pet store and records the purchase summary", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet({ coins: 10, hunger: 40, happiness: 30, energy: 20 }),
+    });
+    const petStore = createPetStore({
+      ...repo.petDependencies,
+      now: () => now,
+    });
+
+    await petStore.getState().initializePet(now);
+    const result = await petStore.getState().buyFood("berry-bowl", now);
+
+    expect(result.pet).toMatchObject({
+      coins: 7,
+      hunger: 52,
+      happiness: 36,
+      energy: 20,
+    });
+    expect(petStore.getState().pet).toEqual(result.pet);
+    expect(petStore.getState().lastFoodPurchase).toMatchObject({
+      item: { id: "berry-bowl" },
+      coinsSpent: 3,
+    });
+  });
+
+  it("surfaces food purchase errors without changing the pet", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet({ coins: 1, hunger: 40 }),
+    });
+    const petStore = createPetStore({
+      ...repo.petDependencies,
+      now: () => now,
+    });
+
+    await petStore.getState().initializePet(now);
+
+    await expect(
+      petStore.getState().buyFood("moon-milk", now),
+    ).rejects.toThrow("Not enough coins");
+
+    expect(repo.pet).toMatchObject({ coins: 1, hunger: 40 });
+    expect(petStore.getState().error).toContain("Not enough coins");
+  });
 });
 
 describe("settings workflows", () => {
@@ -467,6 +512,15 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
       const result = applyStoredImpactValues(pet, session, impactNow);
       pet = result.pet;
       sessions.set(session.id, result.session);
+      return result;
+    },
+    buyFoodForStoredPet: async ({ petId, foodId, now: foodNow }) => {
+      if (!pet || pet.id !== petId) {
+        throw new Error("Pet not found.");
+      }
+
+      const result = buyFoodForPet(pet, foodId, foodNow);
+      pet = result.pet;
       return result;
     },
     now: () => now,

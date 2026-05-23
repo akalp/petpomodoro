@@ -9,6 +9,7 @@ import { Card } from "../ui/Card";
 interface SettingsPanelProps {
   disabled?: boolean;
   durations: number[];
+  framed?: boolean;
   hasEnabledFocusNotifications: boolean;
   hasInstalledShortcut: boolean;
   notificationNotice: "unavailable" | "off" | null;
@@ -25,6 +26,7 @@ interface SettingsPanelProps {
   onShortcutInstalledChange: (hasInstalledShortcut: boolean) => void;
   pet: PetState | null;
   selectedDuration: number;
+  showHeader?: boolean;
   language: SupportedLanguage;
   t: Translator;
 }
@@ -32,6 +34,7 @@ interface SettingsPanelProps {
 export function SettingsPanel({
   disabled = false,
   durations,
+  framed = true,
   hasEnabledFocusNotifications,
   hasInstalledShortcut,
   notificationNotice,
@@ -48,19 +51,22 @@ export function SettingsPanel({
   onShortcutInstalledChange,
   pet,
   selectedDuration,
+  showHeader = true,
   language,
   t,
 }: SettingsPanelProps) {
   const [resetArmed, setResetArmed] = useState(false);
 
-  return (
-    <Card className="space-y-5">
-      <div>
-        <h2 className="text-xl font-semibold text-slate-950">{t("settings")}</h2>
-        <p className="mt-1 text-sm leading-6 text-slate-600">
-          {t("settingsSupport")}
-        </p>
-      </div>
+  const content = (
+    <>
+      {showHeader ? (
+        <div>
+          <h2 className="text-xl font-semibold text-slate-950">{t("settings")}</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {t("settingsSupport")}
+          </p>
+        </div>
+      ) : null}
 
       <div className="space-y-2">
         <label
@@ -246,6 +252,16 @@ export function SettingsPanel({
           {t("resetDevice")}
         </Button>
       </div>
+    </>
+  );
+
+  if (!framed) {
+    return <div className="space-y-5">{content}</div>;
+  }
+
+  return (
+    <Card className="space-y-5">
+      {content}
     </Card>
   );
 }

@@ -144,6 +144,12 @@ Reward logic should:
 - Avoid side effects inside the pure domain function.
 - Let the database layer persist all changes in one transaction.
 
+## Feeding Shop
+
+Feeding does not change the Pomodoro session state. Food purchases are local pet-care actions that spend coins and immediately adjust hunger, happiness, and energy.
+
+The shop should be unavailable while a session is `running` or `awaiting_confirmation` so the active focus and confirmation flow remains clear. Once the session is terminal or there is no active session, feeding can resume without changing historical session data.
+
 ## Duplicate Reward Prevention
 
 The same session must never reward the pet twice.

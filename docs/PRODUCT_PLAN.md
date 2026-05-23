@@ -31,7 +31,8 @@ The first version should be optimized for one-handed mobile use and iOS Home Scr
 
 7. If the user confirms, the session is completed and the pet receives XP once.
 8. If the user selects "Not this time", the session is abandoned without punishment and receives one small honesty-heart reward.
-9. The user can start another session when ready.
+9. The user can spend earned coins on food that immediately helps the pet's hunger, happiness, and energy.
+10. The user can start another session when ready.
 
 Ending a running session before it reaches confirmation abandons it without a completion reward. Elapsed focus care impact and base focus coins still apply because the pet spent that time working with the user.
 
@@ -47,6 +48,7 @@ Ending a running session before it reaches confirmation abandons it without a co
   - Not this time
 - Multi-stat reward application for completed sessions and a small honesty reward for declined confirmation.
 - Duration-based focus care impact and base focus coins for elapsed focus time.
+- A local feeding shop with four foods, each with a different coin cost and care-stat impact.
 - Idempotent reward protection per session.
 - Hunger decay based on locally stored timestamps.
 - Local session history for recent completed and abandoned sessions.
@@ -112,3 +114,4 @@ The abandoned path should be neutral and supportive. A user who chooses "Not thi
 - Import and export backup files.
 - Optional local analytics dashboard.
 - Seasonal cosmetics stored locally.
+- More shop item categories, stored foods, and pet looks.

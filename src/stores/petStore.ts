@@ -5,12 +5,15 @@ import {
   applyFocusSessionImpact,
   applyHungerDecay,
   type ClaimFocusRewardResult,
+  type FoodItemId,
+  type FoodPurchaseResult,
   type FocusSession,
   type PetState,
   type RewardSummary,
 } from "../domain";
 import {
   applyStoredSessionImpact,
+  buyFoodForStoredPet,
   claimStoredSessionReward,
   getCurrentPet,
   loadOrCreateDefaultPet,
@@ -25,12 +28,14 @@ export interface PetStoreDependencies {
   updatePet: typeof updatePet;
   claimStoredSessionReward: typeof claimStoredSessionReward;
   applyStoredSessionImpact: typeof applyStoredSessionImpact;
+  buyFoodForStoredPet: typeof buyFoodForStoredPet;
   now: () => string;
 }
 
 export interface PetStoreState {
   pet: PetState | null;
   lastRewardSummary: RewardSummary | null;
+  lastFoodPurchase: FoodPurchaseResult["summary"] | null;
   isLoading: boolean;
   error: string | null;
   initializePet: (now?: string) => Promise<PetState>;
@@ -48,8 +53,13 @@ export interface PetStoreState {
     session: FocusSession,
     now?: string,
   ) => Promise<{ pet: PetState; session: FocusSession }>;
+  buyFood: (
+    foodId: FoodItemId | string,
+    now?: string,
+  ) => Promise<FoodPurchaseResult>;
   renamePet: (name: string, now?: string) => Promise<PetState>;
   clearLastRewardSummary: () => void;
+  clearLastFoodPurchase: () => void;
   updateAppOpenDecay: (now?: string) => Promise<PetState | null>;
   updateDecayOnOpen: (now?: string) => Promise<PetState | null>;
   clearError: () => void;
@@ -61,6 +71,7 @@ const defaultDependencies: PetStoreDependencies = {
   updatePet,
   claimStoredSessionReward,
   applyStoredSessionImpact,
+  buyFoodForStoredPet,
   now: () => new Date().toISOString(),
 };
 
@@ -70,6 +81,7 @@ export function createPetStore(
   return create<PetStoreState>((set, get) => ({
     pet: null,
     lastRewardSummary: null,
+    lastFoodPurchase: null,
     isLoading: false,
     error: null,
 
@@ -185,6 +197,28 @@ export function createPetStore(
       }
     },
 
+    buyFood: async (foodId, now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().initializePet(now));
+      set({ isLoading: true, error: null });
+
+      try {
+        const result = await dependencies.buyFoodForStoredPet({
+          petId: pet.id,
+          foodId,
+          now,
+        });
+        set({
+          pet: result.pet,
+          lastFoodPurchase: result.summary,
+          isLoading: false,
+        });
+        return result;
+      } catch (error) {
+        set({ error: errorMessage(error), isLoading: false });
+        throw error;
+      }
+    },
+
     renamePet: async (name, now = dependencies.now()) => {
       const pet = get().pet ?? (await get().initializePet(now));
       const trimmedName = name.trim();
@@ -203,6 +237,8 @@ export function createPetStore(
     },
 
     clearLastRewardSummary: () => set({ lastRewardSummary: null }),
+
+    clearLastFoodPurchase: () => set({ lastFoodPurchase: null }),
 
     updateAppOpenDecay: async (now = dependencies.now()) => {
       const pet = get().pet ?? (await get().loadCurrentPet());

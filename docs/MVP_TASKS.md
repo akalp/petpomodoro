@@ -82,7 +82,11 @@ Each task should be small enough to review and commit separately. Keep app imple
 - Update pet level when XP crosses level thresholds.
 - Save reward ledger entry for each rewarded session.
 - Prevent duplicate reward from double tap or retry.
+- Add a static food catalog and pure purchase logic for coin-funded feeding.
+- Add a local transaction and store action for immediate food purchases.
+- Add a mobile-first pet shop with distinct food visuals and disabled states for insufficient coins.
 - Add UI feedback for XP gained.
+- Add UI feedback for food purchases.
 - Add UI feedback for level up.
 - Add hunger, happiness, and duration-based focus care decay using local timestamps.
 - Add tests for reward idempotency through the store and database transaction.
@@ -125,5 +129,7 @@ Each task should be small enough to review and commit separately. Keep app imple
 - Test session history after completion and abandonment.
 - Test offline launch after first load.
 - Test switching between English and Türkçe while offline and after reopen.
+- Test buying food with enough coins, too few coins, and full care stats.
+- Test that the feeding shop is unavailable during running and awaiting-confirmation sessions.
 - Test installed iOS Home Screen behavior.
 - Test that no UI copy claims native timer verification.

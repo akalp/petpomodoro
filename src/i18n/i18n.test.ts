@@ -22,6 +22,7 @@ describe("offline translations", () => {
     expect(t("durationMinutes", { minutes: 25 })).toBe("25 dk");
     expect(t("confirmationTitle")).toContain("gerçekten tamamladın mı");
     expect(t("moodWorking")).toBe("Odaklanıyor");
+    expect(t("foodMoonMilk")).toBe("Ay sütü");
   });
 
   it("localizes known persisted store error messages", () => {
@@ -30,5 +31,8 @@ describe("offline translations", () => {
     expect(
       localizeErrorMessage("Your pet needs a small name to answer to.", t),
     ).toContain("Dostunun");
+    expect(localizeErrorMessage("Not enough coins for this food.", t)).toBe(
+      "Daha çok jeton gerekli",
+    );
   });
 });

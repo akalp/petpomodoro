@@ -122,9 +122,10 @@ The MVP should include:
 - A local session lifecycle: idle, running, awaiting confirmation, completed, abandoned.
 - A trust-based completion prompt after the expected end time.
 - Multi-stat completion rewards, duration-based focus care impact, and hunger decay between visits.
+- A local feeding shop where focus coins can buy food that immediately improves hunger, energy, and happiness.
 - An honesty-heart reward only when the user declines completion from the confirmation prompt; ending a running session early gives no completion reward, but elapsed focus care impact and base coins still apply.
 - Idempotent rewards so the same session cannot reward the pet twice.
-- Local session history.
+- Local session history and local-only shop purchases.
 - Offline support after first load.
 - Bundled English and Türkçe interface languages with an on-device saved preference.
 - Mobile-first UI optimized for iOS Home Screen usage.

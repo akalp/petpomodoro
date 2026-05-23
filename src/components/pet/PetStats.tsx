@@ -15,11 +15,8 @@ export function PetStats({ displayMood, pet, t }: PetStatsProps) {
   return (
     <div className="space-y-3">
       <ProgressBar label={t("xpProgress")} max={XP_PER_LEVEL} value={levelXp} />
-      <div className="grid grid-cols-2 gap-3">
-        <StatRow label={t("level")} value={pet.level} />
+      <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
         <StatRow label={t("mood")} value={moodLabel(displayMood, t)} />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
         <StatRow label={t("coins")} value={pet.coins} />
         <StatRow label={t("streak")} value={pet.streak} />
       </div>
