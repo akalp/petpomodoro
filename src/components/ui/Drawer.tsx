@@ -63,7 +63,7 @@ export function Drawer({
         >
           <motion.div
             animate={{ y: 0 }}
-            className="flex max-h-[calc(100dvh-1rem)] w-full min-w-0 max-w-xl flex-col overflow-hidden rounded-t-lg border border-white/80 bg-white shadow-2xl shadow-slate-950/20 sm:max-h-[min(820px,calc(100dvh-2rem))]"
+            className="flex max-h-[min(760px,calc(100dvh-5rem))] w-full min-w-0 max-w-xl flex-col overflow-hidden rounded-t-lg border border-white/80 bg-white shadow-2xl shadow-slate-950/20 sm:max-h-[min(820px,calc(100dvh-2rem))]"
             exit={{ y: "100%" }}
             initial={{ y: "100%" }}
             transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
