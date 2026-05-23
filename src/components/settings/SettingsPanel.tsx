@@ -1,14 +1,19 @@
 import { useState } from "react";
 
 import type { PetState } from "../../domain";
+import type { LocalNotificationPermission } from "../../pwa/notifications";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 
 interface SettingsPanelProps {
   disabled?: boolean;
   durations: number[];
+  hasEnabledFocusNotifications: boolean;
   hasInstalledShortcut: boolean;
+  notificationNotice: string | null;
+  notificationPermission: LocalNotificationPermission;
   onDurationChange: (duration: number) => void;
+  onFocusNotificationsChange: (hasEnabledFocusNotifications: boolean) => void;
   onPetNameSave: (name: string) => void;
   onResetLocalData: () => void;
   onShortcutInstalledChange: (hasInstalledShortcut: boolean) => void;
@@ -19,8 +24,12 @@ interface SettingsPanelProps {
 export function SettingsPanel({
   disabled = false,
   durations,
+  hasEnabledFocusNotifications,
   hasInstalledShortcut,
+  notificationNotice,
+  notificationPermission,
   onDurationChange,
+  onFocusNotificationsChange,
   onPetNameSave,
   onResetLocalData,
   onShortcutInstalledChange,
@@ -123,6 +132,35 @@ export function SettingsPanel({
           />
           I installed shortcut already.
         </label>
+      </div>
+
+      <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
+        <p className="text-sm font-semibold text-slate-900">Local reminders</p>
+        <p className="mt-1 text-sm leading-6 text-slate-600">
+          PetPomodoro can send a local reminder if this app is still allowed to
+          run when focus time ends.
+        </p>
+        <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
+          <input
+            checked={hasEnabledFocusNotifications}
+            className="h-5 w-5 accent-sky-600"
+            disabled={disabled}
+            onChange={(event) =>
+              onFocusNotificationsChange(event.target.checked)
+            }
+            type="checkbox"
+          />
+          Notify me when focus time is done.
+        </label>
+        {notificationNotice ? (
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            {notificationNotice}
+          </p>
+        ) : hasEnabledFocusNotifications && notificationPermission === "granted" ? (
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            Local reminders are on for this device.
+          </p>
+        ) : null}
       </div>
 
       <div className="rounded-lg border border-rose-100 bg-rose-50 p-4">

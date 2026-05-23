@@ -190,6 +190,17 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Confirm the session still uses the normal timestamp-based honesty confirmation.
 - [ ] Confirm that Shortcut support is treated as convenience only, not verification.
 
+## Local Reminder Notifications
+
+- [ ] Enable "Notify me when focus time is done." in Settings.
+- [ ] If permission is denied, confirm the setting stays off and says: "Notifications are off for this device."
+- [ ] Start a 5-minute session with reminders enabled.
+- [ ] Keep the app open or otherwise eligible to run until `expectedEndAt`.
+- [ ] Confirm a local notification says "Your pet is waiting." and does not imply verification.
+- [ ] Tap the notification and confirm PetPomodoro opens or focuses when supported.
+- [ ] Confirm the session still asks the normal honesty confirmation question.
+- [ ] Close or background the app and confirm no copy promises reliable closed-app delivery.
+
 ## Copy Review
 
 - [ ] The app never uses "verified", "detected", "failed", "cheated", or "timer completed automatically" in user-facing completion copy.

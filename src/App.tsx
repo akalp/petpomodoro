@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AppShell } from "./components/layout/AppShell";
 import { PetDashboard } from "./components/pet/PetDashboard";
@@ -15,6 +15,13 @@ import { Card } from "./components/ui/Card";
 import { resetLocalData } from "./db";
 import { isStandaloneDisplayMode } from "./pwa/installHints";
 import {
+  getNotificationPermission,
+  requestLocalNotificationPermission,
+  shouldScheduleFocusNotification,
+  showFocusFinishedNotification,
+  type LocalNotificationPermission,
+} from "./pwa/notifications";
+import {
   buildStartNativeTimerShortcutUrl,
   shouldRunStartNativeTimerShortcut,
 } from "./pwa/shortcuts";
@@ -30,7 +37,15 @@ export function App() {
   const [hasInstalledShortcut, setHasInstalledShortcut] = useState(() =>
     readHasInstalledShortcut(),
   );
+  const [hasEnabledFocusNotifications, setHasEnabledFocusNotifications] =
+    useState(() => readHasEnabledFocusNotifications());
+  const [notificationPermission, setNotificationPermission] =
+    useState<LocalNotificationPermission>(() => getNotificationPermission());
+  const [notificationNotice, setNotificationNotice] = useState<string | null>(
+    null,
+  );
   const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const notifiedSessionIds = useRef(new Set<string>());
   const pet = usePetStore((state) => state.pet);
   const petError = usePetStore((state) => state.error);
   const lastRewardSummary = usePetStore((state) => state.lastRewardSummary);
@@ -65,6 +80,35 @@ export function App() {
     saveHasInstalledShortcut(isInstalled);
   };
 
+  const setFocusNotificationsEnabled = async (isEnabled: boolean) => {
+    if (!isEnabled) {
+      setHasEnabledFocusNotifications(false);
+      saveHasEnabledFocusNotifications(false);
+      setNotificationNotice(null);
+      setNotificationPermission(getNotificationPermission());
+      return;
+    }
+
+    const isGranted = await requestLocalNotificationPermission();
+    const nextPermission = getNotificationPermission();
+    setNotificationPermission(nextPermission);
+
+    if (isGranted) {
+      setHasEnabledFocusNotifications(true);
+      saveHasEnabledFocusNotifications(true);
+      setNotificationNotice(null);
+      return;
+    }
+
+    setHasEnabledFocusNotifications(false);
+    saveHasEnabledFocusNotifications(false);
+    setNotificationNotice(
+      nextPermission === "unsupported"
+        ? "Notifications are not available on this device."
+        : "Notifications are off for this device.",
+    );
+  };
+
   useEffect(() => {
     appInitialization ??= initializeApp();
 
@@ -86,12 +130,14 @@ export function App() {
 
     const handleFocus = () => {
       setCurrentTime(Date.now());
+      setNotificationPermission(getNotificationPermission());
       refreshSession();
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         setCurrentTime(Date.now());
+        setNotificationPermission(getNotificationPermission());
         refreshSession();
       }
     };
@@ -117,6 +163,52 @@ export function App() {
 
     return () => window.clearInterval(intervalId);
   }, [activeSession?.status, refreshSession]);
+
+  useEffect(() => {
+    const scheduledSession = activeSession;
+
+    if (
+      !shouldScheduleFocusNotification(
+        hasEnabledFocusNotifications,
+        notificationPermission,
+        scheduledSession,
+      )
+    ) {
+      return;
+    }
+
+    if (!scheduledSession) {
+      return;
+    }
+
+    const notificationDelayMs =
+      Date.parse(scheduledSession.expectedEndAt) - Date.now();
+
+    if (notificationDelayMs <= 0) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      if (notifiedSessionIds.current.has(scheduledSession.id)) {
+        return;
+      }
+
+      notifiedSessionIds.current.add(scheduledSession.id);
+      setCurrentTime(Date.now());
+      void refreshSessionStatus(scheduledSession.expectedEndAt)
+        .then(() => loadRecentSessions())
+        .catch(() => undefined);
+      showFocusFinishedNotification(scheduledSession.id);
+    }, notificationDelayMs);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    activeSession,
+    hasEnabledFocusNotifications,
+    loadRecentSessions,
+    notificationPermission,
+    refreshSessionStatus,
+  ]);
 
   const isBusy = isInitializing || isSessionLoading;
   const error = uiError ?? petError ?? pomodoroError;
@@ -234,8 +326,14 @@ export function App() {
       <SettingsPanel
         disabled={isBusy || !hasHydrated}
         durations={FOCUS_DURATIONS}
+        hasEnabledFocusNotifications={hasEnabledFocusNotifications}
         hasInstalledShortcut={hasInstalledShortcut}
+        notificationNotice={notificationNotice}
+        notificationPermission={notificationPermission}
         onDurationChange={setPreferredDuration}
+        onFocusNotificationsChange={(isEnabled) => {
+          void setFocusNotificationsEnabled(isEnabled);
+        }}
         onPetNameSave={handlePetNameSave}
         onResetLocalData={handleResetLocalData}
         onShortcutInstalledChange={setShortcutInstalled}
@@ -248,6 +346,8 @@ export function App() {
 
 const PREFERRED_DURATION_KEY = "petpomodoro.preferredDuration";
 const HAS_INSTALLED_SHORTCUT_KEY = "petpomodoro.hasInstalledShortcut";
+const HAS_ENABLED_FOCUS_NOTIFICATIONS_KEY =
+  "petpomodoro.hasEnabledFocusNotifications";
 
 function readPreferredDuration(): number {
   try {
@@ -285,6 +385,27 @@ function saveHasInstalledShortcut(isInstalled: boolean): void {
     );
   } catch {
     // This only controls whether the optional Shortcut hint is shown.
+  }
+}
+
+function readHasEnabledFocusNotifications(): boolean {
+  try {
+    return (
+      window.localStorage.getItem(HAS_ENABLED_FOCUS_NOTIFICATIONS_KEY) === "true"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function saveHasEnabledFocusNotifications(isEnabled: boolean): void {
+  try {
+    window.localStorage.setItem(
+      HAS_ENABLED_FOCUS_NOTIFICATIONS_KEY,
+      String(isEnabled),
+    );
+  } catch {
+    // This only controls whether optional local reminders are scheduled.
   }
 }
 

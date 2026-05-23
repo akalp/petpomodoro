@@ -200,3 +200,26 @@ Do not imply:
 - The Shortcut proves that focus was completed.
 - PetPomodoro can observe the native timer.
 - The confirmation step is skipped.
+
+## Local Reminder Settings
+
+Primary:
+
+- Local reminders
+
+Supporting:
+
+- PetPomodoro can send a local reminder if this app is still allowed to run when focus time ends.
+- Local reminders are on for this device.
+- Notifications are off for this device.
+- Notifications are not available on this device.
+
+Action:
+
+- Notify me when focus time is done.
+
+Do not imply:
+
+- Notifications are guaranteed after the app is closed.
+- Local reminders verify focus completion.
+- The confirmation step is skipped.
