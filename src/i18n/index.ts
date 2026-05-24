@@ -199,7 +199,7 @@ const turkishMessages: Record<MessageKey, string> = {
   honestyHearts: "Dürüstlük kalpleri",
   shopTitle: "Dost atıştırmalıkları",
   shopSupport: "Odak jetonlarını dostun için küçük bir lokmaya harca.",
-  shopCoinBalance: "Jeton: {coins}",
+  shopCoinBalance: "Jetonlar: {coins}",
   feedPet: "Besle",
   foodCost: "{coins} jeton",
   foodNotEnoughCoins: "Daha çok jeton gerekli",
