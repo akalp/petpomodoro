@@ -20,6 +20,10 @@ const englishMessages = {
   continue: "Continue",
   close: "Close",
   store: "Store",
+  homeTab: "Home",
+  petTab: "Pet",
+  shopTab: "Shop",
+  journalTab: "Journal",
   topBarSupport: "Focus and care, saved on this device.",
   installTitle:
     "For the coziest experience, add PetPomodoro to your Home Screen from Safari.",
@@ -166,6 +170,10 @@ const turkishMessages: Record<MessageKey, string> = {
   continue: "Devam et",
   close: "Kapat",
   store: "Dükkan",
+  homeTab: "Anasayfa",
+  petTab: "Dost",
+  shopTab: "Dükkan",
+  journalTab: "Günlük",
   topBarSupport: "Odak ve bakım bu cihazda kaydedilir.",
   installTitle:
     "En sıcak deneyim için PetPomodoro'yu Safari'den Ana Ekranına ekle.",
@@ -199,7 +207,8 @@ const turkishMessages: Record<MessageKey, string> = {
   foodBoughtSupport:
     "Bakım değişimi: tokluk {hunger}, mutluluk {happiness}, enerji {energy}.",
   foodBerryBowl: "Orman meyvesi kasesi",
-  foodBerryBowlDescription: "Tokluk ve biraz neşe için parlak bir atıştırmalık.",
+  foodBerryBowlDescription:
+    "Tokluk ve biraz neşe için parlak bir atıştırmalık.",
   foodWarmSoup: "Ilık çorba",
   foodWarmSoupDescription:
     "Dostunun doyurucu bir öğüne ihtiyacı olduğunda nazik bir kase.",

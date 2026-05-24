@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { AppShell } from "./components/layout/AppShell";
+import { AppRoutes } from "./app/AppRoutes";
+import { AppShell } from "./app/AppShell";
 import { AppTopBar } from "./components/layout/AppTopBar";
 import { PetDashboard } from "./components/pet/PetDashboard";
 import { PetShop } from "./components/pet/PetShop";
@@ -406,8 +407,67 @@ export function App() {
       .catch(() => undefined);
   };
 
+  const petDashboard = <PetDashboard displayMood={displayMood} pet={pet} t={t} />;
+  const sessionPanel =
+    activeSession?.status === "running" ? (
+      <RunningSessionScreen
+        countdownLabel={formatCountdown(activeSession.expectedEndAt, currentTime)}
+        disabled={isBusy}
+        language={language}
+        onEnd={handleEnd}
+        session={activeSession}
+        t={t}
+      />
+    ) : activeSession?.status === "awaiting_confirmation" ? (
+      <AwaitingConfirmationScreen
+        disabled={isBusy}
+        onAbandoned={handleAbandoned}
+        onCompleted={handleCompleted}
+        session={activeSession}
+        t={t}
+      />
+    ) : (
+      <PomodoroStartPanel
+        disabled={isBusy || !hasHydrated}
+        customDurationInput={customDurationInput}
+        durationError={durationError}
+        durations={FOCUS_DURATIONS}
+        onCustomDurationChange={handleCustomDurationChange}
+        onCustomDurationCommit={commitCustomDuration}
+        onDurationChange={setPreferredDuration}
+        onStart={handleStart}
+        selectedDuration={selectedDuration}
+        t={t}
+      />
+    );
+  const sessionHistory = (
+    <SessionHistory
+      isLoading={isBusy && hasHydrated}
+      language={language}
+      sessions={recentSessions}
+      t={t}
+    />
+  );
+  const shopRoute = pet ? (
+    <>
+      {isFocusActive ? (
+        <Card className="border-amber-100 bg-amber-50 text-sm font-medium leading-6 text-amber-950">
+          {t("shopUnavailableDuringFocus")}
+        </Card>
+      ) : null}
+      <PetShop
+        disabled={isBusy || !hasHydrated || isFocusActive}
+        lastFoodPurchase={lastFoodPurchase}
+        onBuyFood={handleBuyFood}
+        onClearPurchase={clearLastFoodPurchase}
+        pet={pet}
+        t={t}
+      />
+    </>
+  ) : null;
+
   return (
-    <AppShell>
+    <AppShell t={t}>
       <AppTopBar
         isSettingsDisabled={!hasHydrated}
         isStoreDisabled={isStoreDisabled}
@@ -424,38 +484,18 @@ export function App() {
         onInstallShortcut={() => setShortcutInstalled(true)}
         t={t}
       />
-      <PetDashboard displayMood={displayMood} pet={pet} t={t} />
-      {activeSession?.status === "running" ? (
-        <RunningSessionScreen
-          countdownLabel={formatCountdown(activeSession.expectedEndAt, currentTime)}
-          disabled={isBusy}
-          language={language}
-          onEnd={handleEnd}
-          session={activeSession}
-          t={t}
-        />
-      ) : activeSession?.status === "awaiting_confirmation" ? (
-        <AwaitingConfirmationScreen
-          disabled={isBusy}
-          onAbandoned={handleAbandoned}
-          onCompleted={handleCompleted}
-          session={activeSession}
-          t={t}
-        />
-      ) : (
-        <PomodoroStartPanel
-          disabled={isBusy || !hasHydrated}
-          customDurationInput={customDurationInput}
-          durationError={durationError}
-          durations={FOCUS_DURATIONS}
-          onCustomDurationChange={handleCustomDurationChange}
-          onCustomDurationCommit={commitCustomDuration}
-          onDurationChange={setPreferredDuration}
-          onStart={handleStart}
-          selectedDuration={selectedDuration}
-          t={t}
-        />
-      )}
+      <AppRoutes
+        home={
+          <>
+            {petDashboard}
+            {sessionPanel}
+            {sessionHistory}
+          </>
+        }
+        journal={sessionHistory}
+        pet={petDashboard}
+        shop={shopRoute}
+      />
       {lastRewardSummary ? (
         <RewardModal
           onClose={clearLastRewardSummary}
@@ -463,12 +503,6 @@ export function App() {
           t={t}
         />
       ) : null}
-      <SessionHistory
-        isLoading={isBusy && hasHydrated}
-        language={language}
-        sessions={recentSessions}
-        t={t}
-      />
       <Drawer
         description={t("shopSupport")}
         headerAction={
