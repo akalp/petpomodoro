@@ -3,15 +3,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppRoutes } from "./app/AppRoutes";
 import { AppShell } from "./app/AppShell";
 import { AppTopBar } from "./components/layout/AppTopBar";
-import { PetDashboard } from "./components/pet/PetDashboard";
 import { PetShop } from "./components/pet/PetShop";
 import { InstallHint } from "./components/pwa/InstallHint";
 import { ShortcutInstallHint } from "./components/pwa/ShortcutInstallHint";
-import { AwaitingConfirmationScreen } from "./components/session/AwaitingConfirmationScreen";
-import { PomodoroStartPanel } from "./components/session/PomodoroStartPanel";
 import { RewardModal } from "./components/session/RewardModal";
-import { RunningSessionScreen } from "./components/session/RunningSessionScreen";
-import { SessionHistory } from "./components/session/SessionHistory";
 import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { Button } from "./components/ui/Button";
 import { Card } from "./components/ui/Card";
@@ -40,6 +35,11 @@ import {
   buildStartNativeTimerShortcutUrl,
   shouldRunStartNativeTimerShortcut,
 } from "./pwa/shortcuts";
+import { FocusSessionSwitcher } from "./features/focus/FocusSessionSwitcher";
+import { HomeScreen } from "./features/home/HomeScreen";
+import { JournalScreen } from "./features/journal/JournalScreen";
+import { PetScreen } from "./features/pet/PetScreen";
+import { ShopScreen } from "./features/shop/ShopScreen";
 import {
   usePetStore,
   usePomodoroStore,
@@ -407,64 +407,40 @@ export function App() {
       .catch(() => undefined);
   };
 
-  const petDashboard = <PetDashboard displayMood={displayMood} pet={pet} t={t} />;
-  const sessionPanel =
-    activeSession?.status === "running" ? (
-      <RunningSessionScreen
-        countdownLabel={formatCountdown(activeSession.expectedEndAt, currentTime)}
-        disabled={isBusy}
-        language={language}
-        onEnd={handleEnd}
-        session={activeSession}
-        t={t}
-      />
-    ) : activeSession?.status === "awaiting_confirmation" ? (
-      <AwaitingConfirmationScreen
-        disabled={isBusy}
-        onAbandoned={handleAbandoned}
-        onCompleted={handleCompleted}
-        session={activeSession}
-        t={t}
-      />
-    ) : (
-      <PomodoroStartPanel
-        disabled={isBusy || !hasHydrated}
-        customDurationInput={customDurationInput}
-        durationError={durationError}
-        durations={FOCUS_DURATIONS}
-        onCustomDurationChange={handleCustomDurationChange}
-        onCustomDurationCommit={commitCustomDuration}
-        onDurationChange={setPreferredDuration}
-        onStart={handleStart}
-        selectedDuration={selectedDuration}
-        t={t}
-      />
-    );
-  const sessionHistory = (
-    <SessionHistory
+  const focusPanel = (
+    <FocusSessionSwitcher
+      activeSession={activeSession}
+      countdownLabel={
+        activeSession?.status === "running"
+          ? formatCountdown(activeSession.expectedEndAt, currentTime)
+          : null
+      }
+      customDurationInput={customDurationInput}
+      disabled={isBusy}
+      durationError={durationError}
+      durations={FOCUS_DURATIONS}
+      language={language}
+      onAbandoned={handleAbandoned}
+      onCompleted={handleCompleted}
+      onCustomDurationChange={handleCustomDurationChange}
+      onCustomDurationCommit={commitCustomDuration}
+      onDurationChange={setPreferredDuration}
+      onEnd={handleEnd}
+      onStart={handleStart}
+      selectedDuration={selectedDuration}
+      startDisabled={isBusy || !hasHydrated}
+      t={t}
+    />
+  );
+  const petScreen = <PetScreen displayMood={displayMood} pet={pet} t={t} />;
+  const journalScreen = (
+    <JournalScreen
       isLoading={isBusy && hasHydrated}
       language={language}
       sessions={recentSessions}
       t={t}
     />
   );
-  const shopRoute = pet ? (
-    <>
-      {isFocusActive ? (
-        <Card className="border-amber-100 bg-amber-50 text-sm font-medium leading-6 text-amber-950">
-          {t("shopUnavailableDuringFocus")}
-        </Card>
-      ) : null}
-      <PetShop
-        disabled={isBusy || !hasHydrated || isFocusActive}
-        lastFoodPurchase={lastFoodPurchase}
-        onBuyFood={handleBuyFood}
-        onClearPurchase={clearLastFoodPurchase}
-        pet={pet}
-        t={t}
-      />
-    </>
-  ) : null;
 
   return (
     <AppShell t={t}>
@@ -478,23 +454,35 @@ export function App() {
       />
       {error ? <ErrorNotice message={localizeErrorMessage(error, t)} t={t} /> : null}
       {!hasHydrated && isInitializing ? <LoadingCard t={t} /> : null}
-      <InstallHint t={t} />
-      <ShortcutInstallHint
-        hasInstalledShortcut={hasInstalledShortcut}
-        onInstallShortcut={() => setShortcutInstalled(true)}
-        t={t}
-      />
       <AppRoutes
         home={
-          <>
-            {petDashboard}
-            {sessionPanel}
-            {sessionHistory}
-          </>
+          <HomeScreen
+            focusPanel={focusPanel}
+            installHint={<InstallHint t={t} />}
+            petSummary={petScreen}
+            sessionHistory={journalScreen}
+            shortcutInstallHint={
+              <ShortcutInstallHint
+                hasInstalledShortcut={hasInstalledShortcut}
+                onInstallShortcut={() => setShortcutInstalled(true)}
+                t={t}
+              />
+            }
+          />
         }
-        journal={sessionHistory}
-        pet={petDashboard}
-        shop={shopRoute}
+        journal={journalScreen}
+        pet={petScreen}
+        shop={
+          <ShopScreen
+            disabled={isBusy || !hasHydrated || isFocusActive}
+            isFocusActive={isFocusActive}
+            lastFoodPurchase={lastFoodPurchase}
+            onBuyFood={handleBuyFood}
+            onClearPurchase={clearLastFoodPurchase}
+            pet={pet}
+            t={t}
+          />
+        }
       />
       {lastRewardSummary ? (
         <RewardModal

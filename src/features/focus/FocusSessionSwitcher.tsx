@@ -1,0 +1,85 @@
+import { AwaitingConfirmationScreen } from "../../components/session/AwaitingConfirmationScreen";
+import { PomodoroStartPanel } from "../../components/session/PomodoroStartPanel";
+import { RunningSessionScreen } from "../../components/session/RunningSessionScreen";
+import type { FocusSession } from "../../domain";
+import type { SupportedLanguage, Translator } from "../../i18n";
+
+interface FocusSessionSwitcherProps {
+  activeSession: FocusSession | null;
+  countdownLabel: string | null;
+  customDurationInput: string;
+  disabled: boolean;
+  durationError: string | null;
+  durations: number[];
+  language: SupportedLanguage;
+  onAbandoned: () => void;
+  onCompleted: () => void;
+  onCustomDurationChange: (value: string) => void;
+  onCustomDurationCommit: (value: string) => void;
+  onDurationChange: (duration: number) => void;
+  onEnd: () => void;
+  onStart: (duration: number) => void;
+  selectedDuration: number;
+  startDisabled: boolean;
+  t: Translator;
+}
+
+export function FocusSessionSwitcher({
+  activeSession,
+  countdownLabel,
+  customDurationInput,
+  disabled,
+  durationError,
+  durations,
+  language,
+  onAbandoned,
+  onCompleted,
+  onCustomDurationChange,
+  onCustomDurationCommit,
+  onDurationChange,
+  onEnd,
+  onStart,
+  selectedDuration,
+  startDisabled,
+  t,
+}: FocusSessionSwitcherProps) {
+  if (activeSession?.status === "running") {
+    return (
+      <RunningSessionScreen
+        countdownLabel={countdownLabel ?? "0:00"}
+        disabled={disabled}
+        language={language}
+        onEnd={onEnd}
+        session={activeSession}
+        t={t}
+      />
+    );
+  }
+
+  if (activeSession?.status === "awaiting_confirmation") {
+    return (
+      <AwaitingConfirmationScreen
+        disabled={disabled}
+        onAbandoned={onAbandoned}
+        onCompleted={onCompleted}
+        session={activeSession}
+        t={t}
+      />
+    );
+  }
+
+  return (
+    <PomodoroStartPanel
+      disabled={startDisabled}
+      customDurationInput={customDurationInput}
+      durationError={durationError}
+      durations={durations}
+      onCustomDurationChange={onCustomDurationChange}
+      onCustomDurationCommit={onCustomDurationCommit}
+      onDurationChange={onDurationChange}
+      onStart={onStart}
+      selectedDuration={selectedDuration}
+      t={t}
+    />
+  );
+}
