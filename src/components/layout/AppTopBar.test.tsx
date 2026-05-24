@@ -6,7 +6,7 @@ import { createTranslator } from "../../i18n";
 import { AppTopBar } from "./AppTopBar";
 
 describe("AppTopBar", () => {
-  it("renders Settings without a primary Store action", () => {
+  it("renders a secondary Settings control without a primary Store action", () => {
     const html = renderToStaticMarkup(
       <AppTopBar
         onOpenSettings={() => undefined}
@@ -15,7 +15,8 @@ describe("AppTopBar", () => {
     );
 
     expect(html).toContain("PetPomodoro");
-    expect(html).toContain("Settings");
+    expect(html).toContain("aria-label=\"Settings\"");
+    expect(html).toContain("<svg");
     expect(html).not.toContain("Store");
   });
 

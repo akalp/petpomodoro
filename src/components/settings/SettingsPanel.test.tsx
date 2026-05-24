@@ -7,7 +7,7 @@ import { makePet } from "../../test/factories";
 import { SettingsPanel } from "./SettingsPanel";
 
 describe("SettingsPanel", () => {
-  it("renders language and reset controls for the settings modal", () => {
+  it("renders language and reset controls for the settings sheet", () => {
     const html = renderToStaticMarkup(
       <SettingsPanel
         customDurationInput="25"

@@ -1,23 +1,23 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 
-interface DrawerProps {
+interface SheetProps {
   children: ReactNode;
+  closeLabel: string;
   description?: string;
-  headerAction?: ReactNode;
   isOpen: boolean;
   onClose: () => void;
   title: string;
 }
 
-export function Drawer({
+export function Sheet({
   children,
+  closeLabel,
   description,
-  headerAction,
   isOpen,
   onClose,
   title,
-}: DrawerProps) {
+}: SheetProps) {
   const titleId = useId();
   const descriptionId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -47,8 +47,8 @@ export function Drawer({
           aria-describedby={description ? descriptionId : undefined}
           aria-labelledby={titleId}
           aria-modal="true"
-          className="fixed inset-0 z-20 flex items-end justify-center bg-slate-950/40 px-2 pt-4 pb-0 focus:outline-none sm:px-6 sm:pt-8"
-          data-testid="drawer-backdrop"
+          className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/40 px-2 pt-4 pb-0 focus:outline-none sm:px-6 sm:pt-8"
+          data-testid="sheet-backdrop"
           exit={{ opacity: 0 }}
           initial={{ opacity: 0 }}
           onMouseDown={(event) => {
@@ -86,9 +86,26 @@ export function Drawer({
                   </p>
                 ) : null}
               </div>
-              {headerAction ? (
-                <div className="shrink-0">{headerAction}</div>
-              ) : null}
+              <button
+                aria-label={closeLabel}
+                className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-rose-100 bg-white text-slate-600 transition hover:bg-rose-50 hover:text-rose-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
+                onClick={onClose}
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-5">
               {children}

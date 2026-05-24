@@ -36,7 +36,9 @@ describe("route registry", () => {
     );
 
     expect(futureRoutePaths.games).toBe("/games");
+    expect(futureRoutePaths.settings).toBe("/settings");
     expect(primaryPaths).not.toContain(futureRoutePaths.games);
+    expect(primaryPaths).not.toContain(futureRoutePaths.settings);
   });
 
   it("derives a route entry from the current pathname", () => {

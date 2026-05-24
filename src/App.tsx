@@ -9,7 +9,7 @@ import { RewardModal } from "./components/session/RewardModal";
 import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { Button } from "./components/ui/Button";
 import { Card } from "./components/ui/Card";
-import { Drawer } from "./components/ui/Drawer";
+import { Sheet } from "./components/ui/Sheet";
 import { resetLocalData } from "./db";
 import {
   DEFAULT_FOCUS_DURATION_MINUTES,
@@ -48,10 +48,10 @@ import {
 
 let appInitialization: Promise<void> | null = null;
 const FOCUS_DURATIONS = [5, 15, 25, 50];
-type AppDialog = "settings" | null;
+type AppSheet = "settings" | null;
 
 export function App() {
-  const [activeDialog, setActiveDialog] = useState<AppDialog>(null);
+  const [activeSheet, setActiveSheet] = useState<AppSheet>(null);
   const [customDurationDraft, setCustomDurationDraft] = useState<string | null>(
     null,
   );
@@ -350,11 +350,11 @@ export function App() {
 
   const openSettings = () => {
     if (hasHydrated) {
-      setActiveDialog("settings");
+      setActiveSheet("settings");
     }
   };
 
-  const closeDialog = () => setActiveDialog(null);
+  const closeSheet = () => setActiveSheet(null);
 
   const handleResetLocalData = () => {
     const shouldReset = window.confirm(
@@ -477,10 +477,11 @@ export function App() {
           t={t}
         />
       ) : null}
-      <Drawer
+      <Sheet
+        closeLabel={t("close")}
         description={t("settingsSupport")}
-        isOpen={activeDialog === "settings"}
-        onClose={closeDialog}
+        isOpen={activeSheet === "settings"}
+        onClose={closeSheet}
         title={t("settings")}
       >
         <SettingsPanel
@@ -511,7 +512,7 @@ export function App() {
           showHeader={false}
           t={t}
         />
-      </Drawer>
+      </Sheet>
     </AppShell>
   );
 }

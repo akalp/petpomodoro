@@ -22,12 +22,26 @@ export function AppTopBar({
         </div>
         <div className="flex min-w-0 justify-end">
           <button
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-rose-100 bg-white px-3 text-sm font-semibold text-rose-800 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-400 sm:min-w-20"
+            aria-label={t("settings")}
+            className="inline-flex size-11 items-center justify-center rounded-lg border border-rose-100 bg-white text-rose-800 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-400"
             disabled={isSettingsDisabled}
             onClick={onOpenSettings}
+            title={t("settings")}
             type="button"
           >
-            {t("settings")}
+            <svg
+              aria-hidden="true"
+              className="size-5"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path d="M9.7 4.1a2.3 2.3 0 0 1 4.6 0 2.3 2.3 0 0 0 3.3 1.9 2.3 2.3 0 0 1 2.3 4 2.3 2.3 0 0 0 0 3.9 2.3 2.3 0 0 1-2.3 4 2.3 2.3 0 0 0-3.3 1.9 2.3 2.3 0 0 1-4.6 0 2.3 2.3 0 0 0-3.3-1.9 2.3 2.3 0 0 1-2.3-4 2.3 2.3 0 0 0 0-3.9 2.3 2.3 0 0 1 2.3-4 2.3 2.3 0 0 0 3.3-1.9Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
           </button>
         </div>
       </div>
