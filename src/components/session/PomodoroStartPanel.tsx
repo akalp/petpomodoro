@@ -35,7 +35,7 @@ export function PomodoroStartPanel({
       initial={{ opacity: 0, y: 8 }}
       transition={{ duration: 0.22 }}
     >
-      <Card className="space-y-4">
+      <Card className="space-y-4 max-[359px]:p-4">
       <div>
         <h2 className="text-2xl font-semibold text-slate-950">
           {t("startTitle")}
@@ -44,7 +44,7 @@ export function PomodoroStartPanel({
           {t("startInstructions")}
         </p>
       </div>
-      <p className="text-sm leading-6 text-slate-600">
+      <p className="text-sm leading-6 text-slate-600 max-[359px]:hidden">
         {t("startSupport")}
       </p>
       <div
@@ -59,7 +59,7 @@ export function PomodoroStartPanel({
             <button
               aria-pressed={isSelected}
               className={[
-                "min-h-12 rounded-lg border px-2 text-sm font-semibold transition active:scale-[0.98]",
+                "min-h-12 whitespace-nowrap rounded-lg border px-1 text-sm font-semibold transition active:scale-[0.98] min-[360px]:px-2",
                 "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500",
                 isSelected
                   ? "border-rose-600 bg-rose-600 text-white"

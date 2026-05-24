@@ -70,9 +70,17 @@ export function PetShop({
           </div>
         ) : null}
         {showHeader && showCoinBalance ? (
-          <CoinBalance coins={pet.coins} t={t} variant="pill" />
+          <div className="hidden shrink-0 sm:block">
+            <CoinBalance coins={pet.coins} t={t} variant="pill" />
+          </div>
         ) : null}
       </div>
+
+      {showHeader && showCoinBalance ? (
+        <div className="sm:hidden">
+          <CoinBalance coins={pet.coins} t={t} variant="bar" />
+        </div>
+      ) : null}
 
       {!showHeader && showCoinBalance ? (
         <CoinBalance coins={pet.coins} t={t} variant="bar" />
