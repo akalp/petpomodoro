@@ -12,8 +12,78 @@ interface RewardModalProps {
   t: Translator;
 }
 
+interface RewardRowMetadata {
+  id: string;
+  label: string;
+  value: number | string;
+  amount: number;
+}
+
+function formatRewardValue(amount: number) {
+  return amount > 0 ? `+${amount}` : amount;
+}
+
+function buildRewardRows(
+  summary: RewardSummary,
+  t: Translator,
+): RewardRowMetadata[] {
+  const rewardRows: RewardRowMetadata[] = [
+    {
+      id: "xp",
+      label: t("xpGained"),
+      value: formatRewardValue(summary.xpAwarded),
+      amount: summary.xpAwarded,
+    },
+    {
+      id: "coins",
+      label: t("coins"),
+      value: formatRewardValue(summary.coinsAwarded),
+      amount: summary.coinsAwarded,
+    },
+    {
+      id: "happiness",
+      label: t("happiness"),
+      value: formatRewardValue(summary.happinessAwarded),
+      amount: summary.happinessAwarded,
+    },
+    {
+      id: "hunger",
+      label: t("hunger"),
+      value: formatRewardValue(summary.hungerAwarded),
+      amount: summary.hungerAwarded,
+    },
+    {
+      id: "energy",
+      label: t("energy"),
+      value: formatRewardValue(summary.energyAwarded),
+      amount: summary.energyAwarded,
+    },
+    {
+      id: "streak",
+      label: t("streak"),
+      value: formatRewardValue(summary.streakAwarded),
+      amount: summary.streakAwarded,
+    },
+    {
+      id: "honesty-hearts",
+      label: t("honestyHearts"),
+      value: formatRewardValue(summary.honestyHeartsAwarded),
+      amount: summary.honestyHeartsAwarded,
+    },
+    {
+      id: "new-level",
+      label: t("newLevel"),
+      value: summary.newLevel,
+      amount: summary.leveledUp ? summary.newLevel : 0,
+    },
+  ];
+
+  return rewardRows.filter((row) => row.amount !== 0);
+}
+
 export function RewardModal({ onClose, summary, t }: RewardModalProps) {
   const shouldReduceMotion = useReducedMotion();
+  const rewardRows = buildRewardRows(summary, t);
 
   return (
     <motion.div
@@ -64,40 +134,9 @@ export function RewardModal({ onClose, summary, t }: RewardModalProps) {
         ) : null}
 
         <div className="grid gap-3">
-          {summary.xpAwarded > 0 ? (
-            <StatRow label={t("xpGained")} value={`+${summary.xpAwarded}`} />
-          ) : null}
-          {summary.coinsAwarded > 0 ? (
-            <StatRow label={t("coins")} value={`+${summary.coinsAwarded}`} />
-          ) : null}
-          {summary.happinessAwarded > 0 ? (
-            <StatRow label={t("happiness")} value={`+${summary.happinessAwarded}`} />
-          ) : null}
-          {summary.hungerAwarded > 0 ? (
-            <StatRow label={t("hunger")} value={`+${summary.hungerAwarded}`} />
-          ) : null}
-          {summary.energyAwarded !== 0 ? (
-            <StatRow
-              label={t("energy")}
-              value={
-                summary.energyAwarded > 0
-                  ? `+${summary.energyAwarded}`
-                  : summary.energyAwarded
-              }
-            />
-          ) : null}
-          {summary.streakAwarded > 0 ? (
-            <StatRow label={t("streak")} value={`+${summary.streakAwarded}`} />
-          ) : null}
-          {summary.honestyHeartsAwarded > 0 ? (
-            <StatRow
-              label={t("honestyHearts")}
-              value={`+${summary.honestyHeartsAwarded}`}
-            />
-          ) : null}
-          {summary.leveledUp ? (
-            <StatRow label={t("newLevel")} value={summary.newLevel} />
-          ) : null}
+          {rewardRows.map((row) => (
+            <StatRow key={row.id} label={row.label} value={row.value} />
+          ))}
         </div>
 
         <Button className="w-full" onClick={onClose}>
