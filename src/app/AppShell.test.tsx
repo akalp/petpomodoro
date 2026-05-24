@@ -11,7 +11,7 @@ import { primaryTabRoutes } from "./routeRegistry";
 describe("AppShell", () => {
   it("renders primary navigation from the route registry", () => {
     const t = createTranslator("en");
-    const html = renderShell(routePaths.home);
+    const html = renderShell(routePaths.pet);
 
     for (const route of primaryTabRoutes) {
       expect(html).toContain(`href="${route.path}"`);

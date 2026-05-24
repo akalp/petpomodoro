@@ -122,7 +122,7 @@ For an early cancellation, do not show reward language. After "Not this time" fr
 
 Action:
 
-- Back home
+- Back to pet
 
 ## Completion Reward
 

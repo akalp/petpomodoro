@@ -5,7 +5,7 @@ import {
   type AppRoutePath,
 } from "../routes/routePaths";
 
-export type RouteIconName = "home" | "pet" | "shop" | "journal";
+export type RouteIconName = "pet" | "focus" | "shop" | "journal";
 export type RouteFeatureStatus = "available" | "planned";
 
 export interface AppRouteRegistryEntry {
@@ -22,19 +22,19 @@ export interface AppRouteRegistryEntry {
 
 export const appRouteRegistry = [
   {
-    id: "home",
-    path: routePaths.home,
-    labelKey: "homeTab",
-    icon: { name: "home" },
+    id: "pet",
+    path: routePaths.pet,
+    labelKey: "petTab",
+    icon: { name: "pet" },
     isPrimaryTab: true,
     order: 10,
     featureStatus: "available",
   },
   {
-    id: "pet",
-    path: routePaths.pet,
-    labelKey: "petTab",
-    icon: { name: "pet" },
+    id: "focus",
+    path: routePaths.focus,
+    labelKey: "focusTab",
+    icon: { name: "focus" },
     isPrimaryTab: true,
     order: 20,
     featureStatus: "available",

@@ -1,8 +1,12 @@
 export const routePaths = {
-  home: "/home",
   pet: "/pet",
+  focus: "/focus",
   shop: "/shop",
   journal: "/journal",
+} as const;
+
+export const legacyRoutePaths = {
+  home: "/home",
 } as const;
 
 export const futureRoutePaths = {

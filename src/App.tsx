@@ -34,8 +34,8 @@ import {
   buildStartNativeTimerShortcutUrl,
   shouldRunStartNativeTimerShortcut,
 } from "./pwa/shortcuts";
+import { FocusScreen } from "./features/focus/FocusScreen";
 import { FocusSessionSwitcher } from "./features/focus/FocusSessionSwitcher";
-import { HomeScreen } from "./features/home/HomeScreen";
 import { JournalScreen } from "./features/journal/JournalScreen";
 import { PetScreen } from "./features/pet/PetScreen";
 import { ShopScreen } from "./features/shop/ShopScreen";
@@ -441,12 +441,10 @@ export function App() {
       {error ? <ErrorNotice message={localizeErrorMessage(error, t)} t={t} /> : null}
       {!hasHydrated && isInitializing ? <LoadingCard t={t} /> : null}
       <AppRoutes
-        home={
-          <HomeScreen
+        focus={
+          <FocusScreen
             focusPanel={focusPanel}
             installHint={<InstallHint t={t} />}
-            petSummary={petScreen}
-            sessionHistory={journalScreen}
             shortcutInstallHint={
               <ShortcutInstallHint
                 hasInstalledShortcut={hasInstalledShortcut}

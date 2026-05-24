@@ -1,27 +1,21 @@
 import type { ReactNode } from "react";
 
-interface HomeScreenProps {
+interface FocusScreenProps {
   focusPanel: ReactNode;
   installHint: ReactNode;
-  petSummary: ReactNode;
-  sessionHistory: ReactNode;
   shortcutInstallHint: ReactNode;
 }
 
-export function HomeScreen({
+export function FocusScreen({
   focusPanel,
   installHint,
-  petSummary,
-  sessionHistory,
   shortcutInstallHint,
-}: HomeScreenProps) {
+}: FocusScreenProps) {
   return (
     <section className="space-y-4 sm:space-y-5">
       {installHint}
       {shortcutInstallHint}
-      {petSummary}
       {focusPanel}
-      {sessionHistory}
     </section>
   );
 }

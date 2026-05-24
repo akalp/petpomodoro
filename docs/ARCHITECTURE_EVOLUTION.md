@@ -64,7 +64,7 @@ Primary navigation should use React Router with hash-based routing. Hash routing
 
 Use route state for navigation:
 
-- Primary URLs are represented as hash routes, such as `#/home`, `#/pet`, `#/shop`, and `#/journal`.
+- Primary URLs are represented as hash routes, such as `#/pet`, `#/focus`, `#/shop`, and `#/journal`.
 - `src/app/routeRegistry.ts` is the canonical route/tab registry.
 - The route/tab registry maps route paths to labels, optional icon metadata, primary-tab visibility, and future route metadata when useful.
 - The active tab is derived from the current route.
@@ -72,8 +72,8 @@ Use route state for navigation:
 
 Canonical primary routes/tabs:
 
-1. `/home`
-2. `/pet`
+1. `/pet`
+2. `/focus`
 3. `/shop`
 4. `/journal`
 
@@ -95,21 +95,21 @@ The long-term UI should be a native-feeling tab-based app shell:
 
 Primary tabs:
 
-1. Home
-2. Pet
+1. Pet
+2. Focus
 3. Shop
 4. Journal
 5. Games later, once there is real game content
 
 Recommended initial route ids:
 
-1. `home`
-2. `pet`
+1. `pet`
+2. `focus`
 3. `shop`
 4. `journal`
 5. `games` later
 
-Home may contain the focus controls and current-session summary. Pet should contain richer pet care and visual detail. Shop should contain food/snack purchasing. Journal should contain session history and reflections. Games is reserved for future mini-games and should not be shown as empty chrome before the feature exists.
+Pet is the default landing route and should contain richer pet care and visual detail. Focus contains the focus controls and current-session summary. Shop should contain food/snack purchasing. Journal should contain session history and reflections. Games is reserved for future mini-games and should not be shown as empty chrome before the feature exists.
 
 The "Your pet waited for you. Did you really finish this focus session?" confirmation remains an overlay shown above the current shell. Session reward and honesty reward results also remain overlays so they can interrupt gently without becoming route state.
 
@@ -129,7 +129,7 @@ Recommended boundaries:
 - Layout owns the mobile bottom tab bar, desktop/tablet side navigation, safe-area spacing, and content regions.
 - Overlays own modal/dialog/sheet presentation for confirmation, rewards, reset, food purchase feedback, and transient interruptions.
 - Domain stores own pet, sessions, settings, rewards, hydration, persistence orchestration, and local app data.
-- Feature screens own screen composition for Home, Pet, Shop, Journal, Settings, and future Games.
+- Feature screens own screen composition for Pet, Focus, Shop, Journal, Settings, and future Games.
 
 `App.tsx` or `AppRoot.tsx` should become a composition root that wires providers, bootstrap, router, shell, and overlays. It should not contain domain rules, route-specific screen logic, or growing UI variant branches.
 
@@ -353,9 +353,8 @@ src/
     useFocusNotifications.ts
 
   features/
-    home/
-      HomeScreen.tsx
     focus/
+      FocusScreen.tsx
       FocusPanel.tsx
       FocusSessionSwitcher.tsx
     pet/
@@ -444,8 +443,8 @@ src/routes/routePaths.ts
 Primary routes:
 
 ```txt
-/home
 /pet
+/focus
 /shop
 /journal
 ```
@@ -461,6 +460,7 @@ Acceptance criteria:
 - Use React Router with hash-based routing.
 - If `react-router-dom` is not installed, add it as a runtime dependency and keep the version compatible with the current React/Vite setup.
 - Route registry is typed and includes route id, path, label key, optional icon metadata, and primary-tab visibility.
+- `/` redirects to `/pet`; legacy `/home` redirects to `/focus` during the route rename.
 - It may reference screen components directly or be paired with route definitions in `AppRoutes.tsx`, whichever keeps imports simpler and avoids unnecessary coupling.
 - `/games` is planned in types or comments only; do not render an empty Games tab before the feature exists.
 - Active tab is derived from the current route.
@@ -497,17 +497,17 @@ Goal: stop `App.tsx` from owning all screen composition.
 Suggested files:
 
 ```txt
-src/features/home/HomeScreen.tsx
 src/features/pet/PetScreen.tsx
+src/features/focus/FocusScreen.tsx
+src/features/focus/FocusSessionSwitcher.tsx
 src/features/shop/ShopScreen.tsx
 src/features/journal/JournalScreen.tsx
-src/features/focus/FocusSessionSwitcher.tsx
 ```
 
 Acceptance criteria:
 
-- Home screen contains focus start/running/awaiting-confirmation flow plus concise pet summary if desired.
-- Pet screen contains pet dashboard/stats.
+- Pet screen contains pet dashboard/stats and is the default landing route.
+- Focus screen contains focus start/running/awaiting-confirmation flow.
 - Shop screen hosts the existing shop content in a route-safe screen wrapper. The drawer removal can happen in Phase 5.
 - Journal screen contains session history.
 - `AppRoutes.tsx` renders the active screen via React Router and the route registry.

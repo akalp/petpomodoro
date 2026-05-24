@@ -24,19 +24,20 @@ export function RouteIcon({ name, ...props }: RouteIconProps) {
 }
 
 const routeIconPaths: Record<RouteIconName, ReactElement> = {
-  home: (
-    <>
-      <path d="M4 10.5 12 4l8 6.5" />
-      <path d="M6.5 10.5V20h11v-9.5" />
-      <path d="M10 20v-5h4v5" />
-    </>
-  ),
   pet: (
     <>
       <circle cx="7.5" cy="9" r="1.6" />
       <circle cx="12" cy="6.8" r="1.6" />
       <circle cx="16.5" cy="9" r="1.6" />
       <path d="M7.5 16.6c0-2.4 2-4.1 4.5-4.1s4.5 1.7 4.5 4.1c0 1.5-1 2.4-2.4 2.4-.8 0-1.2-.3-2.1-.3s-1.3.3-2.1.3c-1.4 0-2.4-.9-2.4-2.4Z" />
+    </>
+  ),
+  focus: (
+    <>
+      <circle cx="12" cy="12" r="7.5" />
+      <path d="M12 7.5V12l3 2" />
+      <path d="M7 4.8 5.4 3.2" />
+      <path d="M17 4.8l1.6-1.6" />
     </>
   ),
   shop: (

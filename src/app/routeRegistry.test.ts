@@ -6,14 +6,14 @@ import { futureRoutePaths, routePaths } from "../routes/routePaths";
 describe("route registry", () => {
   it("defines the MVP primary tabs in shell order", () => {
     expect(primaryTabRoutes.map((route) => route.id)).toEqual([
-      "home",
       "pet",
+      "focus",
       "shop",
       "journal",
     ]);
     expect(primaryTabRoutes.map((route) => route.path)).toEqual([
-      routePaths.home,
       routePaths.pet,
+      routePaths.focus,
       routePaths.shop,
       routePaths.journal,
     ]);
@@ -23,8 +23,8 @@ describe("route registry", () => {
     expect(
       primaryTabRoutes.map((route) => [route.id, route.icon?.name]),
     ).toEqual([
-      ["home", "home"],
       ["pet", "pet"],
+      ["focus", "focus"],
       ["shop", "shop"],
       ["journal", "journal"],
     ]);
