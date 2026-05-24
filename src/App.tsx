@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppRoutes } from "./app/AppRoutes";
 import { AppShell } from "./app/AppShell";
 import { AppTopBar } from "./components/layout/AppTopBar";
-import { PetShop } from "./components/pet/PetShop";
 import { InstallHint } from "./components/pwa/InstallHint";
 import { ShortcutInstallHint } from "./components/pwa/ShortcutInstallHint";
 import { RewardModal } from "./components/session/RewardModal";
@@ -49,7 +48,7 @@ import {
 
 let appInitialization: Promise<void> | null = null;
 const FOCUS_DURATIONS = [5, 15, 25, 50];
-type AppDialog = "store" | "settings" | null;
+type AppDialog = "settings" | null;
 
 export function App() {
   const [activeDialog, setActiveDialog] = useState<AppDialog>(null);
@@ -139,10 +138,6 @@ export function App() {
   const isFocusActive =
     activeSession?.status === "running" ||
     activeSession?.status === "awaiting_confirmation";
-  const isStoreDisabled = !pet || !hasHydrated || isFocusActive;
-  const storeDisabledReason = isFocusActive
-    ? t("shopUnavailableDuringFocus")
-    : undefined;
 
   const setPreferredDuration = (duration: number) => {
     setCustomDurationDraft(String(duration));
@@ -353,12 +348,6 @@ export function App() {
     void buyFood(foodId).catch(() => undefined);
   };
 
-  const openStore = () => {
-    if (!isStoreDisabled) {
-      setActiveDialog("store");
-    }
-  };
-
   const openSettings = () => {
     if (hasHydrated) {
       setActiveDialog("settings");
@@ -446,10 +435,7 @@ export function App() {
     <AppShell t={t}>
       <AppTopBar
         isSettingsDisabled={!hasHydrated}
-        isStoreDisabled={isStoreDisabled}
         onOpenSettings={openSettings}
-        onOpenStore={openStore}
-        storeDisabledReason={storeDisabledReason}
         t={t}
       />
       {error ? <ErrorNotice message={localizeErrorMessage(error, t)} t={t} /> : null}
@@ -492,29 +478,6 @@ export function App() {
         />
       ) : null}
       <Drawer
-        description={t("shopSupport")}
-        headerAction={
-          pet ? <StoreCoinBadge coins={pet.coins} t={t} /> : undefined
-        }
-        isOpen={activeDialog === "store" && Boolean(pet)}
-        onClose={closeDialog}
-        title={t("shopTitle")}
-      >
-        {pet ? (
-          <PetShop
-            disabled={isBusy || !hasHydrated}
-            framed={false}
-            lastFoodPurchase={lastFoodPurchase}
-            onBuyFood={handleBuyFood}
-            onClearPurchase={clearLastFoodPurchase}
-            pet={pet}
-            showCoinBalance={false}
-            showHeader={false}
-            t={t}
-          />
-        ) : null}
-      </Drawer>
-      <Drawer
         description={t("settingsSupport")}
         isOpen={activeDialog === "settings"}
         onClose={closeDialog}
@@ -550,14 +513,6 @@ export function App() {
         />
       </Drawer>
     </AppShell>
-  );
-}
-
-function StoreCoinBadge({ coins, t }: { coins: number; t: Translator }) {
-  return (
-    <div className="inline-flex min-h-10 items-center justify-center rounded-lg border border-amber-100 bg-amber-50 px-3 text-sm font-bold text-amber-950">
-      {t("shopCoinBalance", { coins })}
-    </div>
   );
 }
 
