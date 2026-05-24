@@ -24,12 +24,7 @@ export function RunningSessionScreen({
   t,
 }: RunningSessionScreenProps) {
   return (
-    <motion.div
-      animate={{ opacity: 1, y: 0 }}
-      initial={{ opacity: 0, y: 8 }}
-      transition={{ duration: 0.22 }}
-    >
-      <Card className="space-y-4">
+    <Card className="space-y-4">
       <div>
         <p className="text-sm font-semibold uppercase text-teal-700">
           {t("inProgress")}
@@ -75,8 +70,7 @@ export function RunningSessionScreen({
           {t("endSession")}
         </Button>
       ) : null}
-      </Card>
-    </motion.div>
+    </Card>
   );
 }
 

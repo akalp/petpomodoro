@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
@@ -30,12 +28,7 @@ export function PomodoroStartPanel({
   t,
 }: PomodoroStartPanelProps) {
   return (
-    <motion.div
-      animate={{ opacity: 1, y: 0 }}
-      initial={{ opacity: 0, y: 8 }}
-      transition={{ duration: 0.22 }}
-    >
-      <Card className="space-y-4 max-[359px]:p-4">
+    <Card className="space-y-4 max-[359px]:p-4">
       <div>
         <h2 className="text-2xl font-semibold text-slate-950">
           {t("startTitle")}
@@ -103,7 +96,6 @@ export function PomodoroStartPanel({
       >
         {t("startFocus")}
       </Button>
-      </Card>
-    </motion.div>
+    </Card>
   );
 }

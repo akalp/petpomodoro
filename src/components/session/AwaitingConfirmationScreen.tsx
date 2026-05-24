@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 import type { FocusSession } from "../../domain";
 import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
@@ -22,12 +20,7 @@ export function AwaitingConfirmationScreen({
   t,
 }: AwaitingConfirmationScreenProps) {
   return (
-    <motion.div
-      animate={{ opacity: 1, y: 0 }}
-      initial={{ opacity: 0, y: 8 }}
-      transition={{ duration: 0.22 }}
-    >
-      <Card className="space-y-4 border-rose-200">
+    <Card className="space-y-4 border-rose-200">
       <div>
         <p className="text-sm font-semibold uppercase text-rose-700">
           {t("confirmationStatus")}
@@ -55,7 +48,6 @@ export function AwaitingConfirmationScreen({
           {t("abandonedChoice")}
         </Button>
       </div>
-      </Card>
-    </motion.div>
+    </Card>
   );
 }

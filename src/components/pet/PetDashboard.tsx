@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 import type { PetDisplayMood, PetState } from "../../domain";
 import type { Translator } from "../../i18n";
 import { Badge } from "../ui/Badge";
@@ -30,23 +28,17 @@ export function PetDashboard({ displayMood, pet, t }: PetDashboardProps) {
   }
 
   return (
-    <motion.div
-      animate={{ opacity: 1, y: 0 }}
-      initial={{ opacity: 0, y: 8 }}
-      transition={{ duration: 0.25 }}
-    >
-      <Card className="space-y-5 text-center">
-        <div className="flex items-center justify-between gap-3 text-left">
-          <div>
-            <h1 className="text-3xl font-semibold text-slate-950">
-              {pet.name}
-            </h1>
-          </div>
-          <Badge>{t("levelValue", { level: pet.level })}</Badge>
+    <Card className="space-y-5 text-center">
+      <div className="flex items-center justify-between gap-3 text-left">
+        <div>
+          <h1 className="text-3xl font-semibold text-slate-950">
+            {pet.name}
+          </h1>
         </div>
-        <PetAvatar mood={displayMood ?? pet.mood} t={t} />
-        <PetStats displayMood={displayMood ?? pet.mood} pet={pet} t={t} />
-      </Card>
-    </motion.div>
+        <Badge>{t("levelValue", { level: pet.level })}</Badge>
+      </div>
+      <PetAvatar mood={displayMood ?? pet.mood} t={t} />
+      <PetStats displayMood={displayMood ?? pet.mood} pet={pet} t={t} />
+    </Card>
   );
 }
