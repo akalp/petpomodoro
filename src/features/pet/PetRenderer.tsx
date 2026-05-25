@@ -42,6 +42,10 @@ export function PetRenderer({
       </span>
       <span className="pet-art__heart" />
       <span className="pet-art__body">
+        <span className="pet-art__horn pet-art__horn--left" />
+        <span className="pet-art__horn pet-art__horn--right" />
+        <span className="pet-art__patch pet-art__patch--head" />
+        <span className="pet-art__patch pet-art__patch--body" />
         <span className="pet-art__ear pet-art__ear--left">
           <span />
         </span>
@@ -53,6 +57,10 @@ export function PetRenderer({
           <span className="pet-art__eye pet-art__eye--right" />
           <span className="pet-art__cheek pet-art__cheek--left" />
           <span className="pet-art__cheek pet-art__cheek--right" />
+          <span className="pet-art__muzzle">
+            <span />
+            <span />
+          </span>
           <span className="pet-art__mouth" />
           <span className="pet-art__tear" />
         </span>

@@ -4,6 +4,7 @@ import {
   applyAppOpenDecay,
   applyFocusSessionImpact,
   applyHungerDecay,
+  changePetSpecies,
   isPetSleeping,
   type ClaimFocusRewardResult,
   type FoodItemId,
@@ -11,6 +12,7 @@ import {
   type FocusSession,
   type PetSleepResult,
   type PetSleepSummary,
+  type PetSpeciesId,
   type PetState,
   type RewardSummary,
 } from "../domain";
@@ -68,6 +70,7 @@ export interface PetStoreState {
   startSleep: (now?: string) => Promise<PetState>;
   wakeSleep: (now?: string) => Promise<PetSleepResult>;
   renamePet: (name: string, now?: string) => Promise<PetState>;
+  changeSpecies: (speciesId: PetSpeciesId, now?: string) => Promise<PetState>;
   clearLastRewardSummary: () => void;
   clearLastFoodPurchase: () => void;
   clearLastSleepSummary: () => void;
@@ -288,6 +291,17 @@ export function createPetStore(
         name: trimmedName.slice(0, 24),
         updatedAt: now,
       };
+
+      return get().applyReward(nextPet);
+    },
+
+    changeSpecies: async (speciesId, now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().initializePet(now));
+      const nextPet = changePetSpecies(pet, speciesId, now);
+
+      if (nextPet === pet) {
+        return pet;
+      }
 
       return get().applyReward(nextPet);
     },

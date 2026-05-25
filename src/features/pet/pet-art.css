@@ -258,7 +258,16 @@
   width: 0.82rem;
   height: 0.82rem;
   background: #fbbf24;
-  clip-path: polygon(50% 0, 62% 37%, 100% 50%, 62% 63%, 50% 100%, 38% 63%, 0 50%, 38% 37%);
+  clip-path: polygon(
+    50% 0,
+    62% 37%,
+    100% 50%,
+    62% 63%,
+    50% 100%,
+    38% 63%,
+    0 50%,
+    38% 37%
+  );
   animation: pet-sparkle 1.65s ease-in-out infinite;
 }
 
@@ -583,6 +592,239 @@
   left: 2.42rem;
   width: 0.92rem;
   height: 0.46rem;
+}
+
+.pet-art[data-species="moowi"] {
+  --pet-fur: #fffaf0;
+  --pet-fur-shade: #eee2cb;
+  --pet-inner-ear: #f4afb0;
+  --pet-cheek: #f4afb5;
+  --pet-ink: #513e41;
+  --pet-shadow: rgb(86 64 60 / 18%);
+  --pet-glow: #fffdf7;
+}
+
+.pet-art[data-species="moowi"] .pet-art__body {
+  border-color: rgb(95 70 63 / 16%);
+  border-radius: 45% 45% 42% 42%;
+  background: linear-gradient(145deg, var(--pet-fur), var(--pet-fur-shade));
+}
+
+.pet-art[data-species="moowi"] .pet-art__horn {
+  position: absolute;
+  top: -0.63rem;
+  z-index: 3;
+  display: block;
+  width: 0.58rem;
+  height: 0.9rem;
+  border-radius: 78% 78% 20% 20%;
+  background: #ddbc83;
+  transform-origin: center bottom;
+}
+
+.pet-art[data-species="moowi"] .pet-art__horn--left {
+  left: 1.76rem;
+  transform: rotate(-15deg);
+}
+
+.pet-art[data-species="moowi"] .pet-art__horn--right {
+  right: 1.76rem;
+  transform: rotate(15deg);
+}
+
+.pet-art[data-species="moowi"] .pet-art__ear {
+  top: 0.04rem;
+  z-index: 1;
+  width: 1.65rem;
+  height: 1.16rem;
+  border: 0.1rem solid rgb(95 70 63 / 13%);
+  border-radius: 72% 30% 72% 34%;
+  background: var(--pet-fur-shade);
+  transform-origin: 76% 76%;
+}
+
+.pet-art[data-species="moowi"] .pet-art__ear > span {
+  top: 0.28rem;
+  left: 0.35rem;
+  width: 0.84rem;
+  height: 0.48rem;
+}
+
+.pet-art[data-species="moowi"] .pet-art__ear--left {
+  left: 0.02rem;
+  border-color: rgb(95 70 63 / 18%);
+  background: #c4a095;
+  transform: rotate(-18deg);
+}
+
+.pet-art[data-species="moowi"] .pet-art__ear--right {
+  top: 0.04rem;
+  right: 0.8rem;
+  transform: scaleX(-1) rotate(-18deg);
+}
+
+.pet-art[data-species="moowi"] .pet-art__patch {
+  position: absolute;
+  z-index: 0;
+  display: block;
+  background: #ae8f88;
+}
+
+.pet-art[data-species="moowi"] .pet-art__patch::before,
+.pet-art[data-species="moowi"] .pet-art__patch::after {
+  content: none;
+}
+
+.pet-art[data-species="moowi"] .pet-art__patch--head {
+  top: 1.4rem;
+  right: 0.48rem;
+  width: 1.42rem;
+  height: 1.62rem;
+  border-radius: 58% 37% 63% 42% / 43% 59% 38% 62%;
+  transform: rotate(16deg);
+}
+
+.pet-art[data-species="moowi"] .pet-art__patch--head::after {
+  position: absolute;
+  bottom: 0.24rem;
+  left: -0.18rem;
+  display: block;
+  width: 0.45rem;
+  height: 0.54rem;
+  border-radius: 62% 45% 50% 58%;
+  background: inherit;
+  content: "";
+}
+
+.pet-art[data-species="moowi"] .pet-art__patch--body {
+  bottom: 0.94rem;
+  left: 0.6rem;
+  width: 1.72rem;
+  height: 1.36rem;
+  border-radius: 47% 67% 41% 61% / 62% 42% 59% 40%;
+  transform: rotate(-12deg);
+}
+
+.pet-art[data-species="moowi"] .pet-art__patch--body::after {
+  position: absolute;
+  top: 0.26rem;
+  right: -0.18rem;
+  display: block;
+  width: 0.43rem;
+  height: 0.5rem;
+  border-radius: 48% 66% 55% 42%;
+  background: inherit;
+  content: "";
+}
+
+.pet-art[data-species="moowi"] .pet-art__face {
+  z-index: 2;
+}
+
+.pet-art[data-species="moowi"] .pet-art__muzzle {
+  position: absolute;
+  top: 1.36rem;
+  left: 1.73rem;
+  z-index: 1;
+  display: block;
+  width: 2.34rem;
+  height: 1.42rem;
+  border-radius: 52% 52% 48% 48%;
+  background: #f4b7ba;
+}
+
+.pet-art[data-species="moowi"] .pet-art__muzzle > span {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.56rem;
+  width: 0.3rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #9f6470;
+}
+
+.pet-art[data-species="moowi"] .pet-art__muzzle > span:last-child {
+  right: 0.56rem;
+  left: auto;
+}
+
+.pet-art[data-species="moowi"] .pet-art__eye,
+.pet-art[data-species="moowi"] .pet-art__mouth {
+  z-index: 2;
+}
+
+.pet-art[data-species="moowi"] .pet-art__mouth {
+  top: 2.34rem;
+  left: 2.47rem;
+  width: 0.86rem;
+  height: 0.34rem;
+}
+
+.pet-art[data-species="moowi"] .pet-art__tail {
+  display: none;
+}
+
+.pet-art[data-species="moowi"] .pet-art__paw {
+  background: #69555a;
+}
+
+.pet-art[data-species="moowi"][data-mood="happy"] .pet-art__mouth {
+  top: 2.17rem;
+  left: 2.26rem;
+  width: 1.28rem;
+  height: 0.48rem;
+}
+
+.pet-art[data-species="moowi"][data-mood="hungry"] .pet-art__mouth {
+  top: 2.13rem;
+  left: 2.53rem;
+  width: 0.7rem;
+  height: 0.64rem;
+}
+
+.pet-art[data-species="moowi"][data-mood="hungry"] .pet-art__muzzle {
+  transform: scale(1.03);
+}
+
+.pet-art[data-species="moowi"][data-mood="tired"] .pet-art__mouth,
+.pet-art[data-species="moowi"][data-mood="sleeping"] .pet-art__mouth {
+  top: 2.35rem;
+  left: 2.47rem;
+  width: 0.86rem;
+}
+
+.pet-art[data-species="moowi"][data-mood="sad"] .pet-art__mouth {
+  top: 2.35rem;
+  left: 2.43rem;
+}
+
+.pet-art[data-species="moowi"][data-mood="working"] .pet-art__mouth {
+  top: 2.29rem;
+  left: 2.46rem;
+  width: 0.9rem;
+  height: 0.34rem;
+}
+
+.pet-art[data-species="moowi"][data-mood="sad"] .pet-art__ear--left {
+  transform: rotate(-30deg);
+}
+
+.pet-art[data-species="moowi"][data-mood="sad"] .pet-art__ear--right {
+  transform: scaleX(-1) rotate(-30deg);
+}
+
+.pet-art[data-species="moowi"][data-mood="working"] .pet-art__ear--left {
+  transform: rotate(-9deg);
+}
+
+.pet-art[data-species="moowi"][data-mood="working"] .pet-art__ear--right {
+  transform: scaleX(-1) rotate(-9deg);
+}
+
+.pet-art[data-species="moowi"][data-mood="tired"] .pet-art__tail,
+.pet-art[data-species="moowi"][data-mood="sleeping"] .pet-art__tail,
+.pet-art[data-species="moowi"][data-mood="sad"] .pet-art__tail {
+  transform: rotate(-8deg);
 }
 
 @keyframes pet-breathe {

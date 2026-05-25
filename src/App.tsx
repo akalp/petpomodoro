@@ -75,6 +75,7 @@ export function App() {
   const lastRewardSummary = usePetStore((state) => state.lastRewardSummary);
   const lastFoodPurchase = usePetStore((state) => state.lastFoodPurchase);
   const lastSleepSummary = usePetStore((state) => state.lastSleepSummary);
+  const isPetLoading = usePetStore((state) => state.isLoading);
   const clearLastRewardSummary = usePetStore(
     (state) => state.clearLastRewardSummary,
   );
@@ -88,6 +89,7 @@ export function App() {
   const startSleep = usePetStore((state) => state.startSleep);
   const wakeSleep = usePetStore((state) => state.wakeSleep);
   const renamePet = usePetStore((state) => state.renamePet);
+  const changeSpecies = usePetStore((state) => state.changeSpecies);
   const updateAppOpenDecay = usePetStore((state) => state.updateAppOpenDecay);
   const activeSession = usePomodoroStore((state) => state.activeSession);
   const recentSessions = usePomodoroStore((state) => state.recentSessions);
@@ -334,7 +336,7 @@ export function App() {
     supportsIosFeatures,
   ]);
 
-  const isBusy = isInitializing || isSessionLoading;
+  const isBusy = isInitializing || isSessionLoading || isPetLoading;
   const error = uiError ?? petError ?? pomodoroError ?? settingsError;
 
   const handleStart = (duration: number) => {
@@ -375,6 +377,12 @@ export function App() {
 
   const handlePetNameSave = (name: string) => {
     void renamePet(name).catch(() => undefined);
+  };
+
+  const handleSpeciesSelection = (
+    speciesId: Parameters<typeof changeSpecies>[0],
+  ) => {
+    void changeSpecies(speciesId).catch(() => undefined);
   };
 
   const handleBuyFood = (foodId: Parameters<typeof buyFood>[0]) => {
@@ -480,8 +488,10 @@ export function App() {
       installHint={<InstallHint t={t} />}
       isFocusActive={isFocusActive}
       isSleepDisabled={isBusy || !hasHydrated}
+      isSpeciesSelectionDisabled={isBusy || !hasHydrated}
       lastSleepSummary={lastSleepSummary}
       onClearSleepSummary={clearLastSleepSummary}
+      onSelectSpecies={handleSpeciesSelection}
       onStartSleep={handleStartSleep}
       onWakeSleep={handleWakeSleep}
       pet={pet}

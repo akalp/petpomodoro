@@ -1,6 +1,6 @@
 export type PetMood = "calm" | "happy" | "hungry" | "tired" | "sad";
 export type PetDisplayMood = PetMood | "working" | "sleeping";
-export type PetSpeciesId = "momo";
+export type PetSpeciesId = "momo" | "moowi";
 export type SupportedLanguage = "en" | "tr";
 
 export interface PetState {

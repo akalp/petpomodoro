@@ -25,4 +25,14 @@ describe("PetAvatar", () => {
     expect(html).toContain('aria-label="Pet mood: Sleeping"');
     expect(html).toContain('data-mood="sleeping"');
   });
+
+  it("renders the Moowi species through the shared CSS-art renderer", () => {
+    const html = renderToStaticMarkup(
+      <PetAvatar mood="happy" speciesId="moowi" t={createTranslator("en")} />,
+    );
+
+    expect(html).toContain('data-species="moowi"');
+    expect(html).toContain('data-mood="happy"');
+    expect(html).toContain('class="pet-art__muzzle"');
+  });
 });

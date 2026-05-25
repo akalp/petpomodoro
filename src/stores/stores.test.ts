@@ -43,6 +43,27 @@ describe("store workflows", () => {
     expect(repo.pet?.id).toBe("local-pet");
   });
 
+  it("persists a species selection on the current pet without resetting progress", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet({ coins: 9, xp: 64, streak: 2 }),
+    });
+    const petStore = createPetStore(repo.petDependencies);
+
+    await petStore.getState().initializePet(now);
+    const updated = await petStore.getState().changeSpecies("moowi", now);
+
+    expect(updated).toMatchObject({
+      id: "pet-1",
+      speciesId: "moowi",
+      coins: 9,
+      xp: 64,
+      streak: 2,
+      updatedAt: now,
+    });
+    expect(repo.pet).toEqual(updated);
+    expect(petStore.getState().pet).toEqual(updated);
+  });
+
   it("restores an elapsed running session to awaiting confirmation without reward", async () => {
     const repo = createInMemoryRepositories({
       pet: makePet(),

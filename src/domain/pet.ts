@@ -273,6 +273,22 @@ export function normalizePetState(pet: PetState): PetState {
   };
 }
 
+export function changePetSpecies(
+  pet: PetState,
+  speciesId: PetSpeciesId,
+  now: string,
+): PetState {
+  if (pet.speciesId === speciesId) {
+    return pet;
+  }
+
+  return {
+    ...pet,
+    speciesId,
+    updatedAt: now,
+  };
+}
+
 export function isPetSleeping(pet: PetState): boolean {
   return pet.sleepStartedAt != null;
 }

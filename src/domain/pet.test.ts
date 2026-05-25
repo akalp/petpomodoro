@@ -6,6 +6,7 @@ import {
   applyFocusSessionImpact,
   applyHungerDecay,
   calculateLevel,
+  changePetSpecies,
   DEFAULT_PET_SPECIES_ID,
   DEFAULT_HUNGER_DECAY_PER_HOUR,
   displayMoodForSession,
@@ -32,6 +33,25 @@ describe("pet domain logic", () => {
     delete (legacyPet as Partial<typeof legacyPet>).speciesId;
 
     expect(normalizePetState(legacyPet).speciesId).toBe(DEFAULT_PET_SPECIES_ID);
+  });
+
+  it("changes species without changing progress or pet identity", () => {
+    const pet = makePet({ coins: 12, xp: 75, happiness: 82 });
+    const updated = changePetSpecies(
+      pet,
+      "moowi",
+      "2026-05-22T12:30:00.000Z",
+    );
+
+    expect(updated).toMatchObject({
+      id: pet.id,
+      speciesId: "moowi",
+      coins: 12,
+      xp: 75,
+      happiness: 82,
+      updatedAt: "2026-05-22T12:30:00.000Z",
+    });
+    expect(pet.speciesId).toBe(DEFAULT_PET_SPECIES_ID);
   });
 
   it("adds XP and recalculates the pet level", () => {
