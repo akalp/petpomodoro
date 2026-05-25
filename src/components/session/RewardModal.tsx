@@ -88,13 +88,18 @@ export function RewardModal({ onClose, summary, t }: RewardModalProps) {
   return (
     <motion.div
       animate={{ opacity: 1 }}
-      className="fixed inset-0 z-10 flex items-end bg-slate-950/35 p-4 sm:items-center sm:justify-center"
+      className="fixed inset-x-0 top-0 bottom-28 z-20 flex items-end justify-center overflow-y-auto bg-slate-950/35 px-4 pt-4 pb-4 md:inset-0 md:z-50 md:items-center"
       initial={{ opacity: 0 }}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
       transition={{ duration: 0.18 }}
     >
       <motion.div
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full sm:max-w-md"
+        className="w-full max-w-xl sm:max-w-md"
         initial={{ opacity: 0, scale: 0.98, y: 18 }}
         transition={
           shouldReduceMotion
@@ -102,7 +107,7 @@ export function RewardModal({ onClose, summary, t }: RewardModalProps) {
             : { duration: 0.24, ease: "easeOut" }
         }
       >
-        <Card className="w-full space-y-4 border-rose-200 bg-white shadow-xl">
+        <Card className="max-h-[calc(100dvh-8rem)] w-full space-y-4 overflow-y-auto border-rose-200 bg-white shadow-xl md:max-h-[calc(100dvh-2rem)]">
         <div>
           <p className="text-sm font-semibold uppercase text-rose-700">
             {summary.rewardType === "focus_completed"
