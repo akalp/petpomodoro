@@ -66,6 +66,10 @@ const englishMessages = {
   wakePet: "Wake {pet}",
   sleepDuration: "Resting for {duration}",
   sleepEnergyPreview: "Projected energy {energy}",
+  sleepDurationLabel: "Resting",
+  sleepEnergyLabel: "Energy",
+  sleepHungerLabel: "Hunger",
+  sleepHappinessLabel: "Happiness",
   sleepResultTitle: "{pet} had a good rest.",
   sleepResultSupport:
     "Energy {energy}, hunger {hunger}, happiness {happiness}.",
@@ -241,6 +245,10 @@ const turkishMessages: Record<MessageKey, string> = {
   wakePet: "{pet} uyansın",
   sleepDuration: "{duration} dinlendi",
   sleepEnergyPreview: "Beklenen enerji {energy}",
+  sleepDurationLabel: "Dinlenme",
+  sleepEnergyLabel: "Enerji",
+  sleepHungerLabel: "Tokluk",
+  sleepHappinessLabel: "Mutluluk",
   sleepResultTitle: "{pet} güzelce dinlendi.",
   sleepResultSupport:
     "Enerji {energy}, tokluk {hunger}, mutluluk {happiness}.",

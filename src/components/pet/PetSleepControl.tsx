@@ -31,23 +31,46 @@ export function PetSleepControl({
 }: PetSleepControlProps) {
   const sleeping = isPetSleeping(pet);
   const actionDisabled = disabled || (!sleeping && isFocusActive);
-  const supportKey = isFocusActive
-    ? "sleepUnavailableDuringFocus"
-    : sleeping
-      ? "sleepSupportSleeping"
+  const supportKey = sleeping
+    ? "sleepSupportSleeping"
+    : isFocusActive
+      ? "sleepUnavailableDuringFocus"
       : "sleepSupportAwake";
+  const sectionTone = sleeping
+    ? "border-teal-100 bg-teal-50/70 text-slate-950"
+    : isFocusActive
+      ? "border-slate-100 bg-slate-50/80 text-slate-700"
+      : "border-rose-100 bg-rose-50/70 text-slate-950";
 
   return (
-    <div className="space-y-3 rounded-lg border border-indigo-100 bg-indigo-50 p-4 text-left text-indigo-950">
-      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-sm font-semibold">{t("sleepTitle")}</p>
-          <p className="mt-1 text-sm leading-6 text-indigo-900">
+    <div
+      className={[
+        "space-y-3 rounded-lg border p-4 text-left transition-colors",
+        sectionTone,
+      ].join(" ")}
+    >
+      <div className="flex min-w-0 flex-col gap-3">
+        <div className="min-w-0 space-y-1">
+          <div className="flex items-center gap-2">
+            <span
+              aria-hidden="true"
+              className={[
+                "h-2.5 w-2.5 rounded-full",
+                sleeping
+                  ? "bg-teal-500"
+                  : isFocusActive
+                    ? "bg-slate-300"
+                    : "bg-rose-400",
+              ].join(" ")}
+            />
+            <p className="text-sm font-semibold">{t("sleepTitle")}</p>
+          </div>
+          <p className="text-sm leading-6 text-slate-600">
             {t(supportKey, { pet: pet.name })}
           </p>
         </div>
         <Button
-          className="shrink-0"
+          className="w-full sm:w-auto sm:self-start"
           disabled={actionDisabled}
           onClick={sleeping ? onWakeSleep : onStartSleep}
           variant={sleeping ? "primary" : "secondary"}
@@ -57,23 +80,29 @@ export function PetSleepControl({
       </div>
 
       {sleeping && sleepPreview ? (
-        <div className="grid gap-2 text-sm font-medium sm:grid-cols-2">
-          <div className="rounded-md bg-white/80 px-3 py-2">
-            {t("sleepDuration", {
-              duration: formatSleepDuration(sleepPreview.elapsedMinutes),
-            })}
-          </div>
-          <div className="rounded-md bg-white/80 px-3 py-2">
-            {t("sleepEnergyPreview", {
-              energy: formatSigned(sleepPreview.energyGained),
-            })}
-          </div>
-        </div>
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-md bg-white/70 p-3 text-sm ring-1 ring-white/80">
+          <SleepMetric
+            label={t("sleepDurationLabel")}
+            value={formatSleepDuration(sleepPreview.elapsedMinutes)}
+          />
+          <SleepMetric
+            label={t("sleepEnergyLabel")}
+            value={formatSigned(sleepPreview.energyGained)}
+          />
+          <SleepMetric
+            label={t("sleepHungerLabel")}
+            value={formatSigned(sleepPreview.hungerChanged)}
+          />
+          <SleepMetric
+            label={t("sleepHappinessLabel")}
+            value={formatSigned(sleepPreview.happinessGained)}
+          />
+        </dl>
       ) : null}
 
       {lastSleepSummary ? (
-        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-950">
-          <p className="font-semibold">
+        <div className="rounded-md border border-teal-100 bg-white/80 p-3 text-sm leading-6 text-slate-700">
+          <p className="font-semibold text-slate-950">
             {t("sleepResultTitle", { pet: pet.name })}
           </p>
           <p>
@@ -84,7 +113,7 @@ export function PetSleepControl({
             })}
           </p>
           <Button
-            className="mt-3 min-h-10 px-4 py-2 text-sm"
+            className="mt-3 w-full text-sm sm:w-auto"
             onClick={onClearSleepSummary}
             variant="secondary"
           >
@@ -92,6 +121,22 @@ export function PetSleepControl({
           </Button>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+interface SleepMetricProps {
+  label: string;
+  value: string;
+}
+
+function SleepMetric({ label, value }: SleepMetricProps) {
+  return (
+    <div className="min-w-0">
+      <dt className="truncate text-xs font-medium text-slate-500">{label}</dt>
+      <dd className="mt-1 truncate text-sm font-semibold text-slate-950">
+        {value}
+      </dd>
     </div>
   );
 }

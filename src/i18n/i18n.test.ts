@@ -32,6 +32,7 @@ describe("offline translations", () => {
     expect(t("moodWorking")).toBe("Odaklanıyor");
     expect(t("moodSleeping")).toBe("Uyuyor");
     expect(t("wakePet", { pet: "Momo" })).toBe("Momo uyansın");
+    expect(t("sleepHungerLabel")).toBe("Tokluk");
     expect(t("foodMoonMilk")).toBe("Ay sütü");
   });
 
