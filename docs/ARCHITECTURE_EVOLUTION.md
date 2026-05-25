@@ -667,6 +667,50 @@ Acceptance criteria:
 
 Goal: document and optionally scaffold future game boundaries without building games.
 
+Mini-games are a future product area, not MVP chrome. Games should become a
+primary tab only after there is actual playable content. The route registry may
+prepare `/games` in comments, route ids, or future-facing types, but it must not
+render an empty Games tab or placeholder screen before the feature exists.
+
+Mini-game sessions should follow a small state-machine-style model instead of
+ad hoc UI flags. A likely future state model is:
+
+```txt
+idle
+playing
+completed
+rewarded
+```
+
+Likely future events are:
+
+```txt
+START_GAME
+FINISH_GAME
+CLAIM_REWARD
+CANCEL_GAME
+```
+
+Game completion should produce domain-level pet events or stat adjustments that
+stores can persist and present. Mini-games should not directly mutate UI state,
+pet visuals, overlays, or route state as a reward shortcut. Reward application
+must remain idempotent where a game result can be claimed, similar in spirit to
+the Pomodoro reward ledger.
+
+Mini-games must stay local-first and offline-first. Game catalogs, rules,
+scores, reward records, and any pet effects should be bundled or stored locally
+on device. They must not require backend APIs, accounts, cloud sync, leaderboards,
+or a network request for core play.
+
+Mini-games should preserve PetPomodoro's cozy, shame-free tone. Losing,
+cancelling, or skipping a game should not punish the pet or shame the user.
+Games are small moments of care and play, not productivity enforcement.
+
+Mini-games must not compromise honest Pomodoro confirmation. They should not
+claim to verify focus work, replace the confirmation prompt, auto-complete focus
+sessions, or create incentives that pressure the user to answer the Pomodoro
+confirmation dishonestly.
+
 Suggested future shape:
 
 ```txt
