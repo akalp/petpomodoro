@@ -49,18 +49,27 @@ describe("Dexie repositories", () => {
       hasInstalledShortcut: true,
       hasEnabledFocusNotifications: true,
       language: "en",
+      motivationalMessages: [],
     });
 
     const updated = await updateSettings(
-      { ...created, preferredDurationMinutes: 45 },
+      {
+        ...created,
+        motivationalMessages: ["  Keep going softly. "],
+        preferredDurationMinutes: 45,
+      },
       database,
     );
+    expect(updated.motivationalMessages).toEqual(["Keep going softly."]);
     await expect(database.settings.get("local-settings")).resolves.toEqual(updated);
   });
 
-  it("adds a default language when loading settings saved before i18n", async () => {
+  it("adds defaults when loading settings saved before newer fields", async () => {
     const database = makeDatabase("legacy-settings-language");
-    const legacySettings: Omit<AppSettings, "language"> = {
+    const legacySettings: Omit<
+      AppSettings,
+      "language" | "motivationalMessages"
+    > = {
       id: "local-settings",
       preferredDurationMinutes: 25,
       hasInstalledShortcut: false,
@@ -72,8 +81,10 @@ describe("Dexie repositories", () => {
     const upgraded = await loadOrCreateSettings(now, {}, database);
 
     expect(upgraded.language).toBe("en");
+    expect(upgraded.motivationalMessages).toEqual([]);
     await expect(database.settings.get("local-settings")).resolves.toMatchObject({
       language: "en",
+      motivationalMessages: [],
     });
   });
 

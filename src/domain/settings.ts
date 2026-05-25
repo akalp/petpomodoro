@@ -4,6 +4,8 @@ import type { AppSettings } from "./types";
 export const DEFAULT_FOCUS_DURATION_MINUTES = 25;
 export const MIN_FOCUS_DURATION_MINUTES = 1;
 export const MAX_FOCUS_DURATION_MINUTES = 180;
+export const MAX_MOTIVATIONAL_MESSAGES = 6;
+export const MAX_MOTIVATIONAL_MESSAGE_LENGTH = 88;
 
 export function validateFocusDurationMinutes(duration: number): number {
   if (
@@ -33,6 +35,42 @@ export function parseFocusDurationInput(value: string): number | null {
   }
 }
 
+export function sanitizeMotivationalMessages(messages: string[]): string[] {
+  if (messages.length > MAX_MOTIVATIONAL_MESSAGES) {
+    throw new DomainError(
+      `Save up to ${MAX_MOTIVATIONAL_MESSAGES} pet messages.`,
+    );
+  }
+
+  const seenMessages = new Set<string>();
+  const sanitizedMessages: string[] = [];
+
+  for (const message of messages) {
+    const trimmedMessage = message.trim();
+
+    if (trimmedMessage.length === 0) {
+      continue;
+    }
+
+    if (trimmedMessage.length > MAX_MOTIVATIONAL_MESSAGE_LENGTH) {
+      throw new DomainError(
+        `Pet messages must be ${MAX_MOTIVATIONAL_MESSAGE_LENGTH} characters or fewer.`,
+      );
+    }
+
+    const normalizedMessage = trimmedMessage.toLocaleLowerCase().replace(/\s+/g, " ");
+
+    if (seenMessages.has(normalizedMessage)) {
+      throw new DomainError("Pet messages should each feel a little different.");
+    }
+
+    seenMessages.add(normalizedMessage);
+    sanitizedMessages.push(trimmedMessage);
+  }
+
+  return sanitizedMessages;
+}
+
 export function createDefaultSettings(now: string): AppSettings {
   return {
     id: "local-settings",
@@ -40,6 +78,7 @@ export function createDefaultSettings(now: string): AppSettings {
     hasInstalledShortcut: false,
     hasEnabledFocusNotifications: false,
     language: "en",
+    motivationalMessages: [],
     updatedAt: now,
   };
 }

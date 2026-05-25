@@ -129,6 +129,36 @@ describe("PetPomodoroDatabase", () => {
 
     await database.delete();
   });
+
+  it("backfills motivational messages for existing settings", async () => {
+    const name = "petpomodoro-settings-message-upgrade-test";
+    const legacy = new Dexie(name);
+    legacy.version(6).stores({
+      pets: "id, createdAt, updatedAt",
+      sessions: "id, status, startedAt, expectedEndAt, rewardClaimedAt",
+      rewardLedger: "id, &sessionId, petId, createdAt",
+      settings: "id, updatedAt",
+    });
+    await legacy.open();
+    await legacy.table("settings").add({
+      id: "local-settings",
+      preferredDurationMinutes: 25,
+      hasInstalledShortcut: false,
+      hasEnabledFocusNotifications: false,
+      language: "en",
+      updatedAt: "2026-05-22T12:00:00.000Z",
+    });
+    legacy.close();
+
+    const database = new PetPomodoroDatabase(name);
+    await database.open();
+
+    await expect(database.settings.get("local-settings")).resolves.toMatchObject({
+      motivationalMessages: [],
+    });
+
+    await database.delete();
+  });
 });
 
 function indexNames(table: { schema: { indexes: readonly { name: string }[] } }) {

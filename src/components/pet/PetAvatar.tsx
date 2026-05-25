@@ -11,12 +11,14 @@ import { PET_MOTION_BY_MOOD } from "../../features/pet/petMotion";
 import type { Translator } from "../../i18n";
 
 interface PetAvatarProps {
+  message: string;
   mood: PetDisplayMood;
   speciesId?: PetSpeciesId;
   t: Translator;
 }
 
 export function PetAvatar({
+  message,
   mood,
   speciesId = DEFAULT_PET_SPECIES_ID,
   t,
@@ -31,7 +33,7 @@ export function PetAvatar({
       role="img"
     >
       <PetRenderer
-        message={t("petEncouragement")}
+        message={message}
         mood={mood}
         renderFigure={(figure) => (
           <motion.span

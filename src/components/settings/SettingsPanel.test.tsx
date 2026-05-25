@@ -13,6 +13,11 @@ describe("SettingsPanel", () => {
     expect(html).toContain("Language");
     expect(html).toContain("Reset local data");
     expect(html).toContain("Pet name");
+    expect(html).toContain("Pet messages");
+    expect(html).toContain("Write little notes your pet can say.");
+    expect(html).toContain("Keep breathing.");
+    expect(html).toContain("Add message");
+    expect(html).toContain("Save messages");
     expect(html).toContain("Choose your pet companion");
     expect(html).toContain('data-species="moowi"');
     expect(html).toContain("Leave blank to use your companion");
@@ -38,10 +43,12 @@ function renderPanel(supportsIosFeatures: boolean) {
       hasEnabledFocusNotifications={false}
       hasInstalledShortcut={false}
       language="en"
+      motivationalMessages={["Keep breathing."]}
       notificationNotice={null}
       notificationPermission="unsupported"
       onFocusNotificationsChange={() => undefined}
       onLanguageChange={() => undefined}
+      onMotivationalMessagesSave={() => undefined}
       onPetNameSave={() => undefined}
       onSelectSpecies={() => undefined}
       onResetLocalData={() => undefined}

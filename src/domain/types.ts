@@ -55,6 +55,7 @@ export interface AppSettings {
   hasInstalledShortcut: boolean;
   hasEnabledFocusNotifications: boolean;
   language: SupportedLanguage;
+  motivationalMessages: string[];
   updatedAt: string;
 }
 

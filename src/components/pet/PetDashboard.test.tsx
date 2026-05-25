@@ -38,6 +38,7 @@ describe("PetDashboard", () => {
         onStartSleep={() => undefined}
         onWakeSleep={() => undefined}
         pet={pet}
+        petMessage="Your tiny focus counts."
         sleepPreview={null}
         t={createTranslator("en")}
       />,
@@ -45,6 +46,7 @@ describe("PetDashboard", () => {
 
     expect(html).toContain("Let Momo rest");
     expect(html).toContain("A quiet nap helps Momo recover energy.");
+    expect(html).toContain("Your tiny focus counts.");
   });
 
   it("shows wake action and rest metrics while the pet is sleeping", () => {
@@ -61,6 +63,7 @@ describe("PetDashboard", () => {
         onStartSleep={() => undefined}
         onWakeSleep={() => undefined}
         pet={pet}
+        petMessage="Rest softly."
         sleepPreview={sleepSummary}
         t={createTranslator("en")}
       />,
@@ -89,6 +92,7 @@ describe("PetDashboard", () => {
         onStartSleep={() => undefined}
         onWakeSleep={() => undefined}
         pet={pet}
+        petMessage="Keep going gently."
         sleepPreview={null}
         t={createTranslator("en")}
       />,
@@ -110,6 +114,7 @@ describe("PetDashboard", () => {
         onStartSleep={() => undefined}
         onWakeSleep={() => undefined}
         pet={pet}
+        petMessage="Welcome back."
         sleepPreview={null}
         t={createTranslator("en")}
       />,

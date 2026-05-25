@@ -8,7 +8,11 @@ import { PetAvatar } from "./PetAvatar";
 describe("PetAvatar", () => {
   it("keeps its mood label while exposing renderer variant hooks", () => {
     const html = renderToStaticMarkup(
-      <PetAvatar mood="working" t={createTranslator("en")} />,
+      <PetAvatar
+        message="One gentle step at a time."
+        mood="working"
+        t={createTranslator("en")}
+      />,
     );
 
     expect(html).toContain('aria-label="Pet mood: Working"');
@@ -19,7 +23,11 @@ describe("PetAvatar", () => {
 
   it("renders the sleeping display mood", () => {
     const html = renderToStaticMarkup(
-      <PetAvatar mood="sleeping" t={createTranslator("en")} />,
+      <PetAvatar
+        message="Rest softly."
+        mood="sleeping"
+        t={createTranslator("en")}
+      />,
     );
 
     expect(html).toContain('aria-label="Pet mood: Sleeping"');
@@ -28,11 +36,28 @@ describe("PetAvatar", () => {
 
   it("renders the Moowi species through the shared CSS-art renderer", () => {
     const html = renderToStaticMarkup(
-      <PetAvatar mood="happy" speciesId="moowi" t={createTranslator("en")} />,
+      <PetAvatar
+        message="A custom note."
+        mood="happy"
+        speciesId="moowi"
+        t={createTranslator("en")}
+      />,
     );
 
     expect(html).toContain('data-species="moowi"');
     expect(html).toContain('data-mood="happy"');
     expect(html).toContain('class="pet-art__muzzle"');
+  });
+
+  it("renders a supplied custom pet message", () => {
+    const html = renderToStaticMarkup(
+      <PetAvatar
+        message="Your tiny focus counts."
+        mood="calm"
+        t={createTranslator("en")}
+      />,
+    );
+
+    expect(html).toContain("Your tiny focus counts.");
   });
 });

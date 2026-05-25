@@ -1,5 +1,6 @@
 import {
   createDefaultSettings,
+  sanitizeMotivationalMessages,
   validateFocusDurationMinutes,
   type AppSettings,
   type SupportedLanguage,
@@ -13,6 +14,7 @@ export interface InitialSettingsValues {
   hasInstalledShortcut?: boolean;
   hasEnabledFocusNotifications?: boolean;
   language?: SupportedLanguage;
+  motivationalMessages?: string[];
 }
 
 export async function getSettings(
@@ -30,9 +32,19 @@ export async function loadOrCreateSettings(
 
   if (settings) {
     const language = normalizeLanguage(settings.language);
+    const motivationalMessages = sanitizeMotivationalMessages(
+      settings.motivationalMessages ?? [],
+    );
 
-    if (settings.language !== language) {
-      const upgradedSettings = { ...settings, language };
+    if (
+      settings.language !== language ||
+      settings.motivationalMessages === undefined ||
+      settings.motivationalMessages.length !== motivationalMessages.length ||
+      settings.motivationalMessages.some(
+        (message, index) => message !== motivationalMessages[index],
+      )
+    ) {
+      const upgradedSettings = { ...settings, language, motivationalMessages };
       await database.settings.put(upgradedSettings);
       return upgradedSettings;
     }
@@ -54,6 +66,9 @@ export async function loadOrCreateSettings(
       initialValues.hasEnabledFocusNotifications ??
       defaults.hasEnabledFocusNotifications,
     language: initialValues.language ?? defaults.language,
+    motivationalMessages: sanitizeMotivationalMessages(
+      initialValues.motivationalMessages ?? defaults.motivationalMessages,
+    ),
   };
 
   await database.settings.add(created);
@@ -68,6 +83,9 @@ export async function updateSettings(
   const normalizedSettings = {
     ...settings,
     language: normalizeLanguage(settings.language),
+    motivationalMessages: sanitizeMotivationalMessages(
+      settings.motivationalMessages,
+    ),
   };
   await database.settings.put(normalizedSettings);
   return normalizedSettings;

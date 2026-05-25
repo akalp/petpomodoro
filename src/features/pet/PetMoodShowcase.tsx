@@ -41,7 +41,7 @@ export function PetMoodShowcase({ t }: PetMoodShowcaseProps) {
             <p className="rounded-full bg-rose-50 px-3 py-1 text-sm font-medium text-slate-700">
               {t(PET_MOOD_COPY[mood])}
             </p>
-            <PetAvatar mood={mood} t={t} />
+            <PetAvatar message={t("petEncouragement")} mood={mood} t={t} />
           </article>
         ))}
       </div>

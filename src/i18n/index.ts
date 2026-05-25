@@ -181,6 +181,16 @@ const englishMessages = {
   petName: "Pet name",
   petNameSupport: "Leave blank to use your companion's own name.",
   save: "Save",
+  petMessagesTitle: "Pet messages",
+  petMessagesSupport:
+    "Write little notes your pet can say. Saved only on this device.",
+  petMessageLabel: "Message {number}",
+  petMessagePlaceholder: "Write a tiny note.",
+  petMessageCharacters: "{count}/{max}",
+  addPetMessage: "Add message",
+  removePetMessage: "Remove message {number}",
+  savePetMessages: "Save messages",
+  petMessagesLimit: "You can save up to {max} pet messages.",
   shortcutTitle: "iOS Shortcut",
   shortcutSettingsSupport:
     "This only remembers whether this device should hide the Shortcut install hint.",
@@ -380,6 +390,16 @@ const turkishMessages: Record<MessageKey, string> = {
   petName: "Dostunun adı",
   petNameSupport: "Dostunun kendi adını kullanmak için boş bırak.",
   save: "Kaydet",
+  petMessagesTitle: "Dost mesajları",
+  petMessagesSupport:
+    "Dostunun söyleyebileceği küçük notlar yaz. Yalnızca bu cihazda kaydedilir.",
+  petMessageLabel: "Mesaj {number}",
+  petMessagePlaceholder: "Küçük bir not yaz.",
+  petMessageCharacters: "{count}/{max}",
+  addPetMessage: "Mesaj ekle",
+  removePetMessage: "{number}. mesajı kaldır",
+  savePetMessages: "Mesajları kaydet",
+  petMessagesLimit: "En fazla {max} dost mesajı kaydedebilirsin.",
   shortcutTitle: "iOS Kestirmesi",
   shortcutSettingsSupport:
     "Bu ayar yalnızca bu cihazda kestirme yükleme ipucunun gizlenip gizlenmeyeceğini hatırlar.",

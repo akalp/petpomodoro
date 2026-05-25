@@ -122,6 +122,22 @@ export class PetPomodoroDatabase extends Dexie {
               pet.customName ?? defaultPetNameForSpecies(speciesId);
           }),
       );
+
+    this.version(7)
+      .stores({
+        pets: "id, createdAt, updatedAt",
+        sessions: "id, status, startedAt, expectedEndAt, rewardClaimedAt",
+        rewardLedger: "id, &sessionId, petId, createdAt",
+        settings: "id, updatedAt",
+      })
+      .upgrade((transaction) =>
+        transaction
+          .table("settings")
+          .toCollection()
+          .modify((settings: Partial<AppSettings>) => {
+            settings.motivationalMessages ??= [];
+          }),
+      );
   }
 }
 

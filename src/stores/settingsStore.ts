@@ -2,6 +2,7 @@ import { create, type StoreApi, type UseBoundStore } from "zustand";
 
 import {
   parseFocusDurationInput,
+  sanitizeMotivationalMessages,
   validateFocusDurationMinutes,
   type AppSettings,
   type SupportedLanguage,
@@ -42,6 +43,10 @@ export interface SettingsStoreState {
     now?: string,
   ) => Promise<AppSettings>;
   setLanguage: (language: SupportedLanguage, now?: string) => Promise<AppSettings>;
+  updateMotivationalMessages: (
+    messages: string[],
+    now?: string,
+  ) => Promise<AppSettings>;
   clearAfterLocalDataReset: () => void;
   clearError: () => void;
 }
@@ -124,6 +129,22 @@ export function createSettingsStore(
         }),
         now,
       ),
+
+    updateMotivationalMessages: async (messages, now = dependencies.now()) => {
+      const motivationalMessages = sanitizeMotivationalMessages(messages);
+
+      return persistSettings(
+        get,
+        set,
+        dependencies,
+        (settings) => ({
+          ...settings,
+          motivationalMessages,
+          updatedAt: now,
+        }),
+        now,
+      );
+    },
 
     clearAfterLocalDataReset: () => {
       dependencies.clearLegacySettings();

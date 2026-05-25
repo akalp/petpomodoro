@@ -562,15 +562,20 @@ describe("settings workflows", () => {
     const hydrated = await store.getState().initializeSettings(now);
     const updated = await store.getState().updatePreferredDuration(90, now);
     const translated = await store.getState().setLanguage("en", now);
+    const messages = await store
+      .getState()
+      .updateMotivationalMessages(["  You have this moment.  ", ""], now);
 
     expect(hydrated).toMatchObject({
       preferredDurationMinutes: 50,
       hasInstalledShortcut: true,
       hasEnabledFocusNotifications: true,
       language: "tr",
+      motivationalMessages: [],
     });
     expect(updated.preferredDurationMinutes).toBe(90);
     expect(translated.language).toBe("en");
+    expect(messages.motivationalMessages).toEqual(["You have this moment."]);
     expect(legacyCleared).toBe(true);
   });
 

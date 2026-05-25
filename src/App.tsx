@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 import { AppRoutes } from "./app/AppRoutes";
 import { AppShell } from "./app/AppShell";
@@ -52,9 +53,11 @@ import {
 
 let appInitialization: Promise<void> | null = null;
 const FOCUS_DURATIONS = [5, 15, 25, 50];
+const EMPTY_MOTIVATIONAL_MESSAGES: string[] = [];
 type AppSheet = "settings" | null;
 
 export function App() {
+  const location = useLocation();
   const [activeSheet, setActiveSheet] = useState<AppSheet>(null);
   const [selectedDurationOverride, setSelectedDurationOverride] = useState<
     number | null
@@ -69,7 +72,13 @@ export function App() {
     null,
   );
   const [currentTime, setCurrentTime] = useState(() => Date.now());
+  const [selectedPetMessage, setSelectedPetMessage] = useState<string | null>(
+    null,
+  );
   const notifiedSessionIds = useRef(new Set<string>());
+  const petMessageQueue = useRef<string[]>([]);
+  const petMessageKey = useRef("");
+  const lastPetMessage = useRef<string | null>(null);
   const pet = usePetStore((state) => state.pet);
   const petError = usePetStore((state) => state.error);
   const lastRewardSummary = usePetStore((state) => state.lastRewardSummary);
@@ -115,6 +124,9 @@ export function App() {
     (state) => state.setFocusNotificationsEnabled,
   );
   const saveLanguage = useSettingsStore((state) => state.setLanguage);
+  const saveMotivationalMessages = useSettingsStore(
+    (state) => state.updateMotivationalMessages,
+  );
   const clearAfterLocalDataReset = useSettingsStore(
     (state) => state.clearAfterLocalDataReset,
   );
@@ -129,6 +141,9 @@ export function App() {
   const hasInstalledShortcut = settings?.hasInstalledShortcut ?? false;
   const hasEnabledFocusNotifications =
     settings?.hasEnabledFocusNotifications ?? false;
+  const motivationalMessages =
+    settings?.motivationalMessages ?? EMPTY_MOTIVATIONAL_MESSAGES;
+  const motivationalMessageKey = motivationalMessages.join("\n");
   const supportsIosFeatures =
     typeof window !== "undefined" &&
     isIosOrIpadosDevice(
@@ -160,6 +175,7 @@ export function App() {
     pet && petIsSleeping
       ? previewPetSleep(pet, new Date(currentTime).toISOString())
       : null;
+  const petMessage = selectedPetMessage ?? t("petEncouragement");
 
   const setPreferredDuration = (duration: number) => {
     setSelectedDurationOverride(duration);
@@ -205,6 +221,44 @@ export function App() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      if (!hasHydrated || motivationalMessages.length === 0) {
+        petMessageQueue.current = [];
+        petMessageKey.current = motivationalMessageKey;
+        lastPetMessage.current = null;
+        setSelectedPetMessage(null);
+        return;
+      }
+
+      if (petMessageKey.current !== motivationalMessageKey) {
+        petMessageQueue.current = [];
+        petMessageKey.current = motivationalMessageKey;
+      }
+
+      if (petMessageQueue.current.length === 0) {
+        petMessageQueue.current = shufflePetMessages(
+          motivationalMessages,
+          lastPetMessage.current,
+        );
+      }
+
+      const nextMessage =
+        petMessageQueue.current.shift() ?? motivationalMessages[0];
+      lastPetMessage.current = nextMessage;
+      setSelectedPetMessage(nextMessage);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    activeSession?.status,
+    displayMood,
+    hasHydrated,
+    location.pathname,
+    motivationalMessageKey,
+    motivationalMessages,
+  ]);
 
   const refreshSession = useCallback((now = new Date().toISOString()) => {
     void refreshSessionStatus(now)
@@ -352,6 +406,10 @@ export function App() {
     void renamePet(name).catch(() => undefined);
   };
 
+  const handleMotivationalMessagesSave = (messages: string[]) => {
+    void saveMotivationalMessages(messages).catch(() => undefined);
+  };
+
   const handleSpeciesSelection = (
     speciesId: Parameters<typeof changeSpecies>[0],
   ) => {
@@ -416,6 +474,9 @@ export function App() {
           hasHydrated: false,
           isInitializing: false,
         });
+        setSelectedPetMessage(null);
+        petMessageQueue.current = [];
+        lastPetMessage.current = null;
         appInitialization = initializeApp();
         return appInitialization.then(() => loadRecentSessions());
       })
@@ -461,6 +522,7 @@ export function App() {
       onStartSleep={handleStartSleep}
       onWakeSleep={handleWakeSleep}
       pet={pet}
+      petMessage={petMessage}
       sleepPreview={sleepPreview}
       t={t}
     />
@@ -533,12 +595,14 @@ export function App() {
           notificationNotice={notificationNotice}
           notificationPermission={notificationPermission}
           language={language}
+          motivationalMessages={motivationalMessages}
           onFocusNotificationsChange={(isEnabled) => {
             void setFocusNotificationsEnabled(isEnabled).catch(() => undefined);
           }}
           onLanguageChange={(nextLanguage) => {
             void saveLanguage(nextLanguage).catch(() => undefined);
           }}
+          onMotivationalMessagesSave={handleMotivationalMessagesSave}
           onPetNameSave={handlePetNameSave}
           onSelectSpecies={handleSpeciesSelection}
           onResetLocalData={handleResetLocalData}
@@ -582,6 +646,30 @@ function formatCountdown(expectedEndAt: string, nowMs: number): string {
   const seconds = remainingSeconds % 60;
 
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+function shufflePetMessages(
+  messages: string[],
+  previousMessage: string | null,
+): string[] {
+  const shuffledMessages = [...messages];
+
+  for (let index = shuffledMessages.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffledMessages[index], shuffledMessages[swapIndex]] = [
+      shuffledMessages[swapIndex],
+      shuffledMessages[index],
+    ];
+  }
+
+  if (shuffledMessages.length > 1 && shuffledMessages[0] === previousMessage) {
+    [shuffledMessages[0], shuffledMessages[1]] = [
+      shuffledMessages[1],
+      shuffledMessages[0],
+    ];
+  }
+
+  return shuffledMessages;
 }
 
 function LoadingCard({ t }: { t: Translator }) {

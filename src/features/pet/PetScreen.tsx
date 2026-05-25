@@ -21,6 +21,7 @@ interface PetScreenProps {
   onStartSleep: () => void;
   onWakeSleep: () => void;
   pet: PetState | null;
+  petMessage: string;
   sleepPreview: PetSleepSummary | null;
   t: Translator;
 }
@@ -35,6 +36,7 @@ export function PetScreen({
   onStartSleep,
   onWakeSleep,
   pet,
+  petMessage,
   sleepPreview,
   t,
 }: PetScreenProps) {
@@ -59,6 +61,7 @@ export function PetScreen({
         onStartSleep={onStartSleep}
         onWakeSleep={onWakeSleep}
         pet={pet}
+        petMessage={petMessage}
         sleepPreview={sleepPreview}
         t={t}
       />

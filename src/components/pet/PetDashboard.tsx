@@ -16,6 +16,7 @@ interface PetDashboardProps {
   onStartSleep: () => void;
   onWakeSleep: () => void;
   pet: PetState | null;
+  petMessage: string;
   sleepPreview: PetSleepSummary | null;
   t: Translator;
 }
@@ -29,6 +30,7 @@ export function PetDashboard({
   onStartSleep,
   onWakeSleep,
   pet,
+  petMessage,
   sleepPreview,
   t,
 }: PetDashboardProps) {
@@ -57,6 +59,7 @@ export function PetDashboard({
         <Badge>{t("levelValue", { level: pet.level })}</Badge>
       </div>
       <PetAvatar
+        message={petMessage}
         mood={displayMood ?? pet.mood}
         speciesId={pet.speciesId}
         t={t}
