@@ -16,6 +16,8 @@ describe("SettingsPanel", () => {
     expect(html).toContain("Choose your pet companion");
     expect(html).toContain('data-species="moowi"');
     expect(html).toContain("Leave blank to use your companion");
+    expect(html).not.toContain("Custom");
+    expect(html).not.toContain("Preferred focus time");
     expect(html).not.toContain("iOS Shortcut");
     expect(html).not.toContain("Local reminders");
   });
@@ -31,19 +33,13 @@ describe("SettingsPanel", () => {
 function renderPanel(supportsIosFeatures: boolean) {
   return renderToStaticMarkup(
     <SettingsPanel
-      customDurationInput="25"
       disabled={false}
-      durationError={null}
-      durations={[5, 15, 25, 50]}
       framed={false}
       hasEnabledFocusNotifications={false}
       hasInstalledShortcut={false}
       language="en"
       notificationNotice={null}
       notificationPermission="unsupported"
-      onCustomDurationChange={() => undefined}
-      onCustomDurationCommit={() => undefined}
-      onDurationChange={() => undefined}
       onFocusNotificationsChange={() => undefined}
       onLanguageChange={() => undefined}
       onPetNameSave={() => undefined}
@@ -51,7 +47,6 @@ function renderPanel(supportsIosFeatures: boolean) {
       onResetLocalData={() => undefined}
       onShortcutInstalledChange={() => undefined}
       pet={makePet()}
-      selectedDuration={25}
       showHeader={false}
       supportsIosFeatures={supportsIosFeatures}
       t={createTranslator("en")}

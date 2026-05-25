@@ -45,10 +45,12 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Select `15m` and start a session.
 - [ ] Select `25m` and start a session.
 - [ ] Select `50m` and start a session.
-- [ ] Enter a custom whole-minute duration from `1` to `180` and start a session.
-- [ ] Invalid custom values cannot be persisted or started.
-- [ ] The selected duration remains visually clear.
-- [ ] The preferred duration setting updates the start panel selection.
+- [ ] Open `Custom`, apply a whole-minute duration from `1` to `180`, and start a session.
+- [ ] Invalid custom values cannot be applied, persisted, or started.
+- [ ] Closing the custom-duration sheet without applying keeps the previously selected duration.
+- [ ] The selected preset or custom duration remains visually clear.
+- [ ] The latest valid Focus duration is restored as the selected duration after reopen.
+- [ ] Settings does not render a second duration editor.
 - [ ] Starting a session creates exactly one running session.
 
 ## Countdown Behavior

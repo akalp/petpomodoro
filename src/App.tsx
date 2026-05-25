@@ -15,7 +15,6 @@ import {
   DEFAULT_FOCUS_DURATION_MINUTES,
   displayMoodForSession,
   isPetSleeping,
-  parseFocusDurationInput,
   previewPetSleep,
 } from "./domain";
 import {
@@ -57,10 +56,11 @@ type AppSheet = "settings" | null;
 
 export function App() {
   const [activeSheet, setActiveSheet] = useState<AppSheet>(null);
-  const [customDurationDraft, setCustomDurationDraft] = useState<string | null>(
+  const [selectedDurationOverride, setSelectedDurationOverride] = useState<
+    number | null
+  >(
     null,
   );
-  const [isDurationInvalid, setIsDurationInvalid] = useState(false);
   const [notificationPermission, setNotificationPermission] =
     useState<LocalNotificationPermission>(() => getNotificationPermission());
   const [notificationNotice, setNotificationNotice] = useState<
@@ -125,10 +125,7 @@ export function App() {
 
   const persistedDuration =
     settings?.preferredDurationMinutes ?? DEFAULT_FOCUS_DURATION_MINUTES;
-  const selectedDuration =
-    customDurationDraft === null
-      ? persistedDuration
-      : (parseFocusDurationInput(customDurationDraft) ?? persistedDuration);
+  const selectedDuration = selectedDurationOverride ?? persistedDuration;
   const hasInstalledShortcut = settings?.hasInstalledShortcut ?? false;
   const hasEnabledFocusNotifications =
     settings?.hasEnabledFocusNotifications ?? false;
@@ -138,11 +135,8 @@ export function App() {
       window.navigator.userAgent,
       window.navigator.maxTouchPoints,
     );
-  const customDurationInput =
-    customDurationDraft ?? String(selectedDuration);
   const language = settings?.language ?? DEFAULT_LANGUAGE;
   const t = createTranslator(language);
-  const durationError = isDurationInvalid ? t("durationError") : null;
   const notificationCopy = useMemo(() => {
     const translate = createTranslator(language);
 
@@ -168,8 +162,7 @@ export function App() {
       : null;
 
   const setPreferredDuration = (duration: number) => {
-    setCustomDurationDraft(String(duration));
-    setIsDurationInvalid(false);
+    setSelectedDurationOverride(duration);
     void updatePreferredDuration(duration).catch(() => undefined);
   };
 
@@ -199,26 +192,6 @@ export function App() {
     setNotificationNotice(
       nextPermission === "unsupported" ? "unavailable" : "off",
     );
-  };
-
-  const handleCustomDurationChange = (value: string) => {
-    setCustomDurationDraft(value);
-    const duration = parseFocusDurationInput(value);
-
-    if (duration === null) {
-      setIsDurationInvalid(true);
-      return;
-    }
-
-    setIsDurationInvalid(false);
-  };
-
-  const commitCustomDuration = (value: string) => {
-    const duration = parseFocusDurationInput(value);
-
-    if (duration !== null) {
-      void updatePreferredDuration(duration).catch(() => undefined);
-    }
   };
 
   useEffect(() => {
@@ -436,8 +409,7 @@ export function App() {
           recentSessions: [],
         });
         clearAfterLocalDataReset();
-        setCustomDurationDraft(null);
-        setIsDurationInvalid(false);
+        setSelectedDurationOverride(null);
         setNotificationNotice(null);
         useUiStore.setState({
           error: null,
@@ -464,15 +436,11 @@ export function App() {
             ? formatCountdown(activeSession.expectedEndAt, currentTime)
             : null
         }
-        customDurationInput={customDurationInput}
         disabled={isBusy}
-        durationError={durationError}
         durations={FOCUS_DURATIONS}
         language={language}
         onAbandoned={handleAbandoned}
         onCompleted={handleCompleted}
-        onCustomDurationChange={handleCustomDurationChange}
-        onCustomDurationCommit={commitCustomDuration}
         onDurationChange={setPreferredDuration}
         onEnd={handleEnd}
         onStart={handleStart}
@@ -560,17 +528,11 @@ export function App() {
         <SettingsPanel
           disabled={isBusy || !hasHydrated}
           framed={false}
-          customDurationInput={customDurationInput}
-          durationError={durationError}
-          durations={FOCUS_DURATIONS}
           hasEnabledFocusNotifications={hasEnabledFocusNotifications}
           hasInstalledShortcut={hasInstalledShortcut}
           notificationNotice={notificationNotice}
           notificationPermission={notificationPermission}
           language={language}
-          onCustomDurationChange={handleCustomDurationChange}
-          onCustomDurationCommit={commitCustomDuration}
-          onDurationChange={setPreferredDuration}
           onFocusNotificationsChange={(isEnabled) => {
             void setFocusNotificationsEnabled(isEnabled).catch(() => undefined);
           }}
@@ -582,7 +544,6 @@ export function App() {
           onResetLocalData={handleResetLocalData}
           onShortcutInstalledChange={setShortcutInstalled}
           pet={pet}
-          selectedDuration={selectedDuration}
           showHeader={false}
           supportsIosFeatures={supportsIosFeatures}
           t={t}

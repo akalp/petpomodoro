@@ -10,17 +10,11 @@ import { Card } from "../ui/Card";
 
 interface SettingsPanelProps {
   disabled?: boolean;
-  durations: number[];
   framed?: boolean;
   hasEnabledFocusNotifications: boolean;
   hasInstalledShortcut: boolean;
   notificationNotice: "unavailable" | "off" | null;
   notificationPermission: LocalNotificationPermission;
-  customDurationInput: string;
-  durationError: string | null;
-  onCustomDurationChange: (value: string) => void;
-  onCustomDurationCommit: (value: string) => void;
-  onDurationChange: (duration: number) => void;
   onFocusNotificationsChange: (hasEnabledFocusNotifications: boolean) => void;
   onLanguageChange: (language: SupportedLanguage) => void;
   onPetNameSave: (name: string) => void;
@@ -28,7 +22,6 @@ interface SettingsPanelProps {
   onResetLocalData: () => void;
   onShortcutInstalledChange: (hasInstalledShortcut: boolean) => void;
   pet: PetState | null;
-  selectedDuration: number;
   showHeader?: boolean;
   supportsIosFeatures: boolean;
   language: SupportedLanguage;
@@ -37,17 +30,11 @@ interface SettingsPanelProps {
 
 export function SettingsPanel({
   disabled = false,
-  durations,
   framed = true,
   hasEnabledFocusNotifications,
   hasInstalledShortcut,
   notificationNotice,
   notificationPermission,
-  customDurationInput,
-  durationError,
-  onCustomDurationChange,
-  onCustomDurationCommit,
-  onDurationChange,
   onFocusNotificationsChange,
   onLanguageChange,
   onPetNameSave,
@@ -55,7 +42,6 @@ export function SettingsPanel({
   onResetLocalData,
   onShortcutInstalledChange,
   pet,
-  selectedDuration,
   showHeader = true,
   supportsIosFeatures,
   language,
@@ -140,62 +126,6 @@ export function SettingsPanel({
           </Button>
         </div>
       </form>
-
-      <div className="space-y-3">
-        <p className="text-sm font-semibold text-slate-700">
-          {t("preferredFocusTime")}
-        </p>
-        <div
-          aria-label={t("preferredDurationAria")}
-          className="grid grid-cols-4 gap-2"
-          role="group"
-        >
-          {durations.map((duration) => {
-            const isSelected = duration === selectedDuration;
-
-            return (
-              <button
-                aria-pressed={isSelected}
-                className={[
-                  "min-h-12 rounded-lg border px-2 text-sm font-semibold transition",
-                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500",
-                  isSelected
-                    ? "border-teal-600 bg-teal-600 text-white"
-                    : "border-rose-200 bg-white text-slate-700",
-                ].join(" ")}
-                disabled={disabled}
-                key={duration}
-                onClick={() => onDurationChange(duration)}
-                type="button"
-              >
-                {t("durationShort", { minutes: duration })}
-              </button>
-            );
-          })}
-        </div>
-        <label
-          className="block text-sm font-semibold text-slate-700"
-          htmlFor="settings-custom-duration"
-        >
-          {t("customMinutes")}
-        </label>
-        <input
-          aria-invalid={durationError !== null}
-          className="min-h-12 w-full rounded-lg border border-rose-200 bg-white px-4 text-base text-slate-900 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
-          disabled={disabled}
-          id="settings-custom-duration"
-          inputMode="numeric"
-          min={1}
-          max={180}
-          onBlur={(event) => onCustomDurationCommit(event.currentTarget.value)}
-          onChange={(event) => onCustomDurationChange(event.target.value)}
-          type="number"
-          value={customDurationInput}
-        />
-        {durationError ? (
-          <p className="text-sm leading-6 text-rose-700">{durationError}</p>
-        ) : null}
-      </div>
 
       {supportsIosFeatures ? (
         <>

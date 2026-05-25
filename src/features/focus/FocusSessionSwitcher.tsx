@@ -7,15 +7,11 @@ import type { SupportedLanguage, Translator } from "../../i18n";
 interface FocusSessionSwitcherProps {
   activeSession: FocusSession | null;
   countdownLabel: string | null;
-  customDurationInput: string;
   disabled: boolean;
-  durationError: string | null;
   durations: number[];
   language: SupportedLanguage;
   onAbandoned: () => void;
   onCompleted: () => void;
-  onCustomDurationChange: (value: string) => void;
-  onCustomDurationCommit: (value: string) => void;
   onDurationChange: (duration: number) => void;
   onEnd: () => void;
   onStart: (duration: number) => void;
@@ -27,15 +23,11 @@ interface FocusSessionSwitcherProps {
 export function FocusSessionSwitcher({
   activeSession,
   countdownLabel,
-  customDurationInput,
   disabled,
-  durationError,
   durations,
   language,
   onAbandoned,
   onCompleted,
-  onCustomDurationChange,
-  onCustomDurationCommit,
   onDurationChange,
   onEnd,
   onStart,
@@ -71,11 +63,7 @@ export function FocusSessionSwitcher({
   return (
     <PomodoroStartPanel
       disabled={startDisabled}
-      customDurationInput={customDurationInput}
-      durationError={durationError}
       durations={durations}
-      onCustomDurationChange={onCustomDurationChange}
-      onCustomDurationCommit={onCustomDurationCommit}
       onDurationChange={onDurationChange}
       onStart={onStart}
       selectedDuration={selectedDuration}

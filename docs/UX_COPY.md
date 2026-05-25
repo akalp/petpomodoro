@@ -53,7 +53,26 @@ Secondary options:
 
 - Maybe later
 - Change duration
-- Custom minutes
+- Custom
+
+Custom duration sheet:
+
+- Choose your focus time
+- Set a gentle focus session from 1 to 180 minutes.
+- Adjust minutes
+- Use duration
+- Cancel
+- Custom - {minutes} min
+
+Turkish:
+
+- Özel
+- Odak süreni seç
+- 1 ile 180 dakika arasında sakin bir odak oturumu ayarla.
+- Dakikayı ayarla
+- Süreyi kullan
+- Vazgeç
+- Özel - {minutes} dk
 
 ## Running Session
 
