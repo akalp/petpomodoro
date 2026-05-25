@@ -26,6 +26,7 @@ describe("Dexie repositories", () => {
     expect(createInitialPet({ now })).toMatchObject({
       id: "local-pet",
       name: "Momo",
+      customName: null,
       speciesId: "momo",
     });
   });

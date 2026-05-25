@@ -22,5 +22,8 @@ describe("PetSpeciesSelector", () => {
     expect(html).toContain("A gentle little cow who cheers for calm focus.");
     expect(html).toContain('aria-label="Choose Moowi" aria-pressed="true"');
     expect(html).toContain("Selected");
+    expect(html).toContain('class="pet-art pet-art--preview"');
+    expect(html).toContain('data-species="momo"');
+    expect(html).toContain('data-species="moowi"');
   });
 });

@@ -84,6 +84,7 @@ interface Pet {
   id: string;
   speciesId: PetSpeciesId;
   name: string;
+  customName: string | null;
   level: number;
   xp: number;
   mood: PetMood;
@@ -175,7 +176,7 @@ Initial schema:
 
 The unique `rewardLedger.sessionId` index is required. It is the persistence-level guard that prevents one Pomodoro session from rewarding the pet more than once, for completion or honest declined confirmation.
 
-Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`.
+Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`. Version 6 backfills `customName`, preserving user-supplied names while allowing an unnamed pet to display its selected species name.
 
 The feeding shop v1 uses a bundled static food catalog and does not need a new IndexedDB table. Buying food runs in a Dexie transaction that reads the current pet, applies the pure purchase function, and writes the updated pet. Failed purchases, such as insufficient coins or an unknown food id, must leave the stored pet unchanged.
 
@@ -288,7 +289,7 @@ Database tests:
 - Reward ledger enforces one reward per session.
 - Reward transaction is atomic.
 - Schema migration and settings persistence preserve existing local data.
-- Pet migration backfills `sleepStartedAt` and `speciesId`.
+- Pet migration backfills `sleepStartedAt`, `speciesId`, and optional custom-name state.
 
 Store tests:
 

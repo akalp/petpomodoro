@@ -25,6 +25,10 @@ export const PET_ALREADY_SLEEPING_ERROR = "pet_already_sleeping";
 export const PET_NOT_SLEEPING_ERROR = "pet_not_sleeping";
 export const PET_SLEEPING_CANNOT_FOCUS_ERROR = "pet_sleeping_cannot_focus";
 export const DEFAULT_PET_SPECIES_ID = "momo" satisfies PetSpeciesId;
+export const PET_DEFAULT_NAME_BY_SPECIES = {
+  momo: "Momo",
+  moowi: "Moowi",
+} satisfies Record<PetSpeciesId, string>;
 
 export interface PetStatAdjustments {
   xp?: number;
@@ -255,10 +259,17 @@ export function normalizePetState(pet: PetState): PetState {
   const happiness = clampPetStat(pet.happiness ?? 50);
   const hunger = clampPetStat(pet.hunger ?? 100);
   const energy = clampPetStat(pet.energy ?? 80);
+  const speciesId = pet.speciesId ?? DEFAULT_PET_SPECIES_ID;
+  const customName =
+    pet.customName === undefined
+      ? legacyCustomName(pet.name)
+      : pet.customName;
 
   return {
     ...pet,
-    speciesId: pet.speciesId ?? DEFAULT_PET_SPECIES_ID,
+    speciesId,
+    name: customName ?? defaultPetNameForSpecies(speciesId),
+    customName,
     coins: Math.max(0, pet.coins ?? 0),
     happiness,
     hunger,
@@ -285,8 +296,33 @@ export function changePetSpecies(
   return {
     ...pet,
     speciesId,
+    name: pet.customName ?? defaultPetNameForSpecies(speciesId),
     updatedAt: now,
   };
+}
+
+export function changePetName(
+  pet: PetState,
+  name: string,
+  now: string,
+): PetState {
+  const customName = name.trim().slice(0, 24) || null;
+  const displayName = customName ?? defaultPetNameForSpecies(pet.speciesId);
+
+  if (pet.customName === customName && pet.name === displayName) {
+    return pet;
+  }
+
+  return {
+    ...pet,
+    customName,
+    name: displayName,
+    updatedAt: now,
+  };
+}
+
+export function defaultPetNameForSpecies(speciesId: PetSpeciesId): string {
+  return PET_DEFAULT_NAME_BY_SPECIES[speciesId];
 }
 
 export function isPetSleeping(pet: PetState): boolean {
@@ -412,4 +448,8 @@ function clampHunger(hunger: number): number {
 
 function clampPetStat(value: number): number {
   return Math.min(MAX_PET_STAT, Math.max(0, value));
+}
+
+function legacyCustomName(name: string): string | null {
+  return name === defaultPetNameForSpecies(DEFAULT_PET_SPECIES_ID) ? null : name;
 }

@@ -7,6 +7,7 @@ export interface PetState {
   id: string;
   speciesId: PetSpeciesId;
   name: string;
+  customName: string | null;
   level: number;
   xp: number;
   mood: PetMood;

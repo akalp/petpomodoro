@@ -1,7 +1,7 @@
-import { Card } from "../../components/ui/Card";
 import type { PetSpeciesId, PetState } from "../../domain";
 import type { Translator } from "../../i18n";
 
+import { PetRenderer } from "./PetRenderer";
 import { AVAILABLE_PET_SPECIES } from "./petSpeciesRegistry";
 
 interface PetSpeciesSelectorProps {
@@ -18,7 +18,7 @@ export function PetSpeciesSelector({
   t,
 }: PetSpeciesSelectorProps) {
   return (
-    <Card className="space-y-4">
+    <div className="space-y-4">
       <fieldset disabled={disabled}>
         <legend className="text-lg font-semibold text-slate-950">
           {t("speciesTitle")}
@@ -35,7 +35,7 @@ export function PetSpeciesSelector({
                 aria-label={t(species.selectionLabelKey)}
                 aria-pressed={isSelected}
                 className={[
-                  "min-h-24 rounded-lg border p-4 text-left transition",
+                  "flex min-h-28 items-center gap-3 rounded-lg border p-3 text-left transition",
                   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500",
                   isSelected
                     ? "border-rose-300 bg-rose-50"
@@ -46,24 +46,34 @@ export function PetSpeciesSelector({
                 onClick={() => onSelectSpecies(species.id)}
                 type="button"
               >
-                <span className="flex items-center justify-between gap-3">
-                  <span className="font-semibold text-slate-950">
-                    {t(species.nameKey)}
-                  </span>
-                  {isSelected ? (
-                    <span className="rounded-full bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-800">
-                      {t("speciesSelected")}
-                    </span>
-                  ) : null}
+                <span className="pet-species-preview shrink-0">
+                  <PetRenderer
+                    message=""
+                    mood="calm"
+                    preview
+                    speciesId={species.id}
+                  />
                 </span>
-                <span className="mt-2 block text-sm leading-5 text-slate-600">
-                  {t(species.shortDescriptionKey)}
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-slate-950">
+                      {t(species.nameKey)}
+                    </span>
+                    {isSelected ? (
+                      <span className="rounded-full bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-800">
+                        {t("speciesSelected")}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="mt-2 block text-sm leading-5 text-slate-600">
+                    {t(species.shortDescriptionKey)}
+                  </span>
                 </span>
               </button>
             );
           })}
         </div>
       </fieldset>
-    </Card>
+    </div>
   );
 }

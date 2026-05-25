@@ -6,6 +6,7 @@ import {
   applyFocusSessionImpact,
   applyHungerDecay,
   calculateLevel,
+  changePetName,
   changePetSpecies,
   DEFAULT_PET_SPECIES_ID,
   DEFAULT_HUNGER_DECAY_PER_HOUR,
@@ -31,8 +32,24 @@ describe("pet domain logic", () => {
   it("normalizes legacy pets to Momo species", () => {
     const legacyPet = makePet();
     delete (legacyPet as Partial<typeof legacyPet>).speciesId;
+    delete (legacyPet as Partial<typeof legacyPet>).customName;
 
-    expect(normalizePetState(legacyPet).speciesId).toBe(DEFAULT_PET_SPECIES_ID);
+    expect(normalizePetState(legacyPet)).toMatchObject({
+      speciesId: DEFAULT_PET_SPECIES_ID,
+      name: "Momo",
+      customName: null,
+    });
+  });
+
+  it("uses the selected species name for a legacy unnamed Moowi pet", () => {
+    const legacyPet = makePet({ speciesId: "moowi" });
+    delete (legacyPet as Partial<typeof legacyPet>).customName;
+
+    expect(normalizePetState(legacyPet)).toMatchObject({
+      speciesId: "moowi",
+      name: "Moowi",
+      customName: null,
+    });
   });
 
   it("changes species without changing progress or pet identity", () => {
@@ -46,12 +63,37 @@ describe("pet domain logic", () => {
     expect(updated).toMatchObject({
       id: pet.id,
       speciesId: "moowi",
+      name: "Moowi",
+      customName: null,
       coins: 12,
       xp: 75,
       happiness: 82,
       updatedAt: "2026-05-22T12:30:00.000Z",
     });
     expect(pet.speciesId).toBe(DEFAULT_PET_SPECIES_ID);
+  });
+
+  it("preserves a custom name when the pet species changes", () => {
+    const pet = makePet({ name: "Sprout", customName: "Sprout" });
+
+    expect(changePetSpecies(pet, "moowi", "2026-05-22T12:30:00.000Z")).toMatchObject({
+      speciesId: "moowi",
+      name: "Sprout",
+      customName: "Sprout",
+    });
+  });
+
+  it("clears a custom name back to the species default", () => {
+    const pet = makePet({
+      speciesId: "moowi",
+      name: "Biscuit",
+      customName: "Biscuit",
+    });
+
+    expect(changePetName(pet, "  ", "2026-05-22T12:30:00.000Z")).toMatchObject({
+      name: "Moowi",
+      customName: null,
+    });
   });
 
   it("adds XP and recalculates the pet level", () => {

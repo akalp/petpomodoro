@@ -7,6 +7,7 @@ export function makePet(overrides: Partial<PetState> = {}): PetState {
     id: "pet-1",
     speciesId: "momo",
     name: "Momo",
+    customName: null,
     level: 1,
     xp: 0,
     mood: "calm",

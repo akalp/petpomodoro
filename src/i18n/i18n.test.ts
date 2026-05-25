@@ -37,6 +37,7 @@ describe("offline translations", () => {
     expect(t("speciesMoowiName")).toBe("Moowi");
     expect(t("speciesMoowiDescription")).toContain("küçük bir inek");
     expect(t("speciesMoowiSelectionLabel")).toBe("Moowi'yi seç");
+    expect(t("petNameSupport")).toContain("kendi adını");
   });
 
   it("localizes known persisted store error messages", () => {

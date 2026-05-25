@@ -1,5 +1,6 @@
 import {
   DEFAULT_PET_SPECIES_ID,
+  defaultPetNameForSpecies,
   normalizePetState,
   startPetSleep,
   wakePetFromSleep,
@@ -11,7 +12,7 @@ import {
 import { db as defaultDb, type PetPomodoroDatabase } from "./database";
 
 export const DEFAULT_PET_ID = "local-pet";
-export const DEFAULT_PET_NAME = "Momo";
+export const DEFAULT_PET_NAME = defaultPetNameForSpecies(DEFAULT_PET_SPECIES_ID);
 
 export interface CreateInitialPetInput {
   now: string;
@@ -30,6 +31,7 @@ export function createInitialPet({
     id,
     speciesId: DEFAULT_PET_SPECIES_ID,
     name,
+    customName: name === DEFAULT_PET_NAME ? null : name,
     level: 1,
     xp: 0,
     mood,

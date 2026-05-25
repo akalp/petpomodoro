@@ -5,23 +5,19 @@ import { PetDashboard } from "../../components/pet/PetDashboard";
 import type {
   PetDisplayMood,
   PetSleepSummary,
-  PetSpeciesId,
   PetState,
 } from "../../domain";
 import type { Translator } from "../../i18n";
 
 import { PetMoodShowcase } from "./PetMoodShowcase";
-import { PetSpeciesSelector } from "./PetSpeciesSelector";
 
 interface PetScreenProps {
   displayMood: PetDisplayMood | null;
   installHint: ReactNode;
   isFocusActive: boolean;
   isSleepDisabled: boolean;
-  isSpeciesSelectionDisabled: boolean;
   lastSleepSummary: PetSleepSummary | null;
   onClearSleepSummary: () => void;
-  onSelectSpecies: (speciesId: PetSpeciesId) => void;
   onStartSleep: () => void;
   onWakeSleep: () => void;
   pet: PetState | null;
@@ -34,10 +30,8 @@ export function PetScreen({
   installHint,
   isFocusActive,
   isSleepDisabled,
-  isSpeciesSelectionDisabled,
   lastSleepSummary,
   onClearSleepSummary,
-  onSelectSpecies,
   onStartSleep,
   onWakeSleep,
   pet,
@@ -68,14 +62,6 @@ export function PetScreen({
         sleepPreview={sleepPreview}
         t={t}
       />
-      {pet ? (
-        <PetSpeciesSelector
-          disabled={isSpeciesSelectionDisabled}
-          onSelectSpecies={onSelectSpecies}
-          pet={pet}
-          t={t}
-        />
-      ) : null}
     </section>
   );
 }

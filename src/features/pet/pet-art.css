@@ -12,6 +12,27 @@
   isolation: isolate;
 }
 
+.pet-species-preview {
+  position: relative;
+  display: block;
+  width: 4.5rem;
+  height: 4.8rem;
+  overflow: hidden;
+}
+
+.pet-art--preview {
+  position: absolute;
+  top: -2.65rem;
+  left: -2.5rem;
+  transform: scale(0.48);
+  transform-origin: top left;
+}
+
+.pet-art--preview .pet-art__heart,
+.pet-art--preview .pet-art__sparkles {
+  display: none;
+}
+
 .pet-art__message {
   position: absolute;
   top: 2.35rem;

@@ -488,10 +488,8 @@ export function App() {
       installHint={<InstallHint t={t} />}
       isFocusActive={isFocusActive}
       isSleepDisabled={isBusy || !hasHydrated}
-      isSpeciesSelectionDisabled={isBusy || !hasHydrated}
       lastSleepSummary={lastSleepSummary}
       onClearSleepSummary={clearLastSleepSummary}
-      onSelectSpecies={handleSpeciesSelection}
       onStartSleep={handleStartSleep}
       onWakeSleep={handleWakeSleep}
       pet={pet}
@@ -580,6 +578,7 @@ export function App() {
             void saveLanguage(nextLanguage).catch(() => undefined);
           }}
           onPetNameSave={handlePetNameSave}
+          onSelectSpecies={handleSpeciesSelection}
           onResetLocalData={handleResetLocalData}
           onShortcutInstalledChange={setShortcutInstalled}
           pet={pet}

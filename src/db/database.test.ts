@@ -61,6 +61,7 @@ describe("PetPomodoroDatabase", () => {
     delete legacyPet.lastAppOpenedAt;
     delete legacyPet.sleepStartedAt;
     delete legacyPet.speciesId;
+    delete legacyPet.customName;
 
     await legacy.open();
     await legacy.table("pets").add(legacyPet);
@@ -86,6 +87,7 @@ describe("PetPomodoroDatabase", () => {
     await expect(database.pets.get("pet-1")).resolves.toMatchObject({
       id: "pet-1",
       speciesId: "momo",
+      customName: null,
       lastAppOpenedAt: "2026-05-22T12:00:00.000Z",
       sleepStartedAt: null,
     });
@@ -94,6 +96,36 @@ describe("PetPomodoroDatabase", () => {
       honestyHeartsAwarded: 1,
     });
     expect(database.tables.map((table) => table.name)).toContain("settings");
+
+    await database.delete();
+  });
+
+  it("upgrades an unnamed saved Moowi pet to use the Moowi display name", async () => {
+    const name = "petpomodoro-custom-name-upgrade-test";
+    const legacy = new Dexie(name);
+    legacy.version(5).stores({
+      pets: "id, createdAt, updatedAt",
+      sessions: "id, status, startedAt, expectedEndAt, rewardClaimedAt",
+      rewardLedger: "id, &sessionId, petId, createdAt",
+      settings: "id, updatedAt",
+    });
+    const oldMoowi: Record<string, unknown> = {
+      ...makePet({ speciesId: "moowi" }),
+    };
+    delete oldMoowi.customName;
+
+    await legacy.open();
+    await legacy.table("pets").add(oldMoowi);
+    legacy.close();
+
+    const database = new PetPomodoroDatabase(name);
+    await database.open();
+
+    await expect(database.pets.get("pet-1")).resolves.toMatchObject({
+      speciesId: "moowi",
+      name: "Moowi",
+      customName: null,
+    });
 
     await database.delete();
   });

@@ -55,6 +55,8 @@ describe("store workflows", () => {
     expect(updated).toMatchObject({
       id: "pet-1",
       speciesId: "moowi",
+      name: "Moowi",
+      customName: null,
       coins: 9,
       xp: 64,
       streak: 2,
@@ -62,6 +64,28 @@ describe("store workflows", () => {
     });
     expect(repo.pet).toEqual(updated);
     expect(petStore.getState().pet).toEqual(updated);
+  });
+
+  it("preserves and clears a custom name independently of species selection", async () => {
+    const repo = createInMemoryRepositories({ pet: makePet() });
+    const petStore = createPetStore(repo.petDependencies);
+
+    await petStore.getState().initializePet(now);
+    await petStore.getState().renamePet("Juniper", now);
+    await petStore.getState().changeSpecies("moowi", now);
+
+    expect(repo.pet).toMatchObject({
+      speciesId: "moowi",
+      name: "Juniper",
+      customName: "Juniper",
+    });
+
+    await petStore.getState().renamePet("", now);
+    expect(repo.pet).toMatchObject({
+      speciesId: "moowi",
+      name: "Moowi",
+      customName: null,
+    });
   });
 
   it("restores an elapsed running session to awaiting confirmation without reward", async () => {

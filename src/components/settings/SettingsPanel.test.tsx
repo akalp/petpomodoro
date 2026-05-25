@@ -13,6 +13,9 @@ describe("SettingsPanel", () => {
     expect(html).toContain("Language");
     expect(html).toContain("Reset local data");
     expect(html).toContain("Pet name");
+    expect(html).toContain("Choose your pet companion");
+    expect(html).toContain('data-species="moowi"');
+    expect(html).toContain("Leave blank to use your companion");
     expect(html).not.toContain("iOS Shortcut");
     expect(html).not.toContain("Local reminders");
   });
@@ -44,6 +47,7 @@ function renderPanel(supportsIosFeatures: boolean) {
       onFocusNotificationsChange={() => undefined}
       onLanguageChange={() => undefined}
       onPetNameSave={() => undefined}
+      onSelectSpecies={() => undefined}
       onResetLocalData={() => undefined}
       onShortcutInstalledChange={() => undefined}
       pet={makePet()}

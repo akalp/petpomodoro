@@ -4,6 +4,7 @@ import {
   applyAppOpenDecay,
   applyFocusSessionImpact,
   applyHungerDecay,
+  changePetName,
   changePetSpecies,
   isPetSleeping,
   type ClaimFocusRewardResult,
@@ -280,17 +281,11 @@ export function createPetStore(
 
     renamePet: async (name, now = dependencies.now()) => {
       const pet = get().pet ?? (await get().initializePet(now));
-      const trimmedName = name.trim();
+      const nextPet = changePetName(pet, name, now);
 
-      if (!trimmedName) {
-        throw new Error("Your pet needs a small name to answer to.");
+      if (nextPet === pet) {
+        return pet;
       }
-
-      const nextPet: PetState = {
-        ...pet,
-        name: trimmedName.slice(0, 24),
-        updatedAt: now,
-      };
 
       return get().applyReward(nextPet);
     },

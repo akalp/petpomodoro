@@ -1,6 +1,8 @@
 import { useState } from "react";
 
-import type { PetState, SupportedLanguage } from "../../domain";
+import type { PetSpeciesId, PetState, SupportedLanguage } from "../../domain";
+import { PetSpeciesSelector } from "../../features/pet/PetSpeciesSelector";
+import { PET_SPECIES_REGISTRY } from "../../features/pet/petSpeciesRegistry";
 import type { Translator } from "../../i18n";
 import type { LocalNotificationPermission } from "../../pwa/notifications";
 import { Button } from "../ui/Button";
@@ -22,6 +24,7 @@ interface SettingsPanelProps {
   onFocusNotificationsChange: (hasEnabledFocusNotifications: boolean) => void;
   onLanguageChange: (language: SupportedLanguage) => void;
   onPetNameSave: (name: string) => void;
+  onSelectSpecies: (speciesId: PetSpeciesId) => void;
   onResetLocalData: () => void;
   onShortcutInstalledChange: (hasInstalledShortcut: boolean) => void;
   pet: PetState | null;
@@ -48,6 +51,7 @@ export function SettingsPanel({
   onFocusNotificationsChange,
   onLanguageChange,
   onPetNameSave,
+  onSelectSpecies,
   onResetLocalData,
   onShortcutInstalledChange,
   pet,
@@ -92,6 +96,15 @@ export function SettingsPanel({
         </select>
       </div>
 
+      {pet ? (
+        <PetSpeciesSelector
+          disabled={disabled}
+          onSelectSpecies={onSelectSpecies}
+          pet={pet}
+          t={t}
+        />
+      ) : null}
+
       <form
         className="space-y-3"
         onSubmit={(event) => {
@@ -106,16 +119,21 @@ export function SettingsPanel({
         >
           {t("petName")}
         </label>
+        <p className="text-sm leading-6 text-slate-600">
+          {t("petNameSupport")}
+        </p>
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
           <input
             className="min-h-12 rounded-lg border border-rose-200 bg-white px-4 text-base text-slate-900 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
             disabled={disabled || !pet}
             id="pet-name"
-            key={pet?.name ?? "pet-name"}
+            key={`${pet?.speciesId ?? "pet"}:${pet?.customName ?? ""}`}
             maxLength={24}
             name="petName"
-            placeholder="Momo"
-            defaultValue={pet?.name ?? ""}
+            placeholder={
+              pet ? t(PET_SPECIES_REGISTRY[pet.speciesId].nameKey) : "Momo"
+            }
+            defaultValue={pet?.customName ?? ""}
           />
           <Button disabled={disabled || !pet} type="submit" variant="secondary">
             {t("save")}

@@ -1,6 +1,9 @@
 import Dexie, { type Table } from "dexie";
 
-import { DEFAULT_PET_SPECIES_ID } from "../domain";
+import {
+  DEFAULT_PET_SPECIES_ID,
+  defaultPetNameForSpecies,
+} from "../domain";
 import type {
   AppSettings,
   FocusSession,
@@ -94,6 +97,29 @@ export class PetPomodoroDatabase extends Dexie {
           .toCollection()
           .modify((pet: Partial<PetState>) => {
             pet.speciesId ??= DEFAULT_PET_SPECIES_ID;
+          }),
+      );
+
+    this.version(6)
+      .stores({
+        pets: "id, createdAt, updatedAt",
+        sessions: "id, status, startedAt, expectedEndAt, rewardClaimedAt",
+        rewardLedger: "id, &sessionId, petId, createdAt",
+        settings: "id, updatedAt",
+      })
+      .upgrade((transaction) =>
+        transaction
+          .table("pets")
+          .toCollection()
+          .modify((pet: Partial<PetState>) => {
+            const speciesId = pet.speciesId ?? DEFAULT_PET_SPECIES_ID;
+            const legacyDefaultName = defaultPetNameForSpecies(DEFAULT_PET_SPECIES_ID);
+            if (pet.customName === undefined) {
+              pet.customName =
+                pet.name === legacyDefaultName ? null : (pet.name ?? null);
+            }
+            pet.name =
+              pet.customName ?? defaultPetNameForSpecies(speciesId);
           }),
       );
   }

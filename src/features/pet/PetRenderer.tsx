@@ -12,6 +12,7 @@ import "./pet-art.css";
 interface PetRendererProps {
   message: string;
   mood: PetDisplayMood;
+  preview?: boolean;
   renderFigure?: (figure: ReactElement) => ReactNode;
   speciesId?: PetSpeciesId;
 }
@@ -19,6 +20,7 @@ interface PetRendererProps {
 export function PetRenderer({
   message,
   mood,
+  preview = false,
   renderFigure,
   speciesId = DEFAULT_PET_SPECIES_ID,
 }: PetRendererProps) {
@@ -75,11 +77,11 @@ export function PetRenderer({
   return (
     <div
       aria-hidden="true"
-      className="pet-art"
+      className={preview ? "pet-art pet-art--preview" : "pet-art"}
       data-mood={mood}
       data-species={species.id}
     >
-      <span className="pet-art__message">{message}</span>
+      {preview ? null : <span className="pet-art__message">{message}</span>}
       <span className="pet-art__shadow" />
       {renderFigure ? renderFigure(figure) : figure}
       <span className="pet-art__paw pet-art__paw--left" />
