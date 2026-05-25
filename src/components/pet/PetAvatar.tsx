@@ -1,6 +1,10 @@
 import { motion, useReducedMotion } from "framer-motion";
 
-import type { PetDisplayMood } from "../../domain";
+import {
+  DEFAULT_PET_SPECIES_ID,
+  type PetDisplayMood,
+  type PetSpeciesId,
+} from "../../domain";
 import { PetRenderer } from "../../features/pet/PetRenderer";
 import { PET_MOOD_COPY } from "../../features/pet/petMoodPresentation";
 import { PET_MOTION_BY_MOOD } from "../../features/pet/petMotion";
@@ -8,10 +12,15 @@ import type { Translator } from "../../i18n";
 
 interface PetAvatarProps {
   mood: PetDisplayMood;
+  speciesId?: PetSpeciesId;
   t: Translator;
 }
 
-export function PetAvatar({ mood, t }: PetAvatarProps) {
+export function PetAvatar({
+  mood,
+  speciesId = DEFAULT_PET_SPECIES_ID,
+  t,
+}: PetAvatarProps) {
   const shouldReduceMotion = useReducedMotion();
   const motionProfile = PET_MOTION_BY_MOOD[mood];
 
@@ -33,6 +42,7 @@ export function PetAvatar({ mood, t }: PetAvatarProps) {
             {figure}
           </motion.span>
         )}
+        speciesId={speciesId}
       />
     </motion.div>
   );

@@ -60,6 +60,7 @@ describe("PetPomodoroDatabase", () => {
     const legacyPet: Record<string, unknown> = { ...makePet() };
     delete legacyPet.lastAppOpenedAt;
     delete legacyPet.sleepStartedAt;
+    delete legacyPet.speciesId;
 
     await legacy.open();
     await legacy.table("pets").add(legacyPet);
@@ -84,6 +85,7 @@ describe("PetPomodoroDatabase", () => {
     });
     await expect(database.pets.get("pet-1")).resolves.toMatchObject({
       id: "pet-1",
+      speciesId: "momo",
       lastAppOpenedAt: "2026-05-22T12:00:00.000Z",
       sleepStartedAt: null,
     });

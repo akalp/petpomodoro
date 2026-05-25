@@ -1,6 +1,12 @@
 import Dexie, { type Table } from "dexie";
 
-import type { AppSettings, FocusSession, PetState, RewardLedger } from "../domain";
+import { DEFAULT_PET_SPECIES_ID } from "../domain";
+import type {
+  AppSettings,
+  FocusSession,
+  PetState,
+  RewardLedger,
+} from "../domain";
 
 export const DATABASE_NAME = "petpomodoro";
 
@@ -72,6 +78,22 @@ export class PetPomodoroDatabase extends Dexie {
           .toCollection()
           .modify((pet: Partial<PetState>) => {
             pet.sleepStartedAt ??= null;
+          }),
+      );
+
+    this.version(5)
+      .stores({
+        pets: "id, createdAt, updatedAt",
+        sessions: "id, status, startedAt, expectedEndAt, rewardClaimedAt",
+        rewardLedger: "id, &sessionId, petId, createdAt",
+        settings: "id, updatedAt",
+      })
+      .upgrade((transaction) =>
+        transaction
+          .table("pets")
+          .toCollection()
+          .modify((pet: Partial<PetState>) => {
+            pet.speciesId ??= DEFAULT_PET_SPECIES_ID;
           }),
       );
   }

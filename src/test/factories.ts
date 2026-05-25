@@ -5,6 +5,7 @@ export const baseNow = "2026-05-22T12:00:00.000Z";
 export function makePet(overrides: Partial<PetState> = {}): PetState {
   return {
     id: "pet-1",
+    speciesId: "momo",
     name: "Momo",
     level: 1,
     xp: 0,

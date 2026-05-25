@@ -1,16 +1,19 @@
 import type { ReactElement, ReactNode } from "react";
 
-import type { PetDisplayMood } from "../../domain";
+import {
+  DEFAULT_PET_SPECIES_ID,
+  type PetDisplayMood,
+  type PetSpeciesId,
+} from "../../domain";
+import { PET_SPECIES_REGISTRY } from "./petSpeciesRegistry";
 
 import "./pet-art.css";
-
-const DEFAULT_PET_SPECIES_ID = "momo";
 
 interface PetRendererProps {
   message: string;
   mood: PetDisplayMood;
   renderFigure?: (figure: ReactElement) => ReactNode;
-  speciesId?: string;
+  speciesId?: PetSpeciesId;
 }
 
 export function PetRenderer({
@@ -19,6 +22,7 @@ export function PetRenderer({
   renderFigure,
   speciesId = DEFAULT_PET_SPECIES_ID,
 }: PetRendererProps) {
+  const species = PET_SPECIES_REGISTRY[speciesId];
   const figure = (
     <span className="pet-art__figure">
       <span className="pet-art__tail" />
@@ -65,7 +69,7 @@ export function PetRenderer({
       aria-hidden="true"
       className="pet-art"
       data-mood={mood}
-      data-species={speciesId}
+      data-species={species.id}
     >
       <span className="pet-art__message">{message}</span>
       <span className="pet-art__shadow" />

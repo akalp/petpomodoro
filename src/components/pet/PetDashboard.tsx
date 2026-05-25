@@ -56,7 +56,11 @@ export function PetDashboard({
         </div>
         <Badge>{t("levelValue", { level: pet.level })}</Badge>
       </div>
-      <PetAvatar mood={displayMood ?? pet.mood} t={t} />
+      <PetAvatar
+        mood={displayMood ?? pet.mood}
+        speciesId={pet.speciesId}
+        t={t}
+      />
       <PetStats displayMood={displayMood ?? pet.mood} pet={pet} t={t} />
       <PetSleepControl
         disabled={isSleepDisabled}

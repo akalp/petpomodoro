@@ -6,6 +6,7 @@ import { INSUFFICIENT_COINS_ERROR, type AppSettings } from "../domain";
 import { makePet, makeReward, makeSession } from "../test/factories";
 import { PetPomodoroDatabase } from "./database";
 import {
+  createInitialPet,
   startStoredPetSleep,
   wakeStoredPetFromSleep,
 } from "./petsRepository";
@@ -21,6 +22,14 @@ afterEach(async () => {
 });
 
 describe("Dexie repositories", () => {
+  it("creates the default pet as Momo species", () => {
+    expect(createInitialPet({ now })).toMatchObject({
+      id: "local-pet",
+      name: "Momo",
+      speciesId: "momo",
+    });
+  });
+
   it("creates and updates singleton settings", async () => {
     const database = makeDatabase("settings");
     const created = await loadOrCreateSettings(

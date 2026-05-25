@@ -1,4 +1,5 @@
 import {
+  DEFAULT_PET_SPECIES_ID,
   normalizePetState,
   startPetSleep,
   wakePetFromSleep,
@@ -27,6 +28,7 @@ export function createInitialPet({
 }: CreateInitialPetInput): PetState {
   return {
     id,
+    speciesId: DEFAULT_PET_SPECIES_ID,
     name,
     level: 1,
     xp: 0,

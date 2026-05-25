@@ -6,8 +6,10 @@ import {
   applyFocusSessionImpact,
   applyHungerDecay,
   calculateLevel,
+  DEFAULT_PET_SPECIES_ID,
   DEFAULT_HUNGER_DECAY_PER_HOUR,
   displayMoodForSession,
+  normalizePetState,
   previewPetSleep,
   startPetSleep,
   wakePetFromSleep,
@@ -23,6 +25,13 @@ describe("pet domain logic", () => {
     expect(calculateLevel(100)).toBe(2);
     expect(calculateLevel(250)).toBe(3);
     expect(calculateLevel(-20)).toBe(1);
+  });
+
+  it("normalizes legacy pets to Momo species", () => {
+    const legacyPet = makePet();
+    delete (legacyPet as Partial<typeof legacyPet>).speciesId;
+
+    expect(normalizePetState(legacyPet).speciesId).toBe(DEFAULT_PET_SPECIES_ID);
   });
 
   it("adds XP and recalculates the pet level", () => {

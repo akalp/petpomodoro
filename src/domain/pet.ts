@@ -1,5 +1,11 @@
 import { DomainError } from "./errors";
-import type { FocusSessionStatus, PetDisplayMood, PetMood, PetState } from "./types";
+import type {
+  FocusSessionStatus,
+  PetDisplayMood,
+  PetMood,
+  PetSpeciesId,
+  PetState,
+} from "./types";
 import { resolvePetMood, type PetMoodStats } from "./petMoodRules";
 
 export const XP_PER_LEVEL = 100;
@@ -18,6 +24,7 @@ export const MAX_SLEEP_HAPPINESS_GAIN = 4;
 export const PET_ALREADY_SLEEPING_ERROR = "pet_already_sleeping";
 export const PET_NOT_SLEEPING_ERROR = "pet_not_sleeping";
 export const PET_SLEEPING_CANNOT_FOCUS_ERROR = "pet_sleeping_cannot_focus";
+export const DEFAULT_PET_SPECIES_ID = "momo" satisfies PetSpeciesId;
 
 export interface PetStatAdjustments {
   xp?: number;
@@ -251,6 +258,7 @@ export function normalizePetState(pet: PetState): PetState {
 
   return {
     ...pet,
+    speciesId: pet.speciesId ?? DEFAULT_PET_SPECIES_ID,
     coins: Math.max(0, pet.coins ?? 0),
     happiness,
     hunger,
