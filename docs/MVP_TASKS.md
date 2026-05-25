@@ -2,6 +2,22 @@
 
 Each task should be small enough to review and commit separately. Keep app implementation changes out of the planning-docs commit.
 
+## Current Status
+
+The original MVP phases below are implemented in the current codebase and should be treated as acceptance coverage for regression work. New work should continue from the architecture evolution phases in `ARCHITECTURE_EVOLUTION.md`, especially keeping route navigation out of Zustand, business rules in `src/domain`, persistence in `src/db`, and UI composition in route-backed feature screens.
+
+Current implemented architecture includes:
+
+- Hash-based React Router navigation for Pet, Focus, Shop, and Journal.
+- Mobile bottom tabs and desktop side navigation from `src/app/routeRegistry.ts`.
+- Settings as a header sheet, not a primary tab.
+- Routed Shop screen with focus/sleep disabled states.
+- CSS-art pet and food visuals with typed presentation registries.
+- Priority-based pet mood rules.
+- Minimal future-ready pet `speciesId`.
+- Pet rest/sleep care flow.
+- Focus-session transition reducer/table in `src/domain/focusSessionMachine.ts`.
+
 ## Phase 0: Project Setup
 
 - Scaffold a Vite React TypeScript project.
@@ -54,13 +70,15 @@ Each task should be small enough to review and commit separately. Keep app imple
 
 ## Phase 4: Basic UI
 
-- Build the mobile-first app shell.
+- Build the mobile-first app shell with hash routes, mobile bottom tabs, and desktop side navigation.
 - Add pet home screen with name, level, XP, mood, and care stats.
 - Add primary focus session control.
 - Add preset and custom whole-minute durations from 1 to 180 minutes.
 - Add visible active session status.
 - Add empty state for no session history.
 - Add basic recent session history.
+- Add Pet, Focus, Shop, and Journal as primary app sections.
+- Keep Settings out of primary tabs.
 - Ensure touch targets are comfortable on mobile.
 - Ensure UI text does not claim timer verification.
 
@@ -89,6 +107,8 @@ Each task should be small enough to review and commit separately. Keep app imple
 - Add UI feedback for food purchases.
 - Add UI feedback for level up.
 - Add hunger, happiness, and duration-based focus care decay using local timestamps.
+- Add pet rest/sleep behavior with deterministic elapsed-time care changes.
+- Block focus and feeding while the pet is sleeping.
 - Add tests for reward idempotency through the store and database transaction.
 
 ## Phase 7: PWA Setup
@@ -106,6 +126,9 @@ Each task should be small enough to review and commit separately. Keep app imple
 ## Phase 8: Polish
 
 - Add Framer Motion transitions for pet reactions and session result states.
+- Add CSS-art pet visuals with `data-mood` and `data-species` variants.
+- Add CSS-art food visuals with `data-food` variants.
+- Add priority-based pet mood rules for future mood expansion.
 - Refine cozy visual style without reducing readability.
 - Review all copy for trust-based language.
 - Add small loading and error states.
@@ -131,5 +154,20 @@ Each task should be small enough to review and commit separately. Keep app imple
 - Test switching between English and Türkçe while offline and after reopen.
 - Test buying food with enough coins, too few coins, and full care stats.
 - Test that the feeding shop is unavailable during running and awaiting-confirmation sessions.
+- Test starting pet rest, waking the pet, and preserving rest state after reload.
+- Test that focus and feeding are blocked while the pet is sleeping.
+- Test the Pet, Focus, Shop, and Journal hash routes through bottom and side navigation.
+- Test that Settings opens from the header and is not a primary tab.
 - Test installed iOS Home Screen behavior.
 - Test that no UI copy claims native timer verification.
+
+## Phase 10: Architecture Evolution Maintenance
+
+Use `docs/ARCHITECTURE_EVOLUTION.md` as the canonical direction for post-MVP cleanup and future features.
+
+- Keep `App.tsx` moving toward a composition root by extracting bootstrap, notification, overlay, and feature wiring when those changes can stay small.
+- Keep route metadata centralized in `src/app/routeRegistry.ts`.
+- Keep future `/games` and `/settings` paths out of primary tabs until real product scope exists.
+- Prefer registries/config maps for UI variants such as pet moods, species, food presentation, route icons, and future mini-games.
+- Avoid adding backend, auth, cloud sync, accounts, or network-dependent core flows.
+- Run `npm run lint`, `npm test`, and `npm run build` before a release candidate or any substantial refactor.

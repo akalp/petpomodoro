@@ -6,7 +6,8 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 
 ## Included
 
-- One local pet with name, level, XP, mood, and care stats.
+- One local pet with name, species id, level, XP, mood, coins, streak, honesty hearts, and care stats.
+- CSS-art pet presentation with care, working, and sleeping display moods.
 - Focus durations for 5, 15, 25, and 50 minutes, plus custom whole-minute durations from 1 to 180 minutes.
 - Local session states: `idle`, `running`, `awaiting_confirmation`, `completed`, and `abandoned`.
 - Trust-based confirmation after the planned focus window:
@@ -16,6 +17,10 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 - Multi-stat completion rewards with idempotent reward protection.
 - Duration-based focus care impact and base focus coins for elapsed work time.
 - Neutral abandoned-session handling: early cancellation grants no completion reward, while honestly declining after the planned window grants one small honesty reward.
+- Local pet rest/sleep behavior that can restore energy and blocks focus or feeding until the pet wakes.
+- Hash-routed Pet, Focus, Shop, and Journal screens with mobile bottom tabs and desktop side navigation.
+- Header Settings sheet kept outside primary navigation.
+- Local snack shop with CSS-art food visuals and disabled states for focus, sleep, and insufficient coins.
 - Recent session history.
 - IndexedDB-backed settings for pet name, preferred focus duration, Shortcut preference, reminders, and resetting local data.
 - PWA manifest, app icons, service worker precaching, and offline app-shell support after first load.
@@ -23,6 +28,7 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 - Optional iOS Shortcut launch for starting a native timer with the selected duration.
 - Optional local notification reminders while the PWA is allowed to keep running.
 - Care stats, hunger and happiness decay, streak tracking, and honesty hearts.
+- Bundled English and Türkçe interface copy with local language persistence.
 
 ## Not Included
 
@@ -32,6 +38,8 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 - Social features, leaderboards, subscriptions, or paid features.
 - Native iOS app functionality.
 - Native timer verification or monitoring.
+- Multi-pet selection, pet accounts, or cross-device pet profiles.
+- Mini-games or a Games tab.
 
 ## Trust-Based Completion
 
@@ -63,6 +71,7 @@ Use the preview build for browser and PWA checks. Use a real iPhone Safari sessi
 - Local notification reminders are best-effort and are not Web Push or a closed-app delivery guarantee.
 - This MVP has no export or backup flow for local data.
 - The database upgrades in place so existing pets, sessions, rewards, and migrated settings remain on the device.
+- The app uses hash routes for static hosting and offline PWA resilience.
 
 ## Deployment Notes
 

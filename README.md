@@ -25,13 +25,14 @@ The tone should be cozy, trusting, and non-accusatory. The user is rewarded for 
 - React for UI
 - TypeScript for type safety
 - Tailwind CSS for mobile-first styling
+- React Router for hash-based app navigation
 - Zustand for client state orchestration
 - Dexie and IndexedDB for local persistence
 - Framer Motion for cozy UI motion
 - vite-plugin-pwa for service worker and installability
 - Vitest for domain and integration tests
 
-Dependencies should not be installed until the project setup phase begins.
+Use the committed `package-lock.json` for dependency installs.
 
 ## Local Development
 
@@ -90,7 +91,16 @@ whose certificate is trusted on the device.
 
 ## Local-First Architecture
 
-PetPomodoro will store all product data in IndexedDB on the user's device. React components should remain UI-focused. Business logic should live in pure functions under `src/domain` later, persistence should be isolated under `src/db`, and Zustand stores should coordinate UI state, domain actions, and database reads or writes.
+PetPomodoro stores all product data in IndexedDB on the user's device. React components remain UI-focused. Business logic lives in pure functions under `src/domain`, persistence is isolated under `src/db`, and Zustand stores coordinate UI state, domain actions, and database reads or writes.
+
+Primary navigation uses hash-based React Router routes so static hosting, refreshes, iOS Home Screen launches, and offline app-shell fallback stay simple. The current primary routes are:
+
+- `#/pet`
+- `#/focus`
+- `#/shop`
+- `#/journal`
+
+Settings are available from the header as a sheet, not as a primary tab. The mobile shell uses a bottom tab bar; wider viewports use a side navigation rail driven by the same route registry.
 
 The app shell should be cached by the service worker so the installed PWA can open offline after first load. Local data should remain available without any network request.
 
@@ -98,37 +108,37 @@ If IndexedDB is unavailable or blocked, the app should show a local-storage erro
 
 ## Development Approach
 
-Development should proceed in small, reviewable steps:
+Development proceeds in small, reviewable steps. The MVP foundation is now implemented across:
 
-1. Create planning documents.
-2. Scaffold the Vite, React, and TypeScript app.
-3. Add Tailwind CSS, test tooling, and baseline scripts.
-4. Implement domain models and pure state transition tests.
-5. Add Dexie persistence and repository tests.
-6. Add Zustand stores for hydration and session actions.
-7. Build the mobile-first UI.
-8. Wire the Pomodoro flow and honesty confirmation.
-9. Add pet rewards with idempotency protection.
-10. Configure PWA behavior and offline support.
-11. Polish motion, copy, and iOS Home Screen behavior.
-12. Run manual QA on desktop and iOS.
+1. Vite, React, TypeScript, Tailwind CSS, Vitest, and ESLint setup.
+2. Pure domain models, pet care rules, shop rules, and focus-session transition reducer.
+3. Dexie repositories and IndexedDB schema migrations.
+4. Zustand stores for hydration, pet care, focus sessions, settings, rewards, and reset workflows.
+5. Hash-router app shell with Pet, Focus, Shop, and Journal routes.
+6. Mobile bottom navigation and desktop side navigation.
+7. CSS-art pet and food presentation registries.
+8. PWA manifest, app icons, service worker precaching, install hints, Shortcut convenience, and best-effort local reminders.
+
+Future changes should continue following `docs/MVP_TASKS.md` and the architecture direction in `docs/ARCHITECTURE_EVOLUTION.md`.
 
 ## Initial MVP Scope
 
 The MVP should include:
 
-- One local pet with level, XP, mood, and care stats.
+- One local pet with name, level, XP, species id, mood, coins, streak, honesty hearts, rest state, and care stats.
 - Preset focus durations plus a custom 1 to 180 minute option, defaulting to 25 minutes.
 - A local session lifecycle: idle, running, awaiting confirmation, completed, abandoned.
 - A trust-based completion prompt after the expected end time.
 - Multi-stat completion rewards, duration-based focus care impact, and hunger decay between visits.
 - A local feeding shop where focus coins can buy food that immediately improves hunger, energy, and happiness.
+- A local rest flow where the pet can sleep to recover energy; focus and feeding wait until the pet wakes.
 - An honesty-heart reward only when the user declines completion from the confirmation prompt; ending a running session early gives no completion reward, but elapsed focus care impact and base coins still apply.
 - Idempotent rewards so the same session cannot reward the pet twice.
 - Local session history and local-only shop purchases.
 - Offline support after first load.
 - Bundled English and Türkçe interface languages with an on-device saved preference.
 - Mobile-first UI optimized for iOS Home Screen usage.
+- Hash-based Pet, Focus, Shop, and Journal routes with mobile bottom tabs and desktop side navigation.
 - Optional native-timer Shortcut launch and best-effort local reminders as convenience features only.
 
 The MVP should not include backend services, auth, cloud sync, social features, cross-device recovery, or any claim that PetPomodoro can verify a native iOS timer.

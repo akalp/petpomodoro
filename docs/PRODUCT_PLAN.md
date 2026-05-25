@@ -21,8 +21,8 @@ The first version should be optimized for one-handed mobile use and iOS Home Scr
 ## Core Loop
 
 1. The user opens PetPomodoro.
-2. The user sees their pet and current progress.
-3. The user starts a preset or custom whole-minute focus session from 1 to 180 minutes, defaulting to 25 minutes.
+2. The user lands on the Pet tab and sees their pet, current progress, care stats, and rest state.
+3. The user moves to the Focus tab and starts a preset or custom whole-minute focus session from 1 to 180 minutes, defaulting to 25 minutes.
 4. The app records `startedAt` and `expectedEndAt` locally.
 5. The user may leave the app and use the native iOS timer, a Shortcut, or another reminder method.
 6. When the user returns after the expected end time, PetPomodoro asks:
@@ -31,15 +31,18 @@ The first version should be optimized for one-handed mobile use and iOS Home Scr
 
 7. If the user confirms, the session is completed and the pet receives XP once.
 8. If the user selects "Not this time", the session is abandoned without punishment and receives one small honesty-heart reward.
-9. The user can spend earned coins on food that immediately helps the pet's hunger, happiness, and energy.
-10. The user can start another session when ready.
+9. The user can spend earned coins in the Shop tab on food that immediately helps the pet's hunger, happiness, and energy.
+10. The user can let the pet rest to recover energy when no focus session is active.
+11. The user can review recent sessions in the Journal tab and start another session when ready.
 
 Ending a running session before it reaches confirmation abandons it without a completion reward. Elapsed focus care impact and base focus coins still apply because the pet spent that time working with the user.
 
 ## MVP Features
 
 - Single local pet with name, level, XP, mood, coins, care stats, streak, honesty hearts, and timestamps.
+- Single default pet species id for the local pet, with future-ready species presentation metadata but no multi-pet UI.
 - Working display mood and focused face while an active session is running, without changing the saved care mood.
+- Sleeping display mood while the pet is resting, with focus and feeding blocked until wake.
 - Pomodoro session creation with preset durations and custom whole-minute durations from 1 to 180 minutes.
 - Session states: idle, running, awaiting confirmation, completed, abandoned.
 - Local time-based transition from running to awaiting confirmation.
@@ -49,9 +52,12 @@ Ending a running session before it reaches confirmation abandons it without a co
 - Multi-stat reward application for completed sessions and a small honesty reward for declined confirmation.
 - Duration-based focus care impact and base focus coins for elapsed focus time.
 - A local feeding shop with four foods, each with a different coin cost and care-stat impact.
+- A local pet rest flow that restores energy over elapsed local time and may affect hunger and happiness.
 - Idempotent reward protection per session.
 - Hunger decay based on locally stored timestamps.
 - Local session history for recent completed and abandoned sessions.
+- Hash-based Pet, Focus, Shop, and Journal routes with a mobile bottom tab bar and desktop side navigation.
+- Settings available from the header, not as a primary tab.
 - Offline-capable installed PWA after first load.
 - English and Türkçe interface copy bundled in the app, with language choice stored locally.
 - Cozy mobile-first interface and copy.

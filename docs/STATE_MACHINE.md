@@ -1,5 +1,7 @@
 # Pomodoro Session State Machine
 
+The focus-session workflow is represented in code by pure session functions and the transition reducer/table in `src/domain/focusSessionMachine.ts`. Pet care state, display mood, feeding, and rest/sleep are separate domain concerns and must not add hidden Pomodoro transitions.
+
 ## States
 
 ### `idle`
@@ -148,7 +150,22 @@ Reward logic should:
 
 Feeding does not change the Pomodoro session state. Food purchases are local pet-care actions that spend coins and immediately adjust hunger, happiness, and energy.
 
-The shop should be unavailable while a session is `running` or `awaiting_confirmation` so the active focus and confirmation flow remains clear. Once the session is terminal or there is no active session, feeding can resume without changing historical session data.
+The Shop route can remain navigable while a session is `running` or `awaiting_confirmation`, but buying food should be unavailable so the active focus and confirmation flow remains clear. Once the session is terminal or there is no active session, feeding can resume without changing historical session data.
+
+Feeding is also unavailable while the pet is sleeping. Waking the pet first is a pet-care action, not a Pomodoro transition.
+
+## Pet Rest/Sleep
+
+Pet rest is separate from the Pomodoro session state machine.
+
+Rules:
+
+- Starting rest records `sleepStartedAt` on the local pet.
+- A sleeping pet displays the `sleeping` display mood.
+- Focus sessions cannot start while the pet is sleeping.
+- Food purchases cannot be made while the pet is sleeping.
+- Waking the pet computes elapsed local time, restores energy, applies hunger change, may adjust happiness, clears `sleepStartedAt`, and keeps the Pomodoro session state unchanged.
+- Rest must not claim to verify focus work, complete a focus session, or grant a Pomodoro reward.
 
 ## Duplicate Reward Prevention
 

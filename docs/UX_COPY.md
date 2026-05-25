@@ -14,6 +14,25 @@
 - Both languages must keep the same trust-based, shame-free meaning.
 - Language selection is saved locally on the device and must continue to work offline.
 
+## Navigation
+
+Primary tabs:
+
+- Pet / Dost
+- Focus / Odak
+- Shop / Dükkan
+- Journal / Günlük
+
+Settings:
+
+- Settings / Ayarlar
+- Preferences for this device. / Bu cihaz için tercihler.
+
+Guidance:
+
+- Settings should feel like local device preferences, not an account area.
+- Do not add a visible Games tab until there is real playable content.
+
 ## Starting A Focus Session
 
 Primary:
@@ -54,6 +73,7 @@ Status labels:
 - Expected finish
 - In progress
 - Mood: Working / Odaklanıyor
+- Mood: Sleeping / Uyuyor
 - Mood: Hungry / Aç
 - Mood: Tired / Yorgun
 - Mood: Sad / Üzgün
@@ -61,6 +81,7 @@ Status labels:
 Pet reaction:
 
 - Show a focused working face only while the session status is `running`.
+- Show a sleeping face while the pet is resting.
 
 ## Pet Speech Bubble
 
@@ -75,6 +96,51 @@ user to choose or write pet messages stored only on their device.
 Action:
 
 - End this session
+
+## Pet Rest
+
+Primary:
+
+- Rest time
+
+Supporting:
+
+- A quiet nap helps {pet} recover energy.
+- {pet} is resting softly.
+- Rest waits until this focus session is finished.
+- {pet} is resting. Wake them before starting focus.
+
+Actions and labels:
+
+- Let {pet} rest
+- Wake {pet}
+- Resting for {duration}
+- Projected energy {energy}
+- Energy
+- Hunger
+- Happiness
+
+Result:
+
+- {pet} had a good rest.
+- Energy {energy}, hunger {hunger}, happiness {happiness}.
+
+Turkish:
+
+- Dinlenme zamanı
+- Sessiz bir uyku {pet} için enerji toplar.
+- {pet} usulca dinleniyor.
+- Dinlenme bu odak oturumu bitene kadar bekler.
+- {pet} dinleniyor. Odağa başlamadan önce uyandır.
+- {pet} dinlensin
+- {pet} uyansın
+- {duration} dinlendi
+- Beklenen enerji {energy}
+- Enerji
+- Tokluk
+- Mutluluk
+- {pet} güzelce dinlendi.
+- Enerji {energy}, tokluk {hunger}, mutluluk {happiness}.
 
 ## Session Ready For Confirmation
 
@@ -196,6 +262,7 @@ Supporting:
 
 - Spend focus coins on a small bite for your pet.
 - Snacks wait until this focus session is finished.
+- Snacks wait until your pet wakes up.
 
 Food:
 
@@ -217,6 +284,7 @@ Turkish:
 - Dost atıştırmalıkları
 - Odak jetonlarını dostun için küçük bir lokmaya harca.
 - Atıştırmalıklar bu odak oturumu bitene kadar bekler.
+- Atıştırmalıklar dostun uyanana kadar bekler.
 - Besle
 - Daha çok jeton gerekli
 - {coins} jeton

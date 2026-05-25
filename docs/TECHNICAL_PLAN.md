@@ -2,59 +2,87 @@
 
 ## Architecture Overview
 
-PetPomodoro should use a local-first frontend architecture:
+PetPomodoro uses a local-first frontend architecture:
 
 - React renders the UI and handles interaction events.
+- React Router uses hash-based routes for primary navigation.
 - Zustand stores coordinate app state, hydration, and async workflows.
-- Domain functions in `src/domain` implement session transitions, pet care stats, XP, level logic, hunger decay, feeding purchases, and reward idempotency checks.
+- Domain functions in `src/domain` implement session transitions, pet care stats, XP, level logic, hunger and app-open decay, rest/sleep care, feeding purchases, and reward idempotency checks.
 - Dexie repositories in `src/db` isolate IndexedDB reads, writes, transactions, and schema versioning.
 - PWA configuration handles app shell caching, install metadata, and offline fallback.
 
 React components should not contain business rules for reward application or state transitions. They should call store actions, and store actions should call domain functions and persistence functions.
 
-## Future Folder Structure
+Primary screen navigation is route state, not Zustand state. Short-lived overlays such as rewards and settings can remain component or UI-store state.
+
+## Current Folder Structure
 
 ```text
 src/
+  app/
+    AppRoutes.tsx
+    AppShell.tsx
+    DesktopSideNav.tsx
+    MobileBottomTabBar.tsx
+    routeRegistry.ts
   components/
-    pet/
-    session/
     layout/
+    pet/
+    pwa/
+    session/
+    settings/
+    ui/
   db/
     database.ts
     petsRepository.ts
     sessionsRepository.ts
     rewardsRepository.ts
+    settingsRepository.ts
+    shopRepository.ts
   domain/
+    focusSessionMachine.ts
+    petMoodRules.ts
     pet.ts
     rewards.ts
     sessions.ts
-    stateMachine.ts
-  routes/
-    HomeRoute.tsx
-    HistoryRoute.tsx
-  stores/
-    appStore.ts
-    petStore.ts
-    sessionStore.ts
+    settings.ts
+    shop.ts
+  features/
+    focus/
+    journal/
+    pet/
+    shop/
+  i18n/
+    index.ts
   pwa/
     installHints.ts
+    notifications.ts
+    shortcuts.ts
+  routes/
+    routePaths.ts
+  stores/
+    petStore.ts
+    pomodoroStore.ts
+    settingsStore.ts
+    uiStore.ts
   test/
     factories.ts
 ```
 
-This structure may be adjusted during implementation, but the boundaries should remain: domain logic is pure, persistence is isolated, and UI stays mobile-first.
+The boundaries should remain: domain logic is pure, persistence is isolated, route state owns navigation, Zustand stores orchestrate local data workflows, and UI stays mobile-first.
 
 ## Data Models
 
-Planned TypeScript model shapes:
+Current TypeScript model shapes:
 
 ```ts
 type PetMood = "calm" | "happy" | "hungry" | "tired" | "sad";
-type PetDisplayMood = PetMood | "working";
+type PetDisplayMood = PetMood | "working" | "sleeping";
+type PetSpeciesId = "momo";
 
 interface Pet {
   id: string;
+  speciesId: PetSpeciesId;
   name: string;
   level: number;
   xp: number;
@@ -65,6 +93,7 @@ interface Pet {
   energy: number;
   streak: number;
   honestyHearts: number;
+  sleepStartedAt: string | null;
   lastHungerUpdatedAt: string;
   lastAppOpenedAt: string;
   createdAt: string;
@@ -129,7 +158,7 @@ interface FoodItem {
 }
 ```
 
-`PetDisplayMood` is derived for rendering only: a `running` session displays `working`, while the persisted `Pet.mood` remains derived from care stats.
+`PetDisplayMood` is derived for rendering only: a `running` session displays `working`, a resting pet displays `sleeping`, and the persisted `Pet.mood` remains derived from care stats.
 
 Implementation should store dates as ISO strings for IndexedDB portability and straightforward test assertions.
 
@@ -146,9 +175,11 @@ Initial schema:
 
 The unique `rewardLedger.sessionId` index is required. It is the persistence-level guard that prevents one Pomodoro session from rewarding the pet more than once, for completion or honest declined confirmation.
 
-Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`.
+Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`.
 
 The feeding shop v1 uses a bundled static food catalog and does not need a new IndexedDB table. Buying food runs in a Dexie transaction that reads the current pet, applies the pure purchase function, and writes the updated pet. Failed purchases, such as insufficient coins or an unknown food id, must leave the stored pet unchanged.
+
+Pet rest/sleep uses fields on the pet record and does not need a separate table in the MVP. Starting rest records `sleepStartedAt`; waking computes elapsed local time, restores energy, applies hunger change, updates happiness where applicable, and clears `sleepStartedAt`.
 
 Reward application should happen in a Dexie transaction that:
 
@@ -174,6 +205,7 @@ Use small stores or slices with clear responsibilities:
   - pet creation for first launch
   - pet updates after rewards
   - immediate food purchases and the latest purchase summary
+  - pet rest start, wake, preview, and latest rest summary
 - Session state:
   - active session
   - session history summary
@@ -190,6 +222,18 @@ Use small stores or slices with clear responsibilities:
 
 Store actions may be async, but all transition decisions should be delegated to pure domain functions.
 
+Primary route and active-tab state should be derived from React Router and `src/app/routeRegistry.ts`. Do not add a Zustand navigation store for tabs.
+
+## Navigation Requirements
+
+- Use `HashRouter`.
+- Route `/` to `/pet`.
+- Keep the current primary routes as `/pet`, `/focus`, `/shop`, and `/journal`.
+- Keep `/home` as a legacy redirect to `/focus`.
+- Drive mobile bottom tabs and desktop side navigation from `src/app/routeRegistry.ts`.
+- Keep settings out of primary tabs; the current implementation uses a header sheet.
+- Keep `/games` and `/settings` as future route paths only until real product decisions require them.
+
 ## PWA Requirements
 
 The app should meet these installable PWA requirements:
@@ -198,7 +242,7 @@ The app should meet these installable PWA requirements:
 - Mobile viewport metadata.
 - Apple-specific metadata where useful, such as `apple-mobile-web-app-capable`.
 - App shell precaching via `vite-plugin-pwa`.
-- Offline fallback that can load the main app route after first load.
+- Offline fallback that can load the app shell after first load, including hash routes.
 - No network dependency for core user flows after initial installation.
 - Icons sized for iOS Home Screen and general PWA installability.
 
@@ -231,6 +275,10 @@ Domain tests:
 - An honestly declined confirmation can receive one idempotent honesty reward.
 - Completed sessions cannot receive duplicate rewards.
 - XP and level calculations are deterministic.
+- Pet mood rules preserve priority thresholds.
+- Pet rest start and wake rules update energy, hunger, happiness, and sleeping state deterministically.
+- Feeding is rejected while the pet is sleeping.
+- Starting focus is rejected while the pet is sleeping.
 
 Database tests:
 
@@ -240,6 +288,7 @@ Database tests:
 - Reward ledger enforces one reward per session.
 - Reward transaction is atomic.
 - Schema migration and settings persistence preserve existing local data.
+- Pet migration backfills `sleepStartedAt` and `speciesId`.
 
 Store tests:
 
@@ -249,6 +298,14 @@ Store tests:
 - Cancelling a running session applies elapsed focus care impact and base focus coins, but no completion reward or reward-ledger row.
 - Declining confirmation applies one honesty reward.
 - Hydration migrates and restores settings.
+- Pet sleep state persists through hydration.
+- Buying food and starting focus surface sleeping-state errors.
+
+UI and routing tests:
+
+- Route registry exposes Pet, Focus, Shop, and Journal as primary tabs in order.
+- Settings and Games are not primary tabs.
+- Mobile and desktop navigation derive active state from the current route.
 
 Manual QA:
 
@@ -268,6 +325,6 @@ The app should cache the static app shell after first load. Product data and dev
 3. Load the latest active session.
 4. Compare `expectedEndAt` with the current local time.
 5. Move eligible running sessions to awaiting confirmation.
-6. Render the appropriate screen.
+6. Render the current hash route, defaulting to the Pet screen.
 
 English and Türkçe messages must be included in the static app bundle; changing or restoring language cannot depend on a network request. If the app is offline, all MVP flows should continue to work. If IndexedDB is unavailable or blocked, the app should show a clear local storage error rather than pretending progress is saved.

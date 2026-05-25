@@ -15,14 +15,26 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] The app loads without console errors.
 - [ ] The app shell uses the mobile-first layout at narrow widths.
 - [ ] The app shows the PetPomodoro title and gentle companion copy.
+- [ ] The default route lands on the Pet screen through `#/pet`.
 - [ ] The UI does not mention accounts, cloud sync, backend services, or verification of native timers.
 - [ ] Loading states are brief and readable if IndexedDB is slow.
 - [ ] If IndexedDB is blocked or unavailable, the app shows a friendly local-storage error and does not pretend progress is saved.
 
+## Navigation
+
+- [ ] Mobile width shows bottom tabs for Pet, Focus, Shop, and Journal.
+- [ ] Tablet or desktop width shows side navigation for the same primary tabs.
+- [ ] Navigating to `#/pet`, `#/focus`, `#/shop`, and `#/journal` renders the expected screen.
+- [ ] Active tab state follows the current hash route after click, refresh, and direct launch.
+- [ ] `#/home` redirects to `#/focus`.
+- [ ] Unknown hash routes redirect to `#/pet`.
+- [ ] Settings opens from the header and is not shown as a primary tab.
+- [ ] No empty Games tab or placeholder screen is visible.
+
 ## Pet Initialization
 
 - [ ] A default local pet is created on first load.
-- [ ] The pet has a name, level, mood, XP, and care stats.
+- [ ] The pet has a name, species id, level, mood, XP, coins, honesty hearts, and care stats.
 - [ ] Reloading the app preserves the same pet from IndexedDB.
 - [ ] Updating the pet name in Settings persists after reload.
 - [ ] Empty-state copy remains cozy and shame-free.
@@ -43,7 +55,7 @@ Use this checklist before the first MVP deployment and again after every release
 
 - [ ] Running sessions show `In progress`.
 - [ ] While a session is `running`, the pet shows its focused working face and `Working` / `Odaklanıyor` mood label.
-- [ ] After a running session ends or awaits confirmation, the pet returns to its persisted care-derived mood.
+- [ ] After a running session ends or awaits confirmation, the pet returns to its persisted care-derived mood unless it is sleeping.
 - [ ] The countdown decreases while the app is open.
 - [ ] The expected finish time matches the selected duration.
 - [ ] Refreshing before `expectedEndAt` keeps the session running.
@@ -144,12 +156,23 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Hunger remains within valid bounds.
 - [ ] Decay does not create duplicate rewards or sessions.
 
+## Pet Rest
+
+- [ ] Start pet rest from the Pet screen when no focus session is active.
+- [ ] The pet shows the sleeping display mood and `Sleeping` / `Uyuyor` mood label.
+- [ ] Reload while the pet is sleeping and confirm `sleepStartedAt` persists.
+- [ ] Wake the pet and confirm energy increases according to elapsed local time.
+- [ ] Confirm hunger change and happiness change remain within valid bounds.
+- [ ] Confirm focus cannot start while the pet is sleeping.
+- [ ] Confirm food cannot be purchased while the pet is sleeping.
+- [ ] Confirm rest cannot complete or reward a Pomodoro session.
+
 ## Reset Local Data
 
 - [ ] Open Settings.
 - [ ] Confirm the reset checkbox enables the reset button.
 - [ ] Cancel the browser confirmation and verify data remains.
-- [ ] Confirm reset and verify pet, sessions, rewards, duration, Shortcut preference, and reminder preference reset locally.
+- [ ] Confirm reset and verify pet, sleep state, sessions, rewards, duration, language, Shortcut preference, and reminder preference reset locally.
 - [ ] Reload after reset and verify a fresh pet is initialized.
 
 ## Settings Migration
@@ -177,6 +200,7 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Switch the browser or device offline.
 - [ ] Reload the app.
 - [ ] The app shell opens offline.
+- [ ] Pet, Focus, Shop, and Journal hash routes remain reachable offline.
 - [ ] Existing local pet and session data remain available.
 - [ ] Switch between English and Türkçe while offline, reload, and confirm the selected language remains available.
 - [ ] No copy suggests offline support changes native timer behavior.
@@ -187,7 +211,7 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Confirm the install hint appears in Safari and not in standalone mode.
 - [ ] Use Share > Add to Home Screen.
 - [ ] Launch the installed Home Screen app.
-- [ ] The app opens at `/` and uses the installed icon and title.
+- [ ] The app opens to the Pet route from `/` and uses the installed icon and title.
 - [ ] Local IndexedDB data persists across standalone launches.
 
 ## Standalone Display Mode
