@@ -8,4 +8,5 @@ export const PET_MOOD_COPY = {
   tired: "moodTired",
   sad: "moodSad",
   working: "moodWorking",
+  sleeping: "moodSleeping",
 } satisfies Record<PetDisplayMood, MessageKey>;

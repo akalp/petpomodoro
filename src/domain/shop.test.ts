@@ -6,6 +6,7 @@ import {
   buyFoodForPet,
   FOOD_NOT_FOUND_ERROR,
   INSUFFICIENT_COINS_ERROR,
+  PET_SLEEPING_CANNOT_EAT_ERROR,
 } from "./shop";
 
 const now = "2026-05-22T13:00:00.000Z";
@@ -73,5 +74,17 @@ describe("feeding shop domain logic", () => {
     expect(() => buyFoodForPet(makePet({ coins: 10 }), "star-cake", now)).toThrow(
       FOOD_NOT_FOUND_ERROR,
     );
+  });
+
+  it("rejects purchases while the pet is sleeping", () => {
+    const pet = makePet({
+      coins: 10,
+      sleepStartedAt: "2026-05-22T12:30:00.000Z",
+    });
+
+    expect(() => buyFoodForPet(pet, "moon-milk", now)).toThrow(
+      PET_SLEEPING_CANNOT_EAT_ERROR,
+    );
+    expect(pet.coins).toBe(10);
   });
 });

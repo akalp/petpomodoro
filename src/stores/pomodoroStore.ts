@@ -4,6 +4,9 @@ import {
   abandonFocusSession,
   confirmFocusSession,
   createRunningSession,
+  DomainError,
+  isPetSleeping,
+  PET_SLEEPING_CANNOT_FOCUS_ERROR,
   moveRunningSessionToAwaitingConfirmation,
   shouldPersistFocusSessionImpact,
   type FocusSession,
@@ -26,7 +29,7 @@ export interface PomodoroStoreDependencies {
   listRecentFocusSessions: typeof listRecentFocusSessions;
   updateFocusSession: typeof updateFocusSession;
   petStore: UseBoundStore<
-    StoreApi<Pick<PetStoreState, "applyFocusImpact" | "applySessionReward">>
+    StoreApi<Pick<PetStoreState, "applyFocusImpact" | "applySessionReward" | "pet">>
   >;
   now: () => string;
   createId: () => string;
@@ -121,6 +124,12 @@ export function createPomodoroStore(
       set({ isLoading: true, error: null });
 
       try {
+        const pet = dependencies.petStore.getState().pet;
+
+        if (pet && isPetSleeping(pet)) {
+          throw new DomainError(PET_SLEEPING_CANNOT_FOCUS_ERROR);
+        }
+
         const currentStatus = activeStatus(get().activeSession);
         const session = createRunningSession({
           id: dependencies.createId(),

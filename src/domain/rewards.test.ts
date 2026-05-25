@@ -4,8 +4,11 @@ import {
   claimFocusReward,
   claimSessionReward,
   FOCUS_SESSION_COIN_REWARD,
+  FOCUS_SESSION_HAPPINESS_REWARD,
   FOCUS_SESSION_XP_REWARD,
   HONESTY_HEART_REWARD,
+  HONESTY_HAPPINESS_REWARD,
+  HONESTY_ENERGY_REWARD,
 } from "./rewards";
 import { makePet, makeReward, makeSession } from "../test/factories";
 
@@ -29,12 +32,12 @@ describe("focus rewards", () => {
       xp: 90 + FOCUS_SESSION_XP_REWARD,
       level: 2,
       coins: FOCUS_SESSION_COIN_REWARD,
-      happiness: 62,
+      happiness: 50 + FOCUS_SESSION_HAPPINESS_REWARD,
       hunger: 100,
       energy: 80,
       streak: 1,
       honestyHearts: 0,
-      mood: "happy",
+      mood: "calm",
       updatedAt: "2026-05-22T12:31:00.000Z",
     });
     expect(result.session.rewardClaimedAt).toBe("2026-05-22T12:31:00.000Z");
@@ -45,7 +48,7 @@ describe("focus rewards", () => {
       rewardType: "focus_completed",
       xpAwarded: FOCUS_SESSION_XP_REWARD,
       coinsAwarded: FOCUS_SESSION_COIN_REWARD,
-      happinessAwarded: 12,
+      happinessAwarded: FOCUS_SESSION_HAPPINESS_REWARD,
       hungerAwarded: 0,
       energyAwarded: 0,
       streakAwarded: 1,
@@ -77,14 +80,16 @@ describe("focus rewards", () => {
     expect(result.pet).toMatchObject({
       xp: 0,
       coins: 0,
-      happiness: 54,
-      energy: 85,
+      happiness: 50 + HONESTY_HAPPINESS_REWARD,
+      energy: 80 + HONESTY_ENERGY_REWARD,
       streak: 0,
       honestyHearts: HONESTY_HEART_REWARD,
     });
     expect(result.reward).toMatchObject({
       rewardType: "honesty",
       xpAwarded: 0,
+      happinessAwarded: HONESTY_HAPPINESS_REWARD,
+      energyAwarded: HONESTY_ENERGY_REWARD,
       honestyHeartsAwarded: HONESTY_HEART_REWARD,
     });
     expect(result.summary).toMatchObject({

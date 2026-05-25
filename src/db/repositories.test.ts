@@ -2,9 +2,13 @@ import "fake-indexeddb/auto";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import type { AppSettings } from "../domain";
+import { INSUFFICIENT_COINS_ERROR, type AppSettings } from "../domain";
 import { makePet, makeReward, makeSession } from "../test/factories";
 import { PetPomodoroDatabase } from "./database";
+import {
+  startStoredPetSleep,
+  wakeStoredPetFromSleep,
+} from "./petsRepository";
 import { claimStoredSessionReward } from "./rewardsRepository";
 import { loadOrCreateSettings, updateSettings } from "./settingsRepository";
 import { buyFoodForStoredPet } from "./shopRepository";
@@ -118,9 +122,40 @@ describe("Dexie repositories", () => {
 
     expect(honesty.pet.coins).toBe(5);
     expect(honesty.pet.hunger).toBeCloseTo(94.6);
-    expect(honesty.pet.energy).toBe(78);
+    expect(honesty.pet.energy).toBe(73);
     expect(honesty.pet.honestyHearts).toBe(1);
     expect(honesty.reward?.rewardType).toBe("honesty");
+  });
+
+  it("persists pet sleep start and wake actions", async () => {
+    const database = makeDatabase("pet-sleep");
+    await database.pets.add(makePet({ energy: 20, hunger: 100 }));
+
+    const sleeping = await startStoredPetSleep(
+      { petId: "pet-1", now: "2026-05-22T13:00:00.000Z" },
+      database,
+    );
+
+    expect(sleeping.sleepStartedAt).toBe("2026-05-22T13:00:00.000Z");
+    await expect(database.pets.get("pet-1")).resolves.toMatchObject({
+      sleepStartedAt: "2026-05-22T13:00:00.000Z",
+    });
+
+    const result = await wakeStoredPetFromSleep(
+      { petId: "pet-1", now: "2026-05-22T14:00:00.000Z" },
+      database,
+    );
+
+    expect(result.pet).toMatchObject({
+      energy: 38,
+      hunger: 96,
+      sleepStartedAt: null,
+    });
+    await expect(database.pets.get("pet-1")).resolves.toMatchObject({
+      energy: 38,
+      hunger: 96,
+      sleepStartedAt: null,
+    });
   });
 
   it("rolls back pet and session updates when the ledger insert fails", async () => {
@@ -185,7 +220,7 @@ describe("Dexie repositories", () => {
         { petId: "pet-1", foodId: "warm-soup", now },
         database,
       ),
-    ).rejects.toThrow("Not enough coins");
+    ).rejects.toThrow(INSUFFICIENT_COINS_ERROR);
 
     await expect(database.pets.get("pet-1")).resolves.toMatchObject({
       coins: 2,

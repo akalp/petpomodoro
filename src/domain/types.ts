@@ -1,5 +1,5 @@
 export type PetMood = "calm" | "happy" | "hungry" | "tired" | "sad";
-export type PetDisplayMood = PetMood | "working";
+export type PetDisplayMood = PetMood | "working" | "sleeping";
 export type SupportedLanguage = "en" | "tr";
 
 export interface PetState {
@@ -14,6 +14,7 @@ export interface PetState {
   energy: number;
   streak: number;
   honestyHearts: number;
+  sleepStartedAt: string | null;
   lastHungerUpdatedAt: string;
   lastAppOpenedAt: string;
   createdAt: string;

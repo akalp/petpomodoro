@@ -6,6 +6,11 @@ import {
   buyFoodForPet,
   claimSessionReward,
   createDefaultSettings,
+  INSUFFICIENT_COINS_ERROR,
+  PET_SLEEPING_CANNOT_EAT_ERROR,
+  PET_SLEEPING_CANNOT_FOCUS_ERROR,
+  startPetSleep,
+  wakePetFromSleep,
   type AppSettings,
   type FocusSession,
   type PetState,
@@ -148,6 +153,26 @@ describe("store workflows", () => {
     expect(session.plannedDurationMinutes).toBe(15);
     expect(session.expectedEndAt).toBe("2026-05-22T12:45:00.000Z");
     expect(repo.sessions.get("session-new")).toEqual(session);
+  });
+
+  it("rejects starting a focus session while the pet is sleeping", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet({ sleepStartedAt: "2026-05-22T12:00:00.000Z" }),
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    await petStore.getState().initializePet(now);
+
+    await expect(
+      pomodoroStore.getState().startSession(15, now),
+    ).rejects.toThrow(PET_SLEEPING_CANNOT_FOCUS_ERROR);
+    expect(repo.sessions.size).toBe(0);
   });
 
   it("cancels a running session without a reward", async () => {
@@ -349,6 +374,101 @@ describe("store workflows", () => {
     });
   });
 
+  it("starts and wakes pet sleep through the pet store", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet({ energy: 20, hunger: 100 }),
+    });
+    const petStore = createPetStore({
+      ...repo.petDependencies,
+      now: () => now,
+    });
+
+    await petStore.getState().initializePet(now);
+    const sleeping = await petStore
+      .getState()
+      .startSleep("2026-05-22T13:00:00.000Z");
+
+    expect(sleeping.sleepStartedAt).toBe("2026-05-22T13:00:00.000Z");
+    expect(repo.pet?.sleepStartedAt).toBe("2026-05-22T13:00:00.000Z");
+
+    const result = await petStore
+      .getState()
+      .wakeSleep("2026-05-22T14:00:00.000Z");
+
+    expect(result.pet).toMatchObject({
+      energy: 38,
+      hunger: 96,
+      sleepStartedAt: null,
+    });
+    expect(petStore.getState().lastSleepSummary).toMatchObject({
+      energyGained: 18,
+      hungerChanged: -4,
+    });
+  });
+
+  it("surfaces food purchase errors while the pet is sleeping", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet({
+        coins: 10,
+        sleepStartedAt: "2026-05-22T12:00:00.000Z",
+      }),
+    });
+    const petStore = createPetStore({
+      ...repo.petDependencies,
+      now: () => now,
+    });
+
+    await petStore.getState().initializePet(now);
+
+    await expect(
+      petStore.getState().buyFood("moon-milk", now),
+    ).rejects.toThrow(PET_SLEEPING_CANNOT_EAT_ERROR);
+
+    expect(repo.pet).toMatchObject({
+      coins: 10,
+      sleepStartedAt: "2026-05-22T12:00:00.000Z",
+    });
+  });
+
+  it("preserves sleeping state during app hydration", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet({
+        sleepStartedAt: "2026-05-22T10:00:00.000Z",
+        lastHungerUpdatedAt: "2026-05-22T10:00:00.000Z",
+      }),
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+    const settingsStore = createSettingsStore({
+      loadOrCreateSettings: async (createdAt) => createDefaultSettings(createdAt),
+      updateSettings: async (settings) => settings,
+      readLegacySettings: () => ({}),
+      clearLegacySettings: () => undefined,
+      now: () => now,
+    });
+    const uiStore = createUiStore({
+      petStore,
+      pomodoroStore,
+      settingsStore,
+      now: () => now,
+    });
+
+    await uiStore.getState().initializeApp(now);
+
+    expect(repo.pet).toMatchObject({
+      sleepStartedAt: "2026-05-22T10:00:00.000Z",
+      hunger: 100,
+    });
+    expect(petStore.getState().pet?.sleepStartedAt).toBe(
+      "2026-05-22T10:00:00.000Z",
+    );
+  });
+
   it("surfaces food purchase errors without changing the pet", async () => {
     const repo = createInMemoryRepositories({
       pet: makePet({ coins: 1, hunger: 40 }),
@@ -362,10 +482,10 @@ describe("store workflows", () => {
 
     await expect(
       petStore.getState().buyFood("moon-milk", now),
-    ).rejects.toThrow("Not enough coins");
+    ).rejects.toThrow(INSUFFICIENT_COINS_ERROR);
 
     expect(repo.pet).toMatchObject({ coins: 1, hunger: 40 });
-    expect(petStore.getState().error).toContain("Not enough coins");
+    expect(petStore.getState().error).toBe(INSUFFICIENT_COINS_ERROR);
   });
 });
 
@@ -520,6 +640,23 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
       }
 
       const result = buyFoodForPet(pet, foodId, foodNow);
+      pet = result.pet;
+      return result;
+    },
+    startStoredPetSleep: async ({ petId, now: sleepNow }) => {
+      if (!pet || pet.id !== petId) {
+        throw new Error("Pet not found.");
+      }
+
+      pet = startPetSleep(pet, sleepNow);
+      return pet;
+    },
+    wakeStoredPetFromSleep: async ({ petId, now: sleepNow }) => {
+      if (!pet || pet.id !== petId) {
+        throw new Error("Pet not found.");
+      }
+
+      const result = wakePetFromSleep(pet, sleepNow);
       pet = result.pet;
       return result;
     },

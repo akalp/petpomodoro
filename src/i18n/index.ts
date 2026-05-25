@@ -1,6 +1,10 @@
 import {
   FOOD_NOT_FOUND_ERROR,
   INSUFFICIENT_COINS_ERROR,
+  PET_ALREADY_SLEEPING_ERROR,
+  PET_NOT_SLEEPING_ERROR,
+  PET_SLEEPING_CANNOT_EAT_ERROR,
+  PET_SLEEPING_CANNOT_FOCUS_ERROR,
   type SupportedLanguage,
 } from "../domain";
 
@@ -17,6 +21,13 @@ const englishMessages = {
     "If local storage is blocked or full, PetPomodoro cannot safely save progress. Nothing is sent to a server.",
   errorGeneric: "Something went wrong.",
   errorPetName: "Your pet needs a small name to answer to.",
+  errorPetAlreadySleeping: "Your pet is already resting.",
+  errorPetNotSleeping: "Your pet is not resting right now.",
+  errorFoodNotFound: "That snack is not available right now.",
+  errorFoodNotEnoughCoins: "Need more coins",
+  errorPetSleepingCannotEat: "Snacks wait until your pet wakes up.",
+  errorPetSleepingCannotFocus:
+    "Your pet is resting. Wake them before starting focus.",
   continue: "Continue",
   close: "Close",
   store: "Store",
@@ -46,6 +57,22 @@ const englishMessages = {
   happiness: "Happiness",
   hunger: "Hunger",
   energy: "Energy",
+  sleepTitle: "Rest time",
+  sleepSupportAwake: "A quiet nap helps {pet} recover energy.",
+  sleepSupportSleeping: "{pet} is resting softly.",
+  sleepUnavailableDuringFocus:
+    "Rest waits until this focus session is finished.",
+  startPetSleep: "Let {pet} rest",
+  wakePet: "Wake {pet}",
+  sleepDuration: "Resting for {duration}",
+  sleepEnergyPreview: "Projected energy {energy}",
+  sleepResultTitle: "{pet} had a good rest.",
+  sleepResultSupport:
+    "Energy {energy}, hunger {hunger}, happiness {happiness}.",
+  focusUnavailableDuringSleep:
+    "{pet} is resting. Wake them before starting focus.",
+  shopUnavailableDuringSleep:
+    "Snacks wait until {pet} wakes up.",
   totalXp: "Total XP",
   honestyHearts: "Honesty hearts",
   shopTitle: "Pet snack shop",
@@ -73,6 +100,7 @@ const englishMessages = {
   moodSad: "Sad",
   moodCalm: "Calm",
   moodWorking: "Working",
+  moodSleeping: "Sleeping",
   startTitle: "Ready to focus together?",
   startInstructions: "Choose a focus session and begin when you are ready.",
   startSupport:
@@ -168,6 +196,13 @@ const turkishMessages: Record<MessageKey, string> = {
     "Yerel depolama engellenmiş veya doluysa PetPomodoro ilerlemeyi güvenle kaydedemez. Sunucuya hiçbir şey gönderilmez.",
   errorGeneric: "Bir şeyler ters gitti.",
   errorPetName: "Dostunun seslenebileceğin küçük bir isme ihtiyacı var.",
+  errorPetAlreadySleeping: "Dostun zaten dinleniyor.",
+  errorPetNotSleeping: "Dostun şu anda dinlenmiyor.",
+  errorFoodNotFound: "Bu atıştırmalık şu anda kullanılamıyor.",
+  errorFoodNotEnoughCoins: "Daha çok jeton gerekli",
+  errorPetSleepingCannotEat: "Atıştırmalıklar dostun uyanana kadar bekler.",
+  errorPetSleepingCannotFocus:
+    "Dostun dinleniyor. Odağa başlamadan önce uyandır.",
   continue: "Devam et",
   close: "Kapat",
   store: "Dükkan",
@@ -197,6 +232,22 @@ const turkishMessages: Record<MessageKey, string> = {
   happiness: "Mutluluk",
   hunger: "Tokluk",
   energy: "Enerji",
+  sleepTitle: "Dinlenme zamanı",
+  sleepSupportAwake: "Sessiz bir uyku {pet} için enerji toplar.",
+  sleepSupportSleeping: "{pet} usulca dinleniyor.",
+  sleepUnavailableDuringFocus:
+    "Dinlenme bu odak oturumu bitene kadar bekler.",
+  startPetSleep: "{pet} dinlensin",
+  wakePet: "{pet} uyansın",
+  sleepDuration: "{duration} dinlendi",
+  sleepEnergyPreview: "Beklenen enerji {energy}",
+  sleepResultTitle: "{pet} güzelce dinlendi.",
+  sleepResultSupport:
+    "Enerji {energy}, tokluk {hunger}, mutluluk {happiness}.",
+  focusUnavailableDuringSleep:
+    "{pet} dinleniyor. Odağa başlamadan önce uyandır.",
+  shopUnavailableDuringSleep:
+    "Atıştırmalıklar {pet} uyanana kadar bekler.",
   totalXp: "Toplam XP",
   honestyHearts: "Dürüstlük kalpleri",
   shopTitle: "Dost atıştırmalıkları",
@@ -226,6 +277,7 @@ const turkishMessages: Record<MessageKey, string> = {
   moodSad: "Üzgün",
   moodCalm: "Sakin",
   moodWorking: "Odaklanıyor",
+  moodSleeping: "Uyuyor",
   startTitle: "Birlikte odaklanmaya hazır mısın?",
   startInstructions: "Bir odak oturumu seç ve hazır olduğunda başla.",
   startSupport: "Sen işine biraz zaman ayırırken dostun seni bekleyecek.",
@@ -341,12 +393,28 @@ export function localizeErrorMessage(message: string, t: Translator): string {
     return t("errorPetName");
   }
 
+  if (message === PET_ALREADY_SLEEPING_ERROR) {
+    return t("errorPetAlreadySleeping");
+  }
+
+  if (message === PET_NOT_SLEEPING_ERROR) {
+    return t("errorPetNotSleeping");
+  }
+
+  if (message === PET_SLEEPING_CANNOT_EAT_ERROR) {
+    return t("errorPetSleepingCannotEat");
+  }
+
+  if (message === PET_SLEEPING_CANNOT_FOCUS_ERROR) {
+    return t("errorPetSleepingCannotFocus");
+  }
+
   if (message === INSUFFICIENT_COINS_ERROR) {
-    return t("foodNotEnoughCoins");
+    return t("errorFoodNotEnoughCoins");
   }
 
   if (message === FOOD_NOT_FOUND_ERROR) {
-    return t("errorGeneric");
+    return t("errorFoodNotFound");
   }
 
   return message;

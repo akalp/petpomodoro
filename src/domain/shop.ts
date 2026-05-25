@@ -1,5 +1,5 @@
 import { DomainError } from "./errors";
-import { applyPetStatAdjustments } from "./pet";
+import { applyPetStatAdjustments, isPetSleeping } from "./pet";
 import type { PetState } from "./types";
 
 export type ShopItemCategory = "food";
@@ -36,8 +36,9 @@ export interface FoodPurchaseResult {
   summary: FoodPurchaseSummary;
 }
 
-export const FOOD_NOT_FOUND_ERROR = "Food item not found.";
-export const INSUFFICIENT_COINS_ERROR = "Not enough coins for this food.";
+export const FOOD_NOT_FOUND_ERROR = "food_not_found";
+export const INSUFFICIENT_COINS_ERROR = "insufficient_coins";
+export const PET_SLEEPING_CANNOT_EAT_ERROR = "pet_sleeping_cannot_eat";
 
 export const FOOD_CATALOG: readonly FoodItem[] = [
   {
@@ -79,6 +80,10 @@ export function buyFoodForPet(
   foodId: FoodItemId | string,
   now: string,
 ): FoodPurchaseResult {
+  if (isPetSleeping(pet)) {
+    throw new DomainError(PET_SLEEPING_CANNOT_EAT_ERROR);
+  }
+
   const item = FOOD_CATALOG.find((food) => food.id === foodId);
 
   if (!item) {

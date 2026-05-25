@@ -389,6 +389,7 @@
 .pet-art[data-mood="happy"] .pet-art__sparkles,
 .pet-art[data-mood="hungry"] .pet-art__hunger-pulses,
 .pet-art[data-mood="tired"] .pet-art__zzz,
+.pet-art[data-mood="sleeping"] .pet-art__zzz,
 .pet-art[data-mood="working"] .pet-art__focus-bubbles {
   opacity: 1;
 }
@@ -472,6 +473,44 @@
   left: 2.41rem;
   width: 0.92rem;
   height: 0.14rem;
+  border: 0;
+  border-radius: 99px;
+  background: var(--pet-ink);
+}
+
+.pet-art[data-mood="sleeping"] .pet-art__body {
+  animation: pet-sleep-breathe 5.4s ease-in-out infinite;
+  transform-origin: 50% 90%;
+}
+
+.pet-art[data-mood="sleeping"] .pet-art__tail {
+  animation: none;
+  transform: rotate(12deg);
+}
+
+.pet-art[data-mood="sleeping"] .pet-art__ear--left {
+  transform: rotate(-18deg);
+}
+
+.pet-art[data-mood="sleeping"] .pet-art__ear--right {
+  transform: scaleX(-1) rotate(-18deg);
+}
+
+.pet-art[data-mood="sleeping"] .pet-art__eye {
+  top: 0.7rem;
+  height: 0.14rem;
+  animation: none;
+}
+
+.pet-art[data-mood="sleeping"] .pet-art__eye::after {
+  content: none;
+}
+
+.pet-art[data-mood="sleeping"] .pet-art__mouth {
+  top: 1.74rem;
+  left: 2.43rem;
+  width: 0.9rem;
+  height: 0.12rem;
   border: 0;
   border-radius: 99px;
   background: var(--pet-ink);

@@ -4,10 +4,13 @@ import {
   applyAppOpenDecay,
   applyFocusSessionImpact,
   applyHungerDecay,
+  isPetSleeping,
   type ClaimFocusRewardResult,
   type FoodItemId,
   type FoodPurchaseResult,
   type FocusSession,
+  type PetSleepResult,
+  type PetSleepSummary,
   type PetState,
   type RewardSummary,
 } from "../domain";
@@ -17,7 +20,9 @@ import {
   claimStoredSessionReward,
   getCurrentPet,
   loadOrCreateDefaultPet,
+  startStoredPetSleep,
   updatePet,
+  wakeStoredPetFromSleep,
 } from "../db";
 
 import { errorMessage } from "./errors";
@@ -29,6 +34,8 @@ export interface PetStoreDependencies {
   claimStoredSessionReward: typeof claimStoredSessionReward;
   applyStoredSessionImpact: typeof applyStoredSessionImpact;
   buyFoodForStoredPet: typeof buyFoodForStoredPet;
+  startStoredPetSleep: typeof startStoredPetSleep;
+  wakeStoredPetFromSleep: typeof wakeStoredPetFromSleep;
   now: () => string;
 }
 
@@ -36,6 +43,7 @@ export interface PetStoreState {
   pet: PetState | null;
   lastRewardSummary: RewardSummary | null;
   lastFoodPurchase: FoodPurchaseResult["summary"] | null;
+  lastSleepSummary: PetSleepSummary | null;
   isLoading: boolean;
   error: string | null;
   initializePet: (now?: string) => Promise<PetState>;
@@ -57,9 +65,12 @@ export interface PetStoreState {
     foodId: FoodItemId | string,
     now?: string,
   ) => Promise<FoodPurchaseResult>;
+  startSleep: (now?: string) => Promise<PetState>;
+  wakeSleep: (now?: string) => Promise<PetSleepResult>;
   renamePet: (name: string, now?: string) => Promise<PetState>;
   clearLastRewardSummary: () => void;
   clearLastFoodPurchase: () => void;
+  clearLastSleepSummary: () => void;
   updateAppOpenDecay: (now?: string) => Promise<PetState | null>;
   updateDecayOnOpen: (now?: string) => Promise<PetState | null>;
   clearError: () => void;
@@ -72,6 +83,8 @@ const defaultDependencies: PetStoreDependencies = {
   claimStoredSessionReward,
   applyStoredSessionImpact,
   buyFoodForStoredPet,
+  startStoredPetSleep,
+  wakeStoredPetFromSleep,
   now: () => new Date().toISOString(),
 };
 
@@ -82,6 +95,7 @@ export function createPetStore(
     pet: null,
     lastRewardSummary: null,
     lastFoodPurchase: null,
+    lastSleepSummary: null,
     isLoading: false,
     error: null,
 
@@ -219,6 +233,48 @@ export function createPetStore(
       }
     },
 
+    startSleep: async (now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().initializePet(now));
+      set({ isLoading: true, error: null });
+
+      try {
+        const savedPet = await dependencies.startStoredPetSleep({
+          petId: pet.id,
+          now,
+        });
+        set({
+          pet: savedPet,
+          lastSleepSummary: null,
+          isLoading: false,
+        });
+        return savedPet;
+      } catch (error) {
+        set({ error: errorMessage(error), isLoading: false });
+        throw error;
+      }
+    },
+
+    wakeSleep: async (now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().initializePet(now));
+      set({ isLoading: true, error: null });
+
+      try {
+        const result = await dependencies.wakeStoredPetFromSleep({
+          petId: pet.id,
+          now,
+        });
+        set({
+          pet: result.pet,
+          lastSleepSummary: result.summary,
+          isLoading: false,
+        });
+        return result;
+      } catch (error) {
+        set({ error: errorMessage(error), isLoading: false });
+        throw error;
+      }
+    },
+
     renamePet: async (name, now = dependencies.now()) => {
       const pet = get().pet ?? (await get().initializePet(now));
       const trimmedName = name.trim();
@@ -240,11 +296,17 @@ export function createPetStore(
 
     clearLastFoodPurchase: () => set({ lastFoodPurchase: null }),
 
+    clearLastSleepSummary: () => set({ lastSleepSummary: null }),
+
     updateAppOpenDecay: async (now = dependencies.now()) => {
       const pet = get().pet ?? (await get().loadCurrentPet());
 
       if (!pet) {
         return null;
+      }
+
+      if (isPetSleeping(pet)) {
+        return pet;
       }
 
       const decayedPet = applyAppOpenDecay(pet, now);
@@ -261,6 +323,10 @@ export function createPetStore(
 
       if (!pet) {
         return null;
+      }
+
+      if (isPetSleeping(pet)) {
+        return pet;
       }
 
       const decayedPet = applyHungerDecay(pet, now);

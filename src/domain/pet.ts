@@ -1,3 +1,4 @@
+import { DomainError } from "./errors";
 import type { FocusSessionStatus, PetDisplayMood, PetMood, PetState } from "./types";
 import { resolvePetMood, type PetMoodStats } from "./petMoodRules";
 
@@ -10,6 +11,13 @@ export const MAX_APP_OPEN_HAPPINESS_DECAY = 6;
 export const FOCUS_HUNGER_DECAY_PER_MINUTE = 0.2;
 export const FOCUS_ENERGY_DECAY_PER_MINUTE = 0.28;
 export const FOCUS_COIN_MINUTES = 5;
+export const SLEEP_ENERGY_GAIN_PER_HOUR = 18;
+export const MAX_SLEEP_ENERGY_GAIN = 54;
+export const SLEEP_HAPPINESS_ENERGY_STEP = 15;
+export const MAX_SLEEP_HAPPINESS_GAIN = 4;
+export const PET_ALREADY_SLEEPING_ERROR = "pet_already_sleeping";
+export const PET_NOT_SLEEPING_ERROR = "pet_not_sleeping";
+export const PET_SLEEPING_CANNOT_FOCUS_ERROR = "pet_sleeping_cannot_focus";
 
 export interface PetStatAdjustments {
   xp?: number;
@@ -19,6 +27,22 @@ export interface PetStatAdjustments {
   energy?: number;
   streak?: number;
   honestyHearts?: number;
+}
+
+export interface PetSleepSummary {
+  startedAt: string;
+  endedAt: string;
+  elapsedMinutes: number;
+  energyGained: number;
+  hungerChanged: number;
+  happinessGained: number;
+  previousStats: Pick<PetState, "hunger" | "happiness" | "energy">;
+  nextStats: Pick<PetState, "hunger" | "happiness" | "energy">;
+}
+
+export interface PetSleepResult {
+  pet: PetState;
+  summary: PetSleepSummary;
 }
 
 export function calculateLevel(xp: number): number {
@@ -203,8 +227,13 @@ export function moodForHunger(hunger: number): PetMood {
 export function displayMoodForSession(
   mood: PetMood,
   sessionStatus: FocusSessionStatus | null,
+  isSleeping = false,
 ): PetDisplayMood {
-  return sessionStatus === "running" ? "working" : mood;
+  if (sessionStatus === "running") {
+    return "working";
+  }
+
+  return isSleeping ? "sleeping" : mood;
 }
 
 export function moodForStats({
@@ -228,10 +257,54 @@ export function normalizePetState(pet: PetState): PetState {
     energy,
     streak: Math.max(0, pet.streak ?? 0),
     honestyHearts: Math.max(0, pet.honestyHearts ?? 0),
+    sleepStartedAt: pet.sleepStartedAt ?? null,
     lastHungerUpdatedAt: pet.lastHungerUpdatedAt ?? pet.updatedAt,
     lastAppOpenedAt:
       pet.lastAppOpenedAt ?? pet.lastHungerUpdatedAt ?? pet.updatedAt,
     mood: moodForStats({ happiness, hunger, energy }),
+  };
+}
+
+export function isPetSleeping(pet: PetState): boolean {
+  return pet.sleepStartedAt != null;
+}
+
+export function startPetSleep(pet: PetState, now: string): PetState {
+  if (isPetSleeping(pet)) {
+    throw new DomainError(PET_ALREADY_SLEEPING_ERROR);
+  }
+
+  return {
+    ...pet,
+    sleepStartedAt: now,
+    updatedAt: now,
+  };
+}
+
+export function previewPetSleep(pet: PetState, now: string): PetSleepSummary {
+  const startedAt = requireSleepStartedAt(pet);
+  return calculatePetSleepSummary(pet, startedAt, now);
+}
+
+export function wakePetFromSleep(pet: PetState, now: string): PetSleepResult {
+  const summary = previewPetSleep(pet, now);
+  const hasElapsed = Date.parse(now) > Date.parse(summary.startedAt);
+  const { hunger, happiness, energy } = summary.nextStats;
+  const nextPet: PetState = {
+    ...pet,
+    hunger,
+    happiness,
+    energy,
+    sleepStartedAt: null,
+    lastHungerUpdatedAt: hasElapsed ? now : pet.lastHungerUpdatedAt,
+    lastAppOpenedAt: now,
+    mood: moodForStats({ happiness, hunger, energy }),
+    updatedAt: now,
+  };
+
+  return {
+    pet: nextPet,
+    summary,
   };
 }
 
@@ -258,6 +331,55 @@ function lowCareHappinessDecay(
     (Math.max(0, 50 - hunger) + Math.max(0, 50 - energy)) / 100;
 
   return Math.min(elapsedHours * lowCarePressure, elapsedHours);
+}
+
+function requireSleepStartedAt(pet: PetState): string {
+  if (!pet.sleepStartedAt) {
+    throw new DomainError(PET_NOT_SLEEPING_ERROR);
+  }
+
+  return pet.sleepStartedAt;
+}
+
+function calculatePetSleepSummary(
+  pet: PetState,
+  startedAt: string,
+  endedAt: string,
+): PetSleepSummary {
+  const elapsedMs = Math.max(0, Date.parse(endedAt) - Date.parse(startedAt));
+  const elapsedHours = elapsedMs / (60 * 60 * 1000);
+  const energy = clampPetStat(
+    pet.energy +
+      Math.min(elapsedHours * SLEEP_ENERGY_GAIN_PER_HOUR, MAX_SLEEP_ENERGY_GAIN),
+  );
+  const energyGained = energy - pet.energy;
+  const happinessGained = Math.min(
+    Math.floor(energyGained / SLEEP_HAPPINESS_ENERGY_STEP),
+    MAX_SLEEP_HAPPINESS_GAIN,
+  );
+  const happiness = clampPetStat(pet.happiness + happinessGained);
+  const hunger = clampPetStat(
+    pet.hunger - elapsedHours * DEFAULT_HUNGER_DECAY_PER_HOUR,
+  );
+
+  return {
+    startedAt,
+    endedAt,
+    elapsedMinutes: elapsedMs / (60 * 1000),
+    energyGained,
+    hungerChanged: hunger - pet.hunger,
+    happinessGained: happiness - pet.happiness,
+    previousStats: {
+      hunger: pet.hunger,
+      happiness: pet.happiness,
+      energy: pet.energy,
+    },
+    nextStats: {
+      hunger,
+      happiness,
+      energy,
+    },
+  };
 }
 
 function clampHunger(hunger: number): number {

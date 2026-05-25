@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DomainError } from "./errors";
 import {
   addPetXp,
   applyAppOpenDecay,
@@ -7,6 +8,9 @@ import {
   calculateLevel,
   DEFAULT_HUNGER_DECAY_PER_HOUR,
   displayMoodForSession,
+  previewPetSleep,
+  startPetSleep,
+  wakePetFromSleep,
   moodForStats,
 } from "./pet";
 import { PET_MOOD_RULES, resolvePetMood } from "./petMoodRules";
@@ -137,7 +141,122 @@ describe("pet domain logic", () => {
   it("shows a working mood only while a focus session is running", () => {
     expect(displayMoodForSession("happy", "running")).toBe("working");
     expect(displayMoodForSession("happy", "awaiting_confirmation")).toBe("happy");
+    expect(displayMoodForSession("happy", null, true)).toBe("sleeping");
     expect(displayMoodForSession("tired", null)).toBe("tired");
+  });
+
+  it("starts timed pet sleep", () => {
+    const pet = makePet();
+    const updated = startPetSleep(pet, "2026-05-22T13:00:00.000Z");
+
+    expect(updated).toMatchObject({
+      sleepStartedAt: "2026-05-22T13:00:00.000Z",
+      updatedAt: "2026-05-22T13:00:00.000Z",
+    });
+    expect(pet.sleepStartedAt).toBeNull();
+  });
+
+  it("rejects starting sleep while already sleeping", () => {
+    expect(() =>
+      startPetSleep(
+        makePet({ sleepStartedAt: "2026-05-22T13:00:00.000Z" }),
+        "2026-05-22T13:01:00.000Z",
+      ),
+    ).toThrow(DomainError);
+  });
+
+  it("wakes from one hour of sleep with energy recovery and hunger decay", () => {
+    const result = wakePetFromSleep(
+      makePet({
+        energy: 20,
+        happiness: 50,
+        hunger: 100,
+        sleepStartedAt: "2026-05-22T13:00:00.000Z",
+      }),
+      "2026-05-22T14:00:00.000Z",
+    );
+
+    expect(result.pet).toMatchObject({
+      energy: 38,
+      happiness: 51,
+      hunger: 96,
+      sleepStartedAt: null,
+      lastHungerUpdatedAt: "2026-05-22T14:00:00.000Z",
+      lastAppOpenedAt: "2026-05-22T14:00:00.000Z",
+      updatedAt: "2026-05-22T14:00:00.000Z",
+    });
+    expect(result.summary).toMatchObject({
+      elapsedMinutes: 60,
+      energyGained: 18,
+      hungerChanged: -4,
+      happinessGained: 1,
+    });
+  });
+
+  it("caps long sleep energy recovery", () => {
+    const result = wakePetFromSleep(
+      makePet({
+        energy: 10,
+        happiness: 50,
+        hunger: 100,
+        sleepStartedAt: "2026-05-22T13:00:00.000Z",
+      }),
+      "2026-05-22T17:00:00.000Z",
+    );
+
+    expect(result.pet.energy).toBe(64);
+    expect(result.pet.hunger).toBe(84);
+    expect(result.pet.happiness).toBe(53);
+    expect(result.summary.energyGained).toBe(54);
+  });
+
+  it("clamps sleep stat changes at pet stat bounds", () => {
+    const result = wakePetFromSleep(
+      makePet({
+        energy: 90,
+        happiness: 99,
+        hunger: 2,
+        sleepStartedAt: "2026-05-22T13:00:00.000Z",
+      }),
+      "2026-05-22T14:00:00.000Z",
+    );
+
+    expect(result.pet.energy).toBe(100);
+    expect(result.pet.hunger).toBe(0);
+    expect(result.pet.happiness).toBe(99);
+    expect(result.summary.energyGained).toBe(10);
+    expect(result.summary.hungerChanged).toBe(-2);
+  });
+
+  it("recalculates persisted care mood after waking", () => {
+    const result = wakePetFromSleep(
+      makePet({
+        energy: 0,
+        happiness: 80,
+        hunger: 26,
+        sleepStartedAt: "2026-05-22T13:00:00.000Z",
+      }),
+      "2026-05-22T14:00:00.000Z",
+    );
+
+    expect(result.pet.mood).toBe("hungry");
+  });
+
+  it("previews sleep recovery without mutating the pet", () => {
+    const pet = makePet({
+      energy: 20,
+      hunger: 100,
+      sleepStartedAt: "2026-05-22T13:00:00.000Z",
+    });
+
+    const summary = previewPetSleep(pet, "2026-05-22T14:00:00.000Z");
+
+    expect(summary.nextStats).toMatchObject({
+      energy: 38,
+      hunger: 96,
+    });
+    expect(pet.energy).toBe(20);
+    expect(pet.hunger).toBe(100);
   });
 
   it("derives actionable moods from care stats", () => {

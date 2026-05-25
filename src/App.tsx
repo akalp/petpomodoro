@@ -14,7 +14,9 @@ import { resetLocalData } from "./db";
 import {
   DEFAULT_FOCUS_DURATION_MINUTES,
   displayMoodForSession,
+  isPetSleeping,
   parseFocusDurationInput,
+  previewPetSleep,
 } from "./domain";
 import {
   createTranslator,
@@ -72,13 +74,19 @@ export function App() {
   const petError = usePetStore((state) => state.error);
   const lastRewardSummary = usePetStore((state) => state.lastRewardSummary);
   const lastFoodPurchase = usePetStore((state) => state.lastFoodPurchase);
+  const lastSleepSummary = usePetStore((state) => state.lastSleepSummary);
   const clearLastRewardSummary = usePetStore(
     (state) => state.clearLastRewardSummary,
   );
   const clearLastFoodPurchase = usePetStore(
     (state) => state.clearLastFoodPurchase,
   );
+  const clearLastSleepSummary = usePetStore(
+    (state) => state.clearLastSleepSummary,
+  );
   const buyFood = usePetStore((state) => state.buyFood);
+  const startSleep = usePetStore((state) => state.startSleep);
+  const wakeSleep = usePetStore((state) => state.wakeSleep);
   const renamePet = usePetStore((state) => state.renamePet);
   const updateAppOpenDecay = usePetStore((state) => state.updateAppOpenDecay);
   const activeSession = usePomodoroStore((state) => state.activeSession);
@@ -141,12 +149,21 @@ export function App() {
       title: translate("notificationTitle"),
     };
   }, [language]);
-  const displayMood = pet
-    ? displayMoodForSession(pet.mood, activeSession?.status ?? null)
-    : null;
   const isFocusActive =
     activeSession?.status === "running" ||
     activeSession?.status === "awaiting_confirmation";
+  const petIsSleeping = pet ? isPetSleeping(pet) : false;
+  const displayMood = pet
+    ? displayMoodForSession(
+        pet.mood,
+        activeSession?.status ?? null,
+        petIsSleeping,
+      )
+    : null;
+  const sleepPreview =
+    pet && petIsSleeping
+      ? previewPetSleep(pet, new Date(currentTime).toISOString())
+      : null;
 
   const setPreferredDuration = (duration: number) => {
     setCustomDurationDraft(String(duration));
@@ -255,17 +272,19 @@ export function App() {
   }, [hasHydrated, refreshSession, updateAppOpenDecay]);
 
   useEffect(() => {
-    if (activeSession?.status !== "running") {
+    if (activeSession?.status !== "running" && !petIsSleeping) {
       return;
     }
 
     const intervalId = window.setInterval(() => {
       setCurrentTime(Date.now());
-      refreshSession();
+      if (activeSession?.status === "running") {
+        refreshSession();
+      }
     }, 1000);
 
     return () => window.clearInterval(intervalId);
-  }, [activeSession?.status, refreshSession]);
+  }, [activeSession?.status, petIsSleeping, refreshSession]);
 
   useEffect(() => {
     const scheduledSession = activeSession;
@@ -319,6 +338,10 @@ export function App() {
   const error = uiError ?? petError ?? pomodoroError ?? settingsError;
 
   const handleStart = (duration: number) => {
+    if (petIsSleeping) {
+      return;
+    }
+
     setCurrentTime(Date.now());
     void updatePreferredDuration(duration).catch(() => undefined);
     void startSession(duration)
@@ -358,6 +381,18 @@ export function App() {
     void buyFood(foodId).catch(() => undefined);
   };
 
+  const handleStartSleep = () => {
+    if (isFocusActive) {
+      return;
+    }
+
+    void startSleep().catch(() => undefined);
+  };
+
+  const handleWakeSleep = () => {
+    void wakeSleep().catch(() => undefined);
+  };
+
   const openSettings = () => {
     if (hasHydrated) {
       setActiveSheet("settings");
@@ -383,6 +418,7 @@ export function App() {
           isLoading: false,
           lastFoodPurchase: null,
           lastRewardSummary: null,
+          lastSleepSummary: null,
           pet: null,
         });
         usePomodoroStore.setState({
@@ -407,35 +443,49 @@ export function App() {
   };
 
   const focusPanel = (
-    <FocusSessionSwitcher
-      activeSession={activeSession}
-      countdownLabel={
-        activeSession?.status === "running"
-          ? formatCountdown(activeSession.expectedEndAt, currentTime)
-          : null
-      }
-      customDurationInput={customDurationInput}
-      disabled={isBusy}
-      durationError={durationError}
-      durations={FOCUS_DURATIONS}
-      language={language}
-      onAbandoned={handleAbandoned}
-      onCompleted={handleCompleted}
-      onCustomDurationChange={handleCustomDurationChange}
-      onCustomDurationCommit={commitCustomDuration}
-      onDurationChange={setPreferredDuration}
-      onEnd={handleEnd}
-      onStart={handleStart}
-      selectedDuration={selectedDuration}
-      startDisabled={isBusy || !hasHydrated}
-      t={t}
-    />
+    <>
+      {petIsSleeping && pet ? (
+        <Card className="border-indigo-100 bg-indigo-50 text-sm font-medium leading-6 text-indigo-950">
+          {t("focusUnavailableDuringSleep", { pet: pet.name })}
+        </Card>
+      ) : null}
+      <FocusSessionSwitcher
+        activeSession={activeSession}
+        countdownLabel={
+          activeSession?.status === "running"
+            ? formatCountdown(activeSession.expectedEndAt, currentTime)
+            : null
+        }
+        customDurationInput={customDurationInput}
+        disabled={isBusy}
+        durationError={durationError}
+        durations={FOCUS_DURATIONS}
+        language={language}
+        onAbandoned={handleAbandoned}
+        onCompleted={handleCompleted}
+        onCustomDurationChange={handleCustomDurationChange}
+        onCustomDurationCommit={commitCustomDuration}
+        onDurationChange={setPreferredDuration}
+        onEnd={handleEnd}
+        onStart={handleStart}
+        selectedDuration={selectedDuration}
+        startDisabled={isBusy || !hasHydrated || petIsSleeping}
+        t={t}
+      />
+    </>
   );
   const petScreen = (
     <PetScreen
       displayMood={displayMood}
       installHint={<InstallHint t={t} />}
+      isFocusActive={isFocusActive}
+      isSleepDisabled={isBusy || !hasHydrated}
+      lastSleepSummary={lastSleepSummary}
+      onClearSleepSummary={clearLastSleepSummary}
+      onStartSleep={handleStartSleep}
+      onWakeSleep={handleWakeSleep}
       pet={pet}
+      sleepPreview={sleepPreview}
       t={t}
     />
   );
@@ -474,8 +524,9 @@ export function App() {
         pet={petScreen}
         shop={
           <ShopScreen
-            disabled={isBusy || !hasHydrated || isFocusActive}
+            disabled={isBusy || !hasHydrated || isFocusActive || petIsSleeping}
             isFocusActive={isFocusActive}
+            isPetSleeping={petIsSleeping}
             lastFoodPurchase={lastFoodPurchase}
             onBuyFood={handleBuyFood}
             onClearPurchase={clearLastFoodPurchase}

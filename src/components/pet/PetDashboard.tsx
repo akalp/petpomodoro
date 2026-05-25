@@ -1,18 +1,37 @@
-import type { PetDisplayMood, PetState } from "../../domain";
+import type { PetDisplayMood, PetSleepSummary, PetState } from "../../domain";
 import type { Translator } from "../../i18n";
 import { Badge } from "../ui/Badge";
 import { Card } from "../ui/Card";
 
 import { PetAvatar } from "./PetAvatar";
+import { PetSleepControl } from "./PetSleepControl";
 import { PetStats } from "./PetStats";
 
 interface PetDashboardProps {
   displayMood: PetDisplayMood | null;
+  isFocusActive: boolean;
+  isSleepDisabled: boolean;
+  lastSleepSummary: PetSleepSummary | null;
+  onClearSleepSummary: () => void;
+  onStartSleep: () => void;
+  onWakeSleep: () => void;
   pet: PetState | null;
+  sleepPreview: PetSleepSummary | null;
   t: Translator;
 }
 
-export function PetDashboard({ displayMood, pet, t }: PetDashboardProps) {
+export function PetDashboard({
+  displayMood,
+  isFocusActive,
+  isSleepDisabled,
+  lastSleepSummary,
+  onClearSleepSummary,
+  onStartSleep,
+  onWakeSleep,
+  pet,
+  sleepPreview,
+  t,
+}: PetDashboardProps) {
   if (!pet) {
     return (
       <Card className="text-center">
@@ -39,6 +58,17 @@ export function PetDashboard({ displayMood, pet, t }: PetDashboardProps) {
       </div>
       <PetAvatar mood={displayMood ?? pet.mood} t={t} />
       <PetStats displayMood={displayMood ?? pet.mood} pet={pet} t={t} />
+      <PetSleepControl
+        disabled={isSleepDisabled}
+        isFocusActive={isFocusActive}
+        lastSleepSummary={lastSleepSummary}
+        onClearSleepSummary={onClearSleepSummary}
+        onStartSleep={onStartSleep}
+        onWakeSleep={onWakeSleep}
+        pet={pet}
+        sleepPreview={sleepPreview}
+        t={t}
+      />
     </Card>
   );
 }

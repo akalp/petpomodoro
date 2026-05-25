@@ -1,4 +1,11 @@
-import { normalizePetState, type PetMood, type PetState } from "../domain";
+import {
+  normalizePetState,
+  startPetSleep,
+  wakePetFromSleep,
+  type PetMood,
+  type PetSleepResult,
+  type PetState,
+} from "../domain";
 
 import { db as defaultDb, type PetPomodoroDatabase } from "./database";
 
@@ -30,6 +37,7 @@ export function createInitialPet({
     energy: 80,
     streak: 0,
     honestyHearts: 0,
+    sleepStartedAt: null,
     lastHungerUpdatedAt: now,
     lastAppOpenedAt: now,
     createdAt: now,
@@ -83,4 +91,43 @@ export async function updatePet(
 ): Promise<PetState> {
   await database.pets.put(pet);
   return pet;
+}
+
+export interface PetCareActionInput {
+  petId: string;
+  now: string;
+}
+
+export async function startStoredPetSleep(
+  { petId, now }: PetCareActionInput,
+  database: PetPomodoroDatabase = defaultDb,
+): Promise<PetState> {
+  return database.transaction("rw", database.pets, async () => {
+    const pet = await database.pets.get(petId);
+
+    if (!pet) {
+      throw new Error(`Pet not found: ${petId}`);
+    }
+
+    const nextPet = startPetSleep(normalizePetState(pet), now);
+    await database.pets.put(nextPet);
+    return nextPet;
+  });
+}
+
+export async function wakeStoredPetFromSleep(
+  { petId, now }: PetCareActionInput,
+  database: PetPomodoroDatabase = defaultDb,
+): Promise<PetSleepResult> {
+  return database.transaction("rw", database.pets, async () => {
+    const pet = await database.pets.get(petId);
+
+    if (!pet) {
+      throw new Error(`Pet not found: ${petId}`);
+    }
+
+    const result = wakePetFromSleep(normalizePetState(pet), now);
+    await database.pets.put(result.pet);
+    return result;
+  });
 }

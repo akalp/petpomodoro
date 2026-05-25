@@ -59,6 +59,7 @@ describe("PetPomodoroDatabase", () => {
     delete legacySession.focusCoinsAwarded;
     const legacyPet: Record<string, unknown> = { ...makePet() };
     delete legacyPet.lastAppOpenedAt;
+    delete legacyPet.sleepStartedAt;
 
     await legacy.open();
     await legacy.table("pets").add(legacyPet);
@@ -84,6 +85,7 @@ describe("PetPomodoroDatabase", () => {
     await expect(database.pets.get("pet-1")).resolves.toMatchObject({
       id: "pet-1",
       lastAppOpenedAt: "2026-05-22T12:00:00.000Z",
+      sleepStartedAt: null,
     });
     await expect(database.rewardLedger.get("reward-1")).resolves.toMatchObject({
       rewardType: "honesty",

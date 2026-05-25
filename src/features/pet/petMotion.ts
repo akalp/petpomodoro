@@ -32,4 +32,8 @@ export const PET_MOTION_BY_MOOD = {
     animate: { rotate: [0, -1, 0], y: [0, -1, 0] },
     transition: { duration: 2.2, repeat: Infinity },
   },
+  sleeping: {
+    animate: { rotate: [0, 0.5, 0], y: [0, 1, 0] },
+    transition: { duration: 4.8, repeat: Infinity },
+  },
 } satisfies Record<PetDisplayMood, PetMotionProfile>;

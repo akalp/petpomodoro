@@ -16,4 +16,13 @@ describe("PetAvatar", () => {
     expect(html).toContain('data-species="momo"');
     expect(html).toContain("One gentle step at a time.");
   });
+
+  it("renders the sleeping display mood", () => {
+    const html = renderToStaticMarkup(
+      <PetAvatar mood="sleeping" t={createTranslator("en")} />,
+    );
+
+    expect(html).toContain('aria-label="Pet mood: Sleeping"');
+    expect(html).toContain('data-mood="sleeping"');
+  });
 });

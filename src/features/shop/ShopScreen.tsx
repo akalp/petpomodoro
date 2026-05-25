@@ -6,6 +6,7 @@ import type { Translator } from "../../i18n";
 interface ShopScreenProps {
   disabled: boolean;
   isFocusActive: boolean;
+  isPetSleeping: boolean;
   lastFoodPurchase: FoodPurchaseSummary | null;
   onBuyFood: (foodId: FoodItemId) => void;
   onClearPurchase: () => void;
@@ -16,6 +17,7 @@ interface ShopScreenProps {
 export function ShopScreen({
   disabled,
   isFocusActive,
+  isPetSleeping,
   lastFoodPurchase,
   onBuyFood,
   onClearPurchase,
@@ -31,6 +33,11 @@ export function ShopScreen({
       {isFocusActive ? (
         <Card className="border-amber-100 bg-amber-50 text-sm font-medium leading-6 text-amber-950">
           {t("shopUnavailableDuringFocus")}
+        </Card>
+      ) : null}
+      {isPetSleeping ? (
+        <Card className="border-indigo-100 bg-indigo-50 text-sm font-medium leading-6 text-indigo-950">
+          {t("shopUnavailableDuringSleep", { pet: pet.name })}
         </Card>
       ) : null}
       <PetShop

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 
 import { PetDashboard } from "../../components/pet/PetDashboard";
-import type { PetDisplayMood, PetState } from "../../domain";
+import type { PetDisplayMood, PetSleepSummary, PetState } from "../../domain";
 import type { Translator } from "../../i18n";
 
 import { PetMoodShowcase } from "./PetMoodShowcase";
@@ -10,11 +10,30 @@ import { PetMoodShowcase } from "./PetMoodShowcase";
 interface PetScreenProps {
   displayMood: PetDisplayMood | null;
   installHint: ReactNode;
+  isFocusActive: boolean;
+  isSleepDisabled: boolean;
+  lastSleepSummary: PetSleepSummary | null;
+  onClearSleepSummary: () => void;
+  onStartSleep: () => void;
+  onWakeSleep: () => void;
   pet: PetState | null;
+  sleepPreview: PetSleepSummary | null;
   t: Translator;
 }
 
-export function PetScreen({ displayMood, installHint, pet, t }: PetScreenProps) {
+export function PetScreen({
+  displayMood,
+  installHint,
+  isFocusActive,
+  isSleepDisabled,
+  lastSleepSummary,
+  onClearSleepSummary,
+  onStartSleep,
+  onWakeSleep,
+  pet,
+  sleepPreview,
+  t,
+}: PetScreenProps) {
   const location = useLocation();
   const isMoodShowcase =
     import.meta.env.DEV &&
@@ -27,7 +46,18 @@ export function PetScreen({ displayMood, installHint, pet, t }: PetScreenProps) 
   return (
     <section className="space-y-4 sm:space-y-5">
       {installHint}
-      <PetDashboard displayMood={displayMood} pet={pet} t={t} />
+      <PetDashboard
+        displayMood={displayMood}
+        isFocusActive={isFocusActive}
+        isSleepDisabled={isSleepDisabled}
+        lastSleepSummary={lastSleepSummary}
+        onClearSleepSummary={onClearSleepSummary}
+        onStartSleep={onStartSleep}
+        onWakeSleep={onWakeSleep}
+        pet={pet}
+        sleepPreview={sleepPreview}
+        t={t}
+      />
     </section>
   );
 }

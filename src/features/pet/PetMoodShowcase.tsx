@@ -11,6 +11,7 @@ const SHOWCASE_MOODS = [
   "tired",
   "sad",
   "working",
+  "sleeping",
 ] satisfies readonly PetDisplayMood[];
 
 interface PetMoodShowcaseProps {
