@@ -15,6 +15,7 @@ export function InstallHint({ t }: InstallHintProps) {
       : shouldShowIosInstallHint(
           window.navigator.userAgent,
           isStandaloneDisplayMode(),
+          window.navigator.maxTouchPoints,
         ),
   );
 

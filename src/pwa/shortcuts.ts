@@ -1,3 +1,5 @@
+import { isIosOrIpadosDevice } from "./installHints";
+
 export interface NativeTimerShortcutUrlInput {
   plannedDurationMinutes: number;
 }
@@ -25,8 +27,11 @@ export function shouldRunStartNativeTimerShortcut(
   userAgent: string,
   isStandalone: boolean,
   hasInstalledShortcut: boolean,
+  maxTouchPoints = 0,
 ): boolean {
-  const isiOS = /iPad|iPhone|iPod/.test(userAgent);
-
-  return isiOS && isStandalone && hasInstalledShortcut;
+  return (
+    isIosOrIpadosDevice(userAgent, maxTouchPoints) &&
+    isStandalone &&
+    hasInstalledShortcut
+  );
 }

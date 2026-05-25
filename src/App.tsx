@@ -22,7 +22,10 @@ import {
   localizeErrorMessage,
   type Translator,
 } from "./i18n";
-import { isStandaloneDisplayMode } from "./pwa/installHints";
+import {
+  isIosOrIpadosDevice,
+  isStandaloneDisplayMode,
+} from "./pwa/installHints";
 import {
   getNotificationPermission,
   requestLocalNotificationPermission,
@@ -119,6 +122,12 @@ export function App() {
   const hasInstalledShortcut = settings?.hasInstalledShortcut ?? false;
   const hasEnabledFocusNotifications =
     settings?.hasEnabledFocusNotifications ?? false;
+  const supportsIosFeatures =
+    typeof window !== "undefined" &&
+    isIosOrIpadosDevice(
+      window.navigator.userAgent,
+      window.navigator.maxTouchPoints,
+    );
   const customDurationInput =
     customDurationDraft ?? String(selectedDuration);
   const language = settings?.language ?? DEFAULT_LANGUAGE;
@@ -263,7 +272,7 @@ export function App() {
 
     if (
       !shouldScheduleFocusNotification(
-        hasEnabledFocusNotifications,
+        supportsIosFeatures && hasEnabledFocusNotifications,
         notificationPermission,
         scheduledSession,
       )
@@ -303,6 +312,7 @@ export function App() {
     notificationPermission,
     notificationCopy,
     refreshSessionStatus,
+    supportsIosFeatures,
   ]);
 
   const isBusy = isInitializing || isSessionLoading;
@@ -421,7 +431,14 @@ export function App() {
       t={t}
     />
   );
-  const petScreen = <PetScreen displayMood={displayMood} pet={pet} t={t} />;
+  const petScreen = (
+    <PetScreen
+      displayMood={displayMood}
+      installHint={<InstallHint t={t} />}
+      pet={pet}
+      t={t}
+    />
+  );
   const journalScreen = (
     <JournalScreen
       isLoading={isBusy && hasHydrated}
@@ -444,7 +461,6 @@ export function App() {
         focus={
           <FocusScreen
             focusPanel={focusPanel}
-            installHint={<InstallHint t={t} />}
             shortcutInstallHint={
               <ShortcutInstallHint
                 hasInstalledShortcut={hasInstalledShortcut}
@@ -508,6 +524,7 @@ export function App() {
           pet={pet}
           selectedDuration={selectedDuration}
           showHeader={false}
+          supportsIosFeatures={supportsIosFeatures}
           t={t}
         />
       </Sheet>
@@ -524,6 +541,7 @@ function runStartNativeTimerShortcut(
       window.navigator.userAgent,
       isStandaloneDisplayMode(),
       hasInstalledShortcut,
+      window.navigator.maxTouchPoints,
     )
   ) {
     return;

@@ -44,4 +44,25 @@ describe("Shortcut URL helpers", () => {
     ).toBe(false);
   });
 
+  it("runs the native timer shortcut from an installed iPadOS PWA", () => {
+    const desktopModeIpadUserAgent =
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/17.0 Safari/605.1.15";
+
+    expect(
+      shouldRunStartNativeTimerShortcut(
+        desktopModeIpadUserAgent,
+        true,
+        true,
+        5,
+      ),
+    ).toBe(true);
+    expect(
+      shouldRunStartNativeTimerShortcut(
+        desktopModeIpadUserAgent,
+        true,
+        true,
+        0,
+      ),
+    ).toBe(false);
+  });
 });

@@ -27,6 +27,7 @@ interface SettingsPanelProps {
   pet: PetState | null;
   selectedDuration: number;
   showHeader?: boolean;
+  supportsIosFeatures: boolean;
   language: SupportedLanguage;
   t: Translator;
 }
@@ -52,6 +53,7 @@ export function SettingsPanel({
   pet,
   selectedDuration,
   showHeader = true,
+  supportsIosFeatures,
   language,
   t,
 }: SettingsPanelProps) {
@@ -177,56 +179,60 @@ export function SettingsPanel({
         ) : null}
       </div>
 
-      <div className="rounded-lg border border-teal-100 bg-teal-50 p-4">
-        <p className="text-sm font-semibold text-slate-900">
-          {t("shortcutTitle")}
-        </p>
-        <p className="mt-1 text-sm leading-6 text-slate-600">
-          {t("shortcutSettingsSupport")}
-        </p>
-        <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
-          <input
-            checked={hasInstalledShortcut}
-            className="h-5 w-5 accent-teal-600"
-            disabled={disabled}
-            onChange={(event) =>
-              onShortcutInstalledChange(event.target.checked)
-            }
-            type="checkbox"
-          />
-          {t("installedShortcut")}
-        </label>
-      </div>
+      {supportsIosFeatures ? (
+        <>
+          <div className="rounded-lg border border-teal-100 bg-teal-50 p-4">
+            <p className="text-sm font-semibold text-slate-900">
+              {t("shortcutTitle")}
+            </p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              {t("shortcutSettingsSupport")}
+            </p>
+            <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
+              <input
+                checked={hasInstalledShortcut}
+                className="h-5 w-5 accent-teal-600"
+                disabled={disabled}
+                onChange={(event) =>
+                  onShortcutInstalledChange(event.target.checked)
+                }
+                type="checkbox"
+              />
+              {t("installedShortcut")}
+            </label>
+          </div>
 
-      <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
-        <p className="text-sm font-semibold text-slate-900">{t("remindersTitle")}</p>
-        <p className="mt-1 text-sm leading-6 text-slate-600">
-          {t("remindersSupport")}
-        </p>
-        <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
-          <input
-            checked={hasEnabledFocusNotifications}
-            className="h-5 w-5 accent-sky-600"
-            disabled={disabled}
-            onChange={(event) =>
-              onFocusNotificationsChange(event.target.checked)
-            }
-            type="checkbox"
-          />
-          {t("notifyAtEnd")}
-        </label>
-        {notificationNotice ? (
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            {notificationNotice === "unavailable"
-              ? t("notificationsUnavailable")
-              : t("notificationsOff")}
-          </p>
-        ) : hasEnabledFocusNotifications && notificationPermission === "granted" ? (
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            {t("remindersOn")}
-          </p>
-        ) : null}
-      </div>
+          <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
+            <p className="text-sm font-semibold text-slate-900">{t("remindersTitle")}</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              {t("remindersSupport")}
+            </p>
+            <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
+              <input
+                checked={hasEnabledFocusNotifications}
+                className="h-5 w-5 accent-sky-600"
+                disabled={disabled}
+                onChange={(event) =>
+                  onFocusNotificationsChange(event.target.checked)
+                }
+                type="checkbox"
+              />
+              {t("notifyAtEnd")}
+            </label>
+            {notificationNotice ? (
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {notificationNotice === "unavailable"
+                  ? t("notificationsUnavailable")
+                  : t("notificationsOff")}
+              </p>
+            ) : hasEnabledFocusNotifications && notificationPermission === "granted" ? (
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                {t("remindersOn")}
+              </p>
+            ) : null}
+          </div>
+        </>
+      ) : null}
 
       <div className="rounded-lg border border-rose-100 bg-rose-50 p-4">
         <p className="text-sm font-semibold text-slate-900">{t("resetTitle")}</p>

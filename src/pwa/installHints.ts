@@ -1,18 +1,38 @@
-export function shouldShowIosInstallHint(userAgent: string, isStandalone: boolean): boolean {
-  const isiOS = /iPad|iPhone|iPod/.test(userAgent);
+export function isIosOrIpadosDevice(
+  userAgent: string,
+  maxTouchPoints = 0,
+): boolean {
+  return (
+    /iPad|iPhone|iPod/.test(userAgent) ||
+    (/Macintosh/.test(userAgent) && maxTouchPoints > 1)
+  );
+}
+
+export function shouldShowIosInstallHint(
+  userAgent: string,
+  isStandalone: boolean,
+  maxTouchPoints = 0,
+): boolean {
   const isSafari = /Safari/.test(userAgent) && !/CriOS|FxiOS|EdgiOS/.test(userAgent);
 
-  return isiOS && isSafari && !isStandalone;
+  return (
+    isIosOrIpadosDevice(userAgent, maxTouchPoints) &&
+    isSafari &&
+    !isStandalone
+  );
 }
 
 export function shouldShowIosShortcutInstallHint(
   userAgent: string,
   isStandalone: boolean,
   hasInstalledShortcut: boolean,
+  maxTouchPoints = 0,
 ): boolean {
-  const isiOS = /iPad|iPhone|iPod/.test(userAgent);
-
-  return isiOS && isStandalone && !hasInstalledShortcut;
+  return (
+    isIosOrIpadosDevice(userAgent, maxTouchPoints) &&
+    isStandalone &&
+    !hasInstalledShortcut
+  );
 }
 
 export function isStandaloneDisplayMode(): boolean {

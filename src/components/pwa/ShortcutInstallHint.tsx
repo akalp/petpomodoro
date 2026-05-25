@@ -24,6 +24,7 @@ export function ShortcutInstallHint({
           window.navigator.userAgent,
           isStandaloneDisplayMode(),
           hasInstalledShortcut,
+          window.navigator.maxTouchPoints,
         );
 
   if (!shouldShow) {
