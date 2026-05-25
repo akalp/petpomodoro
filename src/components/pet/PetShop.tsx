@@ -7,7 +7,9 @@ import {
   type FoodPurchaseSummary,
   type PetState,
 } from "../../domain";
-import type { MessageKey, Translator } from "../../i18n";
+import { FoodVisual } from "../../features/shop/FoodVisual";
+import { FOOD_PRESENTATION } from "../../features/shop/foodPresentation";
+import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 
@@ -22,28 +24,6 @@ interface PetShopProps {
   showHeader?: boolean;
   t: Translator;
 }
-
-const foodCopy: Record<
-  FoodItemId,
-  { name: MessageKey; description: MessageKey }
-> = {
-  "berry-bowl": {
-    name: "foodBerryBowl",
-    description: "foodBerryBowlDescription",
-  },
-  "warm-soup": {
-    name: "foodWarmSoup",
-    description: "foodWarmSoupDescription",
-  },
-  "honey-toast": {
-    name: "foodHoneyToast",
-    description: "foodHoneyToastDescription",
-  },
-  "moon-milk": {
-    name: "foodMoonMilk",
-    description: "foodMoonMilkDescription",
-  },
-};
 
 export function PetShop({
   disabled,
@@ -94,7 +74,7 @@ export function PetShop({
         >
           <p className="font-semibold">
             {t("foodBought", {
-              food: t(foodCopy[lastFoodPurchase.item.id].name),
+              food: t(FOOD_PRESENTATION[lastFoodPurchase.item.id].nameKey),
             })}
           </p>
           <p>
@@ -176,7 +156,7 @@ function FoodButton({
       type="button"
     >
       <div className="flex min-h-24 items-start gap-3">
-        <FoodVisual foodId={food.id} isDisabled={disabled} />
+        <FoodVisual disabled={disabled} foodId={food.id} />
         <div className="min-w-0 flex-1">
           <p
             className={[
@@ -184,7 +164,7 @@ function FoodButton({
               disabled ? "text-slate-500" : "text-slate-950",
             ].join(" ")}
           >
-            {t(foodCopy[food.id].name)}
+            {t(FOOD_PRESENTATION[food.id].nameKey)}
           </p>
           <p
             className={[
@@ -192,7 +172,7 @@ function FoodButton({
               disabled ? "text-slate-500" : "text-slate-600",
             ].join(" ")}
           >
-            {t(foodCopy[food.id].description)}
+            {t(FOOD_PRESENTATION[food.id].descriptionKey)}
           </p>
         </div>
       </div>
@@ -276,69 +256,6 @@ function StatBoost({
         {label}
       </dt>
       <dd className="mt-1 text-sm">{formatSigned(value)}</dd>
-    </div>
-  );
-}
-
-function FoodVisual({
-  foodId,
-  isDisabled,
-}: {
-  foodId: FoodItemId;
-  isDisabled: boolean;
-}) {
-  const opacityClass = isDisabled ? "opacity-50" : "";
-
-  if (foodId === "berry-bowl") {
-    return (
-      <div
-        aria-hidden="true"
-        className={`relative h-16 w-16 shrink-0 rounded-full bg-rose-100 ${opacityClass}`}
-      >
-        <div className="absolute bottom-3 left-2 h-8 w-12 rounded-b-full rounded-t-md bg-sky-200" />
-        <div className="absolute left-4 top-5 h-4 w-4 rounded-full bg-rose-500" />
-        <div className="absolute left-7 top-3 h-4 w-4 rounded-full bg-fuchsia-500" />
-        <div className="absolute right-3 top-6 h-4 w-4 rounded-full bg-red-500" />
-      </div>
-    );
-  }
-
-  if (foodId === "warm-soup") {
-    return (
-      <div
-        aria-hidden="true"
-        className={`relative h-16 w-16 shrink-0 rounded-full bg-orange-100 ${opacityClass}`}
-      >
-        <div className="absolute bottom-3 left-2 h-7 w-12 rounded-b-full rounded-t-md bg-amber-300" />
-        <div className="absolute left-5 top-4 h-6 w-6 rounded-full bg-orange-300" />
-        <div className="absolute left-4 top-2 h-1 w-2 rounded-full bg-orange-400" />
-        <div className="absolute right-5 top-1 h-1 w-2 rounded-full bg-orange-400" />
-      </div>
-    );
-  }
-
-  if (foodId === "honey-toast") {
-    return (
-      <div
-        aria-hidden="true"
-        className={`relative h-16 w-16 shrink-0 rounded-full bg-yellow-100 ${opacityClass}`}
-      >
-        <div className="absolute bottom-3 left-3 h-10 w-10 rounded-lg bg-amber-200 shadow-inner shadow-amber-300" />
-        <div className="absolute left-5 top-5 h-6 w-6 rounded-md bg-yellow-400" />
-        <div className="absolute right-4 top-7 h-2 w-2 rounded-full bg-amber-600" />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      aria-hidden="true"
-      className={`relative h-16 w-16 shrink-0 rounded-full bg-indigo-100 ${opacityClass}`}
-    >
-      <div className="absolute bottom-3 left-4 h-9 w-8 rounded-b-xl rounded-t-md bg-slate-100 shadow-inner shadow-indigo-200" />
-      <div className="absolute left-6 top-3 h-2 w-4 rounded-full bg-white" />
-      <div className="absolute right-3 top-3 h-2 w-2 rounded-full bg-indigo-300" />
-      <div className="absolute right-5 top-6 h-1.5 w-1.5 rounded-full bg-indigo-400" />
     </div>
   );
 }

@@ -1,0 +1,336 @@
+.food-visual {
+  position: relative;
+  display: block;
+  flex: none;
+  width: 4rem;
+  height: 4rem;
+  isolation: isolate;
+  transition:
+    filter 160ms ease,
+    opacity 160ms ease;
+}
+
+.food-visual[data-disabled="true"] {
+  filter: grayscale(0.22) saturate(0.72);
+  opacity: 0.5;
+}
+
+.food-visual__halo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  border-radius: 50%;
+  background: var(--food-halo);
+}
+
+.food-visual__steam,
+.food-visual__vessel,
+.food-visual__fill,
+.food-visual__morsel,
+.food-visual__garnish,
+.food-visual__shine,
+.food-visual__side-detail {
+  position: absolute;
+  display: block;
+}
+
+.food-visual__steam {
+  top: 0.36rem;
+  left: 1.26rem;
+  width: 1.65rem;
+  height: 1.3rem;
+  opacity: 0;
+}
+
+.food-visual__steam-line {
+  position: absolute;
+  bottom: 0;
+  display: block;
+  width: 0.42rem;
+  height: 1rem;
+  border-left: 0.15rem solid var(--food-steam, #f4a889);
+  border-radius: 80%;
+  transform: rotate(14deg);
+  animation: food-steam 2.4s ease-in-out infinite;
+}
+
+.food-visual__steam-line--one {
+  left: 0.2rem;
+}
+
+.food-visual__steam-line--two {
+  right: 0.22rem;
+  height: 0.78rem;
+  animation-delay: 0.72s;
+}
+
+.food-visual__fill,
+.food-visual__morsel,
+.food-visual__garnish,
+.food-visual__shine,
+.food-visual__side-detail {
+  opacity: 0;
+}
+
+.food-visual[data-food="berry-bowl"] {
+  --food-halo: #ffe4e9;
+}
+
+.food-visual[data-food="berry-bowl"] .food-visual__vessel {
+  bottom: 0.64rem;
+  left: 0.52rem;
+  width: 3rem;
+  height: 1.48rem;
+  border-radius: 0.28rem 0.28rem 1.48rem 1.48rem;
+  background: linear-gradient(145deg, #d0ecf3, #91cddd);
+  box-shadow:
+    inset 0 -0.16rem 0 rgb(83 148 170 / 20%),
+    0 0.18rem 0.26rem rgb(99 72 76 / 10%);
+}
+
+.food-visual[data-food="berry-bowl"] .food-visual__fill {
+  top: -0.16rem;
+  left: 0.12rem;
+  width: 2.75rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: #7db8c9;
+  opacity: 1;
+}
+
+.food-visual[data-food="berry-bowl"] .food-visual__morsel {
+  top: -0.42rem;
+  width: 0.86rem;
+  height: 0.86rem;
+  border-radius: 50%;
+  opacity: 1;
+  box-shadow: inset 0.16rem 0.16rem 0 rgb(255 255 255 / 20%);
+}
+
+.food-visual[data-food="berry-bowl"] .food-visual__morsel--one {
+  left: 0.4rem;
+  background: #f04467;
+}
+
+.food-visual[data-food="berry-bowl"] .food-visual__morsel--two {
+  top: -0.72rem;
+  left: 1.08rem;
+  background: #ba58b8;
+}
+
+.food-visual[data-food="berry-bowl"] .food-visual__morsel--three {
+  left: 1.86rem;
+  background: #df3b54;
+}
+
+.food-visual[data-food="berry-bowl"] .food-visual__garnish {
+  top: -0.76rem;
+  left: 0.92rem;
+  width: 0.47rem;
+  height: 0.27rem;
+  border-radius: 90% 10% 90% 10%;
+  background: #66aa78;
+  opacity: 1;
+  transform: rotate(-31deg);
+}
+
+.food-visual[data-food="warm-soup"] {
+  --food-halo: #fff0dd;
+  --food-steam: #efac8d;
+}
+
+.food-visual[data-food="warm-soup"] .food-visual__steam {
+  opacity: 0.8;
+}
+
+.food-visual[data-food="warm-soup"] .food-visual__vessel {
+  bottom: 0.62rem;
+  left: 0.48rem;
+  width: 3.08rem;
+  height: 1.44rem;
+  border-radius: 0.24rem 0.24rem 1.52rem 1.52rem;
+  background: linear-gradient(145deg, #ffd27b, #eaa15d);
+  box-shadow: inset 0 -0.14rem 0 rgb(190 105 52 / 18%);
+}
+
+.food-visual[data-food="warm-soup"] .food-visual__fill {
+  top: -0.13rem;
+  left: 0.12rem;
+  width: 2.83rem;
+  height: 0.44rem;
+  border-radius: 50%;
+  background: #e77a47;
+  opacity: 1;
+}
+
+.food-visual[data-food="warm-soup"] .food-visual__morsel {
+  top: 0.02rem;
+  width: 0.2rem;
+  height: 0.12rem;
+  border-radius: 99px;
+  background: #75a05d;
+  opacity: 1;
+}
+
+.food-visual[data-food="warm-soup"] .food-visual__morsel--one {
+  left: 0.76rem;
+  transform: rotate(18deg);
+}
+
+.food-visual[data-food="warm-soup"] .food-visual__morsel--two {
+  left: 1.45rem;
+  transform: rotate(-18deg);
+}
+
+.food-visual[data-food="warm-soup"] .food-visual__morsel--three {
+  left: 1.98rem;
+}
+
+.food-visual[data-food="warm-soup"] .food-visual__side-detail {
+  right: 0.16rem;
+  bottom: 1.02rem;
+  width: 0.76rem;
+  height: 0.14rem;
+  border-radius: 999px;
+  background: #d77c56;
+  opacity: 1;
+  transform: rotate(-14deg);
+}
+
+.food-visual[data-food="honey-toast"] {
+  --food-halo: #fff3d1;
+}
+
+.food-visual[data-food="honey-toast"] .food-visual__vessel {
+  bottom: 0.58rem;
+  left: 0.74rem;
+  width: 2.58rem;
+  height: 2.54rem;
+  border-radius: 0.82rem 0.82rem 0.38rem 0.38rem;
+  background: #d88c46;
+  box-shadow: 0 0.17rem 0.2rem rgb(126 82 39 / 13%);
+  transform: rotate(-4deg);
+}
+
+.food-visual[data-food="honey-toast"] .food-visual__fill {
+  inset: 0.17rem;
+  border-radius: 0.68rem 0.68rem 0.28rem 0.28rem;
+  background: linear-gradient(150deg, #f6d893, #efbd68);
+  opacity: 1;
+}
+
+.food-visual[data-food="honey-toast"] .food-visual__morsel--one {
+  top: 0.74rem;
+  left: 0.64rem;
+  width: 1.25rem;
+  height: 0.72rem;
+  border-radius: 45% 55% 50% 50%;
+  background: #f5b82e;
+  opacity: 1;
+  transform: rotate(15deg);
+}
+
+.food-visual[data-food="honey-toast"] .food-visual__shine {
+  top: 0.84rem;
+  left: 0.84rem;
+  width: 0.5rem;
+  height: 0.18rem;
+  border-radius: 99px;
+  background: rgb(255 242 178 / 80%);
+  opacity: 1;
+}
+
+.food-visual[data-food="honey-toast"] .food-visual__side-detail {
+  top: 2.09rem;
+  left: 2.18rem;
+  width: 0.24rem;
+  height: 0.46rem;
+  border-radius: 0 0 99px 99px;
+  background: #e9a91f;
+  opacity: 1;
+}
+
+.food-visual[data-food="moon-milk"] {
+  --food-halo: #e8e8ff;
+  --food-steam: #b9b6e4;
+}
+
+.food-visual[data-food="moon-milk"] .food-visual__steam {
+  left: 1.38rem;
+  opacity: 0.52;
+}
+
+.food-visual[data-food="moon-milk"] .food-visual__vessel {
+  bottom: 0.52rem;
+  left: 1.04rem;
+  width: 1.92rem;
+  height: 2.4rem;
+  border: 0.12rem solid #dadcf3;
+  border-radius: 0.3rem 0.3rem 0.62rem 0.62rem;
+  background: linear-gradient(140deg, #fffdf8, #e9eafd);
+  box-shadow: 0 0.18rem 0.25rem rgb(69 66 111 / 10%);
+}
+
+.food-visual[data-food="moon-milk"] .food-visual__fill {
+  right: 0.12rem;
+  bottom: 0.14rem;
+  left: 0.12rem;
+  height: 1.72rem;
+  border-radius: 0.12rem 0.12rem 0.44rem 0.44rem;
+  background: linear-gradient(135deg, #fffdf5, #e6e5fa);
+  opacity: 1;
+}
+
+.food-visual[data-food="moon-milk"] .food-visual__morsel--one {
+  top: 0.74rem;
+  left: 0.6rem;
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 50%;
+  background: #f5d88f;
+  opacity: 1;
+  box-shadow: 0.13rem -0.08rem 0 #eeecff;
+}
+
+.food-visual[data-food="moon-milk"] .food-visual__shine {
+  top: 0.52rem;
+  left: 0.26rem;
+  width: 0.17rem;
+  height: 1.22rem;
+  border-radius: 99px;
+  background: rgb(255 255 255 / 84%);
+  opacity: 1;
+}
+
+.food-visual[data-food="moon-milk"] .food-visual__side-detail {
+  top: 1.2rem;
+  right: 0.58rem;
+  width: 0.22rem;
+  height: 0.22rem;
+  border-radius: 50%;
+  background: #aca9dc;
+  opacity: 1;
+  box-shadow:
+    0.48rem -0.44rem 0 -0.04rem #cac7ec,
+    0.34rem 0.46rem 0 -0.05rem #9f9bd3;
+}
+
+@keyframes food-steam {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0.1rem) rotate(14deg) scaleY(0.85);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: translateY(-0.16rem) rotate(-8deg) scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .food-visual__steam-line {
+    animation: none;
+  }
+}

@@ -23,6 +23,12 @@ describe("PetShop", () => {
     expect(html).toContain("Warm soup");
     expect(html).toContain("Honey toast");
     expect(html).toContain("Moon milk");
+    expect(html).toContain(
+      'class="food-visual" data-food="berry-bowl" data-disabled="false"',
+    );
+    expect(html).toContain(
+      'class="food-visual" data-food="warm-soup" data-disabled="true"',
+    );
     expect(html).toContain("data-testid=\"food-warm-soup\" disabled=\"\"");
     expect(html).toContain("Need more coins");
   });
