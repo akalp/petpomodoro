@@ -1,4 +1,5 @@
 import type { FocusSessionStatus, PetDisplayMood, PetMood, PetState } from "./types";
+import { resolvePetMood, type PetMoodStats } from "./petMoodRules";
 
 export const XP_PER_LEVEL = 100;
 export const MAX_PET_STAT = 100;
@@ -210,24 +211,8 @@ export function moodForStats({
   happiness,
   hunger,
   energy,
-}: Pick<PetState, "happiness" | "hunger" | "energy">): PetMood {
-  if (hunger <= 25) {
-    return "hungry";
-  }
-
-  if (energy <= 15) {
-    return "tired";
-  }
-
-  if (happiness <= 25) {
-    return "sad";
-  }
-
-  if (happiness >= 60) {
-    return "happy";
-  }
-
-  return "calm";
+}: PetMoodStats): PetMood {
+  return resolvePetMood({ happiness, hunger, energy });
 }
 
 export function normalizePetState(pet: PetState): PetState {

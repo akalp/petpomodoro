@@ -9,6 +9,7 @@ import {
   displayMoodForSession,
   moodForStats,
 } from "./pet";
+import { PET_MOOD_RULES, resolvePetMood } from "./petMoodRules";
 import { makePet, makeSession } from "../test/factories";
 
 describe("pet domain logic", () => {
@@ -152,6 +153,46 @@ describe("pet domain logic", () => {
     );
     expect(moodForStats({ happiness: 50, hunger: 80, energy: 80 })).toBe(
       "calm",
+    );
+  });
+
+  it("keeps pet mood rule priorities explicit", () => {
+    expect(
+      PET_MOOD_RULES.map(({ mood, priority }) => ({ mood, priority })),
+    ).toEqual([
+      { mood: "hungry", priority: 100 },
+      { mood: "tired", priority: 90 },
+      { mood: "sad", priority: 80 },
+      { mood: "happy", priority: 40 },
+      { mood: "calm", priority: 0 },
+    ]);
+  });
+
+  it("resolves pet moods at documented thresholds", () => {
+    expect(resolvePetMood({ happiness: 50, hunger: 25, energy: 50 })).toBe(
+      "hungry",
+    );
+    expect(resolvePetMood({ happiness: 50, hunger: 26, energy: 15 })).toBe(
+      "tired",
+    );
+    expect(resolvePetMood({ happiness: 25, hunger: 26, energy: 16 })).toBe("sad");
+    expect(resolvePetMood({ happiness: 60, hunger: 26, energy: 16 })).toBe(
+      "happy",
+    );
+    expect(resolvePetMood({ happiness: 59, hunger: 26, energy: 16 })).toBe(
+      "calm",
+    );
+  });
+
+  it("uses priority order when multiple pet mood rules match", () => {
+    expect(resolvePetMood({ happiness: 20, hunger: 20, energy: 10 })).toBe(
+      "hungry",
+    );
+    expect(resolvePetMood({ happiness: 20, hunger: 26, energy: 10 })).toBe(
+      "tired",
+    );
+    expect(resolvePetMood({ happiness: 20, hunger: 26, energy: 16 })).toBe(
+      "sad",
     );
   });
 });
