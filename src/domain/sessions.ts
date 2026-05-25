@@ -1,5 +1,9 @@
+import {
+  focusSessionStateFromSession,
+  idleFocusSessionState,
+  reduceFocusSession,
+} from "./focusSessionMachine";
 import { DomainError } from "./errors";
-import { validateFocusDurationMinutes } from "./settings";
 import type { AbandonmentReason, FocusSession, FocusSessionStatus } from "./types";
 
 export interface CreateRunningSessionInput {
@@ -19,39 +23,26 @@ export function createRunningSession({
     throw new DomainError("A focus session can only start from idle.");
   }
 
-  validateFocusDurationMinutes(plannedDurationMinutes);
-
-  return {
+  const nextState = reduceFocusSession(idleFocusSessionState(), {
+    type: "start",
     id,
-    status: "running",
     plannedDurationMinutes,
-    startedAt: now,
-    expectedEndAt: addMinutes(now, plannedDurationMinutes),
-    confirmedAt: null,
-    abandonedAt: null,
-    abandonmentReason: null,
-    rewardClaimedAt: null,
-    focusImpactAppliedUntil: now,
-    focusCoinsAwarded: 0,
-  };
+    now,
+  });
+
+  return sessionFromState(nextState);
 }
 
 export function moveRunningSessionToAwaitingConfirmation(
   session: FocusSession,
   now: string,
 ): FocusSession {
-  if (session.status !== "running") {
-    throw new DomainError("Only running sessions can be checked for completion time.");
-  }
-
-  if (Date.parse(now) < Date.parse(session.expectedEndAt)) {
-    return session;
-  }
-
-  return {
-    ...session,
-    status: "awaiting_confirmation",
-  };
+  return sessionFromState(
+    reduceFocusSession(focusSessionStateFromSession(session), {
+      type: "check_time",
+      now,
+    }),
+  );
 }
 
 export function abandonFocusSession(
@@ -59,46 +50,31 @@ export function abandonFocusSession(
   abandonmentReason: AbandonmentReason,
   now: string,
 ): FocusSession {
-  if (session.status !== "running" && session.status !== "awaiting_confirmation") {
-    throw new DomainError("Only running or awaiting confirmation sessions can be abandoned.");
-  }
-
-  if (session.status === "running" && abandonmentReason !== "cancelled") {
-    throw new DomainError("A running session can only be cancelled.");
-  }
-
-  if (
-    session.status === "awaiting_confirmation" &&
-    abandonmentReason !== "honest_confirmation"
-  ) {
-    throw new DomainError("A session awaiting confirmation needs an honest answer.");
-  }
-
-  return {
-    ...session,
-    status: "abandoned",
-    confirmedAt: null,
-    abandonedAt: now,
-    abandonmentReason,
-    rewardClaimedAt: null,
-  };
+  return sessionFromState(
+    reduceFocusSession(focusSessionStateFromSession(session), {
+      type: "abandon",
+      abandonmentReason,
+      now,
+    }),
+  );
 }
 
 export function confirmFocusSession(
   session: FocusSession,
   now: string,
 ): FocusSession {
-  if (session.status !== "awaiting_confirmation") {
-    throw new DomainError("Only sessions awaiting confirmation can be completed.");
-  }
-
-  return {
-    ...session,
-    status: "completed",
-    confirmedAt: now,
-  };
+  return sessionFromState(
+    reduceFocusSession(focusSessionStateFromSession(session), {
+      type: "confirm_completed",
+      now,
+    }),
+  );
 }
 
-function addMinutes(isoDate: string, minutes: number): string {
-  return new Date(Date.parse(isoDate) + minutes * 60 * 1000).toISOString();
+function sessionFromState(state: ReturnType<typeof reduceFocusSession>): FocusSession {
+  if (!state.session) {
+    throw new DomainError("Focus session transition did not return a session.");
+  }
+
+  return state.session;
 }
