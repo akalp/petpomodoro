@@ -137,6 +137,7 @@ The MVP should include:
 - Local session history and local-only shop purchases.
 - Offline support after first load.
 - Bundled English and Türkçe interface languages with an on-device saved preference.
+- Local user-authored pet speech messages saved on the device.
 - Mobile-first UI optimized for iOS Home Screen usage.
 - Hash-based Pet, Focus, Shop, and Journal routes with mobile bottom tabs and desktop side navigation.
 - Optional native-timer Shortcut launch and best-effort local reminders as convenience features only.

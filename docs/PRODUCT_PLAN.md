@@ -60,6 +60,7 @@ Ending a running session before it reaches confirmation abandons it without a co
 - Settings available from the header, not as a primary tab.
 - Offline-capable installed PWA after first load.
 - English and Türkçe interface copy bundled in the app, with language choice stored locally.
+- User-authored pet speech messages stored locally in device settings.
 - Cozy mobile-first interface and copy.
 - Optional iOS Shortcut launch and best-effort local reminder notifications.
 

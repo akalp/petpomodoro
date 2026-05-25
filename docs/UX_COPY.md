@@ -104,13 +104,31 @@ Pet reaction:
 
 ## Pet Speech Bubble
 
-Current motivational message:
+Default motivational message:
 
 - One gentle step at a time.
 - Her seferinde minik bir adım.
 
-This message is bundled and local-first for now. A future iteration may allow the
-user to choose or write pet messages stored only on their device.
+Users may also write pet messages in Settings. Custom messages are stored only
+on this device and are not translated when the interface language changes.
+
+Settings copy:
+
+- Pet messages
+- Write little notes your pet can say. Saved only on this device.
+- Write a tiny note.
+- Add message
+- Save messages
+- You can save up to {max} pet messages.
+
+Turkish:
+
+- Dost mesajları
+- Dostunun söyleyebileceği küçük notlar yaz. Yalnızca bu cihazda kaydedilir.
+- Küçük bir not yaz.
+- Mesaj ekle
+- Mesajları kaydet
+- En fazla {max} dost mesajı kaydedebilirsin.
 
 Action:
 

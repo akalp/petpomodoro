@@ -143,6 +143,7 @@ interface AppSettings {
   hasInstalledShortcut: boolean;
   hasEnabledFocusNotifications: boolean;
   language: "en" | "tr";
+  motivationalMessages: string[];
   updatedAt: string;
 }
 
@@ -176,7 +177,7 @@ Initial schema:
 
 The unique `rewardLedger.sessionId` index is required. It is the persistence-level guard that prevents one Pomodoro session from rewarding the pet more than once, for completion or honest declined confirmation.
 
-Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`. Version 6 backfills `customName`, preserving user-supplied names while allowing an unnamed pet to display its selected species name.
+Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`. Version 6 backfills `customName`, preserving user-supplied names while allowing an unnamed pet to display its selected species name. Version 7 backfills `motivationalMessages = []` on existing settings.
 
 The feeding shop v1 uses a bundled static food catalog and does not need a new IndexedDB table. Buying food runs in a Dexie transaction that reads the current pet, applies the pure purchase function, and writes the updated pet. Failed purchases, such as insufficient coins or an unknown food id, must leave the stored pet unchanged.
 
@@ -219,6 +220,7 @@ Use small stores or slices with clear responsibilities:
   - preferred duration, including custom whole-minute values from 1 to 180
   - optional Shortcut and local-reminder preferences
   - bundled English or Türkçe interface language preference
+  - local user-authored pet speech messages
   - one-time migration of legacy localStorage preferences into IndexedDB
 
 Store actions may be async, but all transition decisions should be delegated to pure domain functions.

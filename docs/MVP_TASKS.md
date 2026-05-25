@@ -17,6 +17,7 @@ Current implemented architecture includes:
 - Minimal future-ready pet `speciesId`.
 - Pet rest/sleep care flow.
 - Focus-session transition reducer/table in `src/domain/focusSessionMachine.ts`.
+- Local user-authored pet speech messages saved in settings.
 
 ## Phase 0: Project Setup
 
