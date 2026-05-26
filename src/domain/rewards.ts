@@ -1,3 +1,4 @@
+import { ACTIVE_BALANCE_PROFILE } from "./balance";
 import { DomainError } from "./errors";
 import { applyPetStatAdjustments } from "./pet";
 import type {
@@ -5,17 +6,24 @@ import type {
   PetState,
   RewardLedger,
   RewardSummary,
-  RewardType,
 } from "./types";
 
-export const FOCUS_SESSION_XP_REWARD = 25;
-export const FOCUS_SESSION_COIN_REWARD = 10;
-export const FOCUS_SESSION_HAPPINESS_REWARD = 8;
-export const FOCUS_SESSION_HUNGER_REWARD = 0;
-export const FOCUS_SESSION_ENERGY_REWARD = 0;
-export const HONESTY_HAPPINESS_REWARD = 3;
-export const HONESTY_ENERGY_REWARD = 0;
-export const HONESTY_HEART_REWARD = 1;
+export const FOCUS_SESSION_XP_REWARD =
+  ACTIVE_BALANCE_PROFILE.focus.completedReward.xp;
+export const FOCUS_SESSION_COIN_REWARD =
+  ACTIVE_BALANCE_PROFILE.focus.completedReward.coins;
+export const FOCUS_SESSION_HAPPINESS_REWARD =
+  ACTIVE_BALANCE_PROFILE.focus.completedReward.happiness;
+export const FOCUS_SESSION_HUNGER_REWARD =
+  ACTIVE_BALANCE_PROFILE.focus.completedReward.hunger;
+export const FOCUS_SESSION_ENERGY_REWARD =
+  ACTIVE_BALANCE_PROFILE.focus.completedReward.energy;
+export const HONESTY_HAPPINESS_REWARD =
+  ACTIVE_BALANCE_PROFILE.honesty.reward.happiness;
+export const HONESTY_ENERGY_REWARD =
+  ACTIVE_BALANCE_PROFILE.honesty.reward.energy;
+export const HONESTY_HEART_REWARD =
+  ACTIVE_BALANCE_PROFILE.honesty.reward.honestyHearts;
 
 export interface ClaimFocusRewardInput {
   pet: PetState;
@@ -157,19 +165,20 @@ function rewardValuesForSession(
       happinessAwarded: FOCUS_SESSION_HAPPINESS_REWARD,
       hungerAwarded: FOCUS_SESSION_HUNGER_REWARD,
       energyAwarded: FOCUS_SESSION_ENERGY_REWARD,
-      streakAwarded: 1,
-      honestyHeartsAwarded: 0,
+      streakAwarded: ACTIVE_BALANCE_PROFILE.focus.completedReward.streak,
+      honestyHeartsAwarded:
+        ACTIVE_BALANCE_PROFILE.focus.completedReward.honestyHearts,
     };
   }
 
   return {
-    rewardType: "honesty" satisfies RewardType,
-    xpAwarded: 0,
-    coinsAwarded: 0,
+    rewardType: "honesty",
+    xpAwarded: ACTIVE_BALANCE_PROFILE.honesty.reward.xp,
+    coinsAwarded: ACTIVE_BALANCE_PROFILE.honesty.reward.coins,
     happinessAwarded: HONESTY_HAPPINESS_REWARD,
-    hungerAwarded: 0,
+    hungerAwarded: ACTIVE_BALANCE_PROFILE.honesty.reward.hunger,
     energyAwarded: HONESTY_ENERGY_REWARD,
-    streakAwarded: 0,
+    streakAwarded: ACTIVE_BALANCE_PROFILE.honesty.reward.streak,
     honestyHeartsAwarded: HONESTY_HEART_REWARD,
   };
 }

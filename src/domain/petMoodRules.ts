@@ -1,3 +1,7 @@
+import {
+  ACTIVE_BALANCE_PROFILE,
+  type BalanceMoodRuleConfig,
+} from "./balance";
 import type { PetMood, PetState } from "./types";
 
 export type PetMoodStats = Pick<PetState, "happiness" | "hunger" | "energy">;
@@ -8,13 +12,8 @@ export interface PetMoodRule {
   matches: (stats: PetMoodStats) => boolean;
 }
 
-export const PET_MOOD_RULES = [
-  { mood: "hungry", priority: 100, matches: ({ hunger }) => hunger <= 25 },
-  { mood: "tired", priority: 90, matches: ({ energy }) => energy <= 15 },
-  { mood: "sad", priority: 80, matches: ({ happiness }) => happiness <= 25 },
-  { mood: "happy", priority: 40, matches: ({ happiness }) => happiness >= 60 },
-  { mood: "calm", priority: 0, matches: () => true },
-] as const satisfies readonly PetMoodRule[];
+export const PET_MOOD_RULES =
+  ACTIVE_BALANCE_PROFILE.mood.rules.map(createMoodRule) satisfies PetMoodRule[];
 
 export function resolvePetMood(stats: PetMoodStats): PetMood {
   const matchingRule = [...PET_MOOD_RULES]
@@ -26,4 +25,34 @@ export function resolvePetMood(stats: PetMoodStats): PetMood {
   }
 
   return matchingRule.mood;
+}
+
+function createMoodRule(rule: BalanceMoodRuleConfig): PetMoodRule {
+  return {
+    mood: rule.mood,
+    priority: rule.priority,
+    matches: (stats) => moodRuleMatches(rule, stats),
+  };
+}
+
+function moodRuleMatches(
+  rule: BalanceMoodRuleConfig,
+  stats: PetMoodStats,
+): boolean {
+  if (rule.comparison === "always") {
+    return true;
+  }
+
+  if (!rule.metric || rule.value === null) {
+    return false;
+  }
+
+  const statValue = stats[rule.metric];
+
+  switch (rule.comparison) {
+    case "lte":
+      return statValue <= rule.value;
+    case "gte":
+      return statValue >= rule.value;
+  }
 }

@@ -1,3 +1,4 @@
+export * from "./balance";
 export * from "./errors";
 export * from "./focusSessionMachine";
 export * from "./pet";

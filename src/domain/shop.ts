@@ -1,14 +1,14 @@
+import {
+  ACTIVE_BALANCE_PROFILE,
+  type BalanceFoodItemId,
+} from "./balance";
 import { DomainError } from "./errors";
 import { applyPetStatAdjustments, isPetSleeping } from "./pet";
 import type { PetState } from "./types";
 
 export type ShopItemCategory = "food";
 
-export type FoodItemId =
-  | "berry-bowl"
-  | "warm-soup"
-  | "honey-toast"
-  | "moon-milk";
+export type FoodItemId = BalanceFoodItemId;
 
 export interface FoodItem {
   id: FoodItemId;
@@ -40,40 +40,8 @@ export const FOOD_NOT_FOUND_ERROR = "food_not_found";
 export const INSUFFICIENT_COINS_ERROR = "insufficient_coins";
 export const PET_SLEEPING_CANNOT_EAT_ERROR = "pet_sleeping_cannot_eat";
 
-export const FOOD_CATALOG: readonly FoodItem[] = [
-  {
-    id: "berry-bowl",
-    category: "food",
-    cost: 3,
-    hunger: 12,
-    happiness: 6,
-    energy: 0,
-  },
-  {
-    id: "warm-soup",
-    category: "food",
-    cost: 5,
-    hunger: 22,
-    happiness: 4,
-    energy: 0,
-  },
-  {
-    id: "honey-toast",
-    category: "food",
-    cost: 6,
-    hunger: 14,
-    happiness: 10,
-    energy: 4,
-  },
-  {
-    id: "moon-milk",
-    category: "food",
-    cost: 7,
-    hunger: 8,
-    happiness: 6,
-    energy: 16,
-  },
-] as const;
+export const FOOD_CATALOG =
+  ACTIVE_BALANCE_PROFILE.shop.foodCatalog satisfies readonly FoodItem[];
 
 export function buyFoodForPet(
   pet: PetState,

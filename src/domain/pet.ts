@@ -1,4 +1,5 @@
 import { DomainError } from "./errors";
+import { ACTIVE_BALANCE_PROFILE } from "./balance";
 import type {
   FocusSessionStatus,
   PetDisplayMood,
@@ -8,19 +9,29 @@ import type {
 } from "./types";
 import { resolvePetMood, type PetMoodStats } from "./petMoodRules";
 
-export const XP_PER_LEVEL = 100;
-export const MAX_PET_STAT = 100;
+export const XP_PER_LEVEL = ACTIVE_BALANCE_PROFILE.progression.xpPerLevel;
+export const MAX_PET_STAT = ACTIVE_BALANCE_PROFILE.progression.maxPetStat;
 export const MAX_HUNGER = MAX_PET_STAT;
-export const DEFAULT_HUNGER_DECAY_PER_HOUR = 4;
-export const APP_OPEN_HAPPINESS_DECAY_PER_HOUR = 0.25;
-export const MAX_APP_OPEN_HAPPINESS_DECAY = 6;
-export const FOCUS_HUNGER_DECAY_PER_MINUTE = 0.2;
-export const FOCUS_ENERGY_DECAY_PER_MINUTE = 0.28;
-export const FOCUS_COIN_MINUTES = 5;
-export const SLEEP_ENERGY_GAIN_PER_HOUR = 18;
-export const MAX_SLEEP_ENERGY_GAIN = 54;
-export const SLEEP_HAPPINESS_ENERGY_STEP = 15;
-export const MAX_SLEEP_HAPPINESS_GAIN = 4;
+export const DEFAULT_HUNGER_DECAY_PER_HOUR =
+  ACTIVE_BALANCE_PROFILE.care.hungerDecayPerHour;
+export const APP_OPEN_HAPPINESS_DECAY_PER_HOUR =
+  ACTIVE_BALANCE_PROFILE.care.appOpenHappinessDecayPerHour;
+export const MAX_APP_OPEN_HAPPINESS_DECAY =
+  ACTIVE_BALANCE_PROFILE.care.maxAppOpenHappinessDecay;
+export const FOCUS_HUNGER_DECAY_PER_MINUTE =
+  ACTIVE_BALANCE_PROFILE.focus.hungerDecayPerMinute;
+export const FOCUS_ENERGY_DECAY_PER_MINUTE =
+  ACTIVE_BALANCE_PROFILE.focus.energyDecayPerMinute;
+export const FOCUS_COIN_MINUTES =
+  ACTIVE_BALANCE_PROFILE.focus.baseCoinIntervalMinutes;
+export const SLEEP_ENERGY_GAIN_PER_HOUR =
+  ACTIVE_BALANCE_PROFILE.sleep.energyGainPerHour;
+export const MAX_SLEEP_ENERGY_GAIN =
+  ACTIVE_BALANCE_PROFILE.sleep.maxEnergyGain;
+export const SLEEP_HAPPINESS_ENERGY_STEP =
+  ACTIVE_BALANCE_PROFILE.sleep.happinessEnergyStep;
+export const MAX_SLEEP_HAPPINESS_GAIN =
+  ACTIVE_BALANCE_PROFILE.sleep.maxHappinessGain;
 export const PET_ALREADY_SLEEPING_ERROR = "pet_already_sleeping";
 export const PET_NOT_SLEEPING_ERROR = "pet_not_sleeping";
 export const PET_SLEEPING_CANNOT_FOCUS_ERROR = "pet_sleeping_cannot_focus";
@@ -387,10 +398,14 @@ function lowCareHappinessDecay(
   energy: number,
   elapsedHours: number,
 ): number {
+  const threshold = ACTIVE_BALANCE_PROFILE.care.lowCareHappinessThreshold;
   const lowCarePressure =
-    (Math.max(0, 50 - hunger) + Math.max(0, 50 - energy)) / 100;
+    (Math.max(0, threshold - hunger) + Math.max(0, threshold - energy)) / 100;
 
-  return Math.min(elapsedHours * lowCarePressure, elapsedHours);
+  return Math.min(
+    elapsedHours * lowCarePressure,
+    elapsedHours * ACTIVE_BALANCE_PROFILE.care.maxLowCareHappinessDecayPerHour,
+  );
 }
 
 function requireSleepStartedAt(pet: PetState): string {
@@ -419,7 +434,7 @@ function calculatePetSleepSummary(
   );
   const happiness = clampPetStat(pet.happiness + happinessGained);
   const hunger = clampPetStat(
-    pet.hunger - elapsedHours * DEFAULT_HUNGER_DECAY_PER_HOUR,
+    pet.hunger - elapsedHours * ACTIVE_BALANCE_PROFILE.sleep.hungerDecayPerHour,
   );
 
   return {
