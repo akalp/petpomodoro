@@ -76,7 +76,7 @@ The boundaries should remain: domain logic is pure, persistence is isolated, rou
 Current TypeScript model shapes:
 
 ```ts
-type PetMood = "calm" | "happy" | "hungry" | "tired" | "sad";
+type PetMood = "calm" | "happy" | "hungry" | "exhausted" | "tired" | "sad";
 type PetDisplayMood = PetMood | "working" | "sleeping";
 type PetSpeciesId = "momo";
 
@@ -165,7 +165,7 @@ interface FoodItem {
 }
 ```
 
-`PetDisplayMood` is derived for rendering only: a `running` session displays `working`, a resting pet displays `sleeping`, and the persisted `Pet.mood` remains derived from care stats.
+`PetDisplayMood` is derived for rendering only: a resting pet displays `sleeping` before any focus display override, a `running` session otherwise displays `working`, and the persisted `Pet.mood` remains derived from care stats. `exhausted` is a distinct care mood and presentation; `tired` remains awake and visually distinct from the resting `sleeping` override.
 
 Implementation should store dates as ISO strings for IndexedDB portability and straightforward test assertions.
 

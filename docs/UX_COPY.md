@@ -94,6 +94,7 @@ Status labels:
 - Mood: Working / Odaklanıyor
 - Mood: Sleeping / Uyuyor
 - Mood: Hungry / Aç
+- Mood: Exhausted / Bitkin
 - Mood: Tired / Yorgun
 - Mood: Sad / Üzgün
 

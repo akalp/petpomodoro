@@ -418,7 +418,6 @@
 
 .pet-art[data-mood="happy"] .pet-art__sparkles,
 .pet-art[data-mood="hungry"] .pet-art__hunger-pulses,
-.pet-art[data-mood="tired"] .pet-art__zzz,
 .pet-art[data-mood="sleeping"] .pet-art__zzz,
 .pet-art[data-mood="working"] .pet-art__focus-bubbles {
   opacity: 1;
@@ -450,7 +449,7 @@
 }
 
 .pet-art[data-mood="happy"] .pet-art__eye::after,
-.pet-art[data-mood="tired"] .pet-art__eye::after {
+.pet-art[data-mood="exhausted"] .pet-art__eye::after {
   content: none;
 }
 
@@ -483,21 +482,31 @@
   border-radius: 50%;
 }
 
+.pet-art[data-mood="exhausted"] .pet-art__body,
 .pet-art[data-mood="tired"] .pet-art__body {
   animation: pet-sleep-breathe 4.7s ease-in-out infinite;
 }
 
+.pet-art[data-mood="exhausted"] .pet-art__tail,
 .pet-art[data-mood="tired"] .pet-art__tail {
   animation: none;
   transform: rotate(7deg);
 }
 
-.pet-art[data-mood="tired"] .pet-art__eye {
+.pet-art[data-mood="exhausted"] .pet-art__eye {
   top: 0.7rem;
   height: 0.14rem;
   animation: none;
 }
 
+.pet-art[data-mood="tired"] .pet-art__eye {
+  top: 0.47rem;
+  height: 0.46rem;
+  opacity: 0.88;
+  animation: none;
+}
+
+.pet-art[data-mood="exhausted"] .pet-art__mouth,
 .pet-art[data-mood="tired"] .pet-art__mouth {
   top: 1.75rem;
   left: 2.41rem;
@@ -807,6 +816,7 @@
   transform: scale(1.03);
 }
 
+.pet-art[data-species="moowi"][data-mood="exhausted"] .pet-art__mouth,
 .pet-art[data-species="moowi"][data-mood="tired"] .pet-art__mouth,
 .pet-art[data-species="moowi"][data-mood="sleeping"] .pet-art__mouth {
   top: 2.35rem;
@@ -842,6 +852,7 @@
   transform: scaleX(-1) rotate(-9deg);
 }
 
+.pet-art[data-species="moowi"][data-mood="exhausted"] .pet-art__tail,
 .pet-art[data-species="moowi"][data-mood="tired"] .pet-art__tail,
 .pet-art[data-species="moowi"][data-mood="sleeping"] .pet-art__tail,
 .pet-art[data-species="moowi"][data-mood="sad"] .pet-art__tail {

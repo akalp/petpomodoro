@@ -287,17 +287,17 @@ export function displayMoodForSession(
   sessionStatus: FocusSessionStatus | null,
   isSleeping = false,
 ): PetDisplayMood {
-  if (sessionStatus === "running") {
-    return calculateMoodForStats(
-      { happiness: 50, hunger: 50, energy: 50 },
-      { isWorking: true },
-    );
-  }
-
   if (isSleeping) {
     return calculateMoodForStats(
       { happiness: 50, hunger: 50, energy: 50 },
       { isSleeping: true },
+    );
+  }
+
+  if (sessionStatus === "running") {
+    return calculateMoodForStats(
+      { happiness: 50, hunger: 50, energy: 50 },
+      { isWorking: true },
     );
   }
 

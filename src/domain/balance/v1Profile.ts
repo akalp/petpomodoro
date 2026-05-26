@@ -34,6 +34,13 @@ export const HONESTY_HAPPINESS_REWARD = 2;
 export const HONESTY_HEART_REWARD = 1;
 export const MIN_HONESTY_SESSION_MINUTES = 15;
 export const MAX_HONESTY_HEARTS_PER_DAY = 2;
+export const EXHAUSTED_ENERGY_THRESHOLD = 8;
+export const HUNGRY_HUNGER_THRESHOLD = 15;
+export const SAD_HAPPINESS_THRESHOLD = 20;
+export const TIRED_ENERGY_THRESHOLD = 25;
+export const HAPPY_HAPPINESS_THRESHOLD = 70;
+export const HAPPY_HUNGER_THRESHOLD = 40;
+export const HAPPY_ENERGY_THRESHOLD = 40;
 
 const NO_REWARD = {
   xp: 0,
@@ -135,39 +142,74 @@ export const BALANCE_PROFILE_V1 = {
   mood: {
     rules: [
       {
-        mood: "hungry",
-        priority: 100,
-        metric: "hunger",
-        comparison: "lte",
-        value: 25,
+        mood: "exhausted",
+        priority: 110,
+        conditions: [
+          {
+            metric: "energy",
+            comparison: "lte",
+            value: EXHAUSTED_ENERGY_THRESHOLD,
+          },
+        ],
       },
       {
-        mood: "tired",
-        priority: 90,
-        metric: "energy",
-        comparison: "lte",
-        value: 15,
+        mood: "hungry",
+        priority: 100,
+        conditions: [
+          {
+            metric: "hunger",
+            comparison: "lte",
+            value: HUNGRY_HUNGER_THRESHOLD,
+          },
+        ],
       },
       {
         mood: "sad",
+        priority: 90,
+        conditions: [
+          {
+            metric: "happiness",
+            comparison: "lte",
+            value: SAD_HAPPINESS_THRESHOLD,
+          },
+        ],
+      },
+      {
+        mood: "tired",
         priority: 80,
-        metric: "happiness",
-        comparison: "lte",
-        value: 25,
+        conditions: [
+          {
+            metric: "energy",
+            comparison: "lte",
+            value: TIRED_ENERGY_THRESHOLD,
+          },
+        ],
       },
       {
         mood: "happy",
         priority: 40,
-        metric: "happiness",
-        comparison: "gte",
-        value: 60,
+        conditions: [
+          {
+            metric: "happiness",
+            comparison: "gte",
+            value: HAPPY_HAPPINESS_THRESHOLD,
+          },
+          {
+            metric: "hunger",
+            comparison: "gte",
+            value: HAPPY_HUNGER_THRESHOLD,
+          },
+          {
+            metric: "energy",
+            comparison: "gte",
+            value: HAPPY_ENERGY_THRESHOLD,
+          },
+        ],
       },
       {
         mood: "calm",
         priority: 0,
-        metric: null,
-        comparison: "always",
-        value: null,
+        conditions: [],
       },
     ],
   },

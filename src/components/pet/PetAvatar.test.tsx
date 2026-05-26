@@ -34,6 +34,19 @@ describe("PetAvatar", () => {
     expect(html).toContain('data-mood="sleeping"');
   });
 
+  it("renders exhausted care with its distinct accessible label", () => {
+    const html = renderToStaticMarkup(
+      <PetAvatar
+        message="Rest may help."
+        mood="exhausted"
+        t={createTranslator("en")}
+      />,
+    );
+
+    expect(html).toContain('aria-label="Pet mood: Exhausted"');
+    expect(html).toContain('data-mood="exhausted"');
+  });
+
   it("renders the Moowi species through the shared CSS-art renderer", () => {
     const html = renderToStaticMarkup(
       <PetAvatar

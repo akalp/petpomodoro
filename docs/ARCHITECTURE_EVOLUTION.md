@@ -229,10 +229,16 @@ Example:
 
 ```ts
 const PET_MOOD_RULES = [
-  { mood: "hungry", priority: 100, matches: ({ hunger }) => hunger <= 25 },
-  { mood: "tired", priority: 90, matches: ({ energy }) => energy <= 15 },
-  { mood: "sad", priority: 80, matches: ({ happiness }) => happiness <= 25 },
-  { mood: "happy", priority: 40, matches: ({ happiness }) => happiness >= 60 },
+  { mood: "exhausted", priority: 110, matches: ({ energy }) => energy <= 8 },
+  { mood: "hungry", priority: 100, matches: ({ hunger }) => hunger <= 15 },
+  { mood: "sad", priority: 90, matches: ({ happiness }) => happiness <= 20 },
+  { mood: "tired", priority: 80, matches: ({ energy }) => energy <= 25 },
+  {
+    mood: "happy",
+    priority: 40,
+    matches: ({ happiness, hunger, energy }) =>
+      happiness >= 70 && hunger >= 40 && energy >= 40,
+  },
   { mood: "calm", priority: 0, matches: () => true },
 ] as const;
 ```
@@ -243,8 +249,8 @@ Current code stores `pet.mood` and also derives `working` mood through session s
 
 Recommended mental model:
 
-- `PetMood`: care/stat-based mood, such as `calm`, `happy`, `hungry`, `tired`, `sad`.
-- `PetDisplayMood`: UI-facing mood, such as `working` during focus.
+- `PetMood`: care/stat-based mood, such as `calm`, `happy`, `hungry`, `exhausted`, `tired`, `sad`.
+- `PetDisplayMood`: UI-facing mood, such as `working` during focus or `sleeping` during rest. The first exhausted presentation can reuse tired visuals.
 - `PetActivity`: future transient activity, such as `idle`, `focused`, `eating`, `playing`, `sleeping`.
 
 `working` is not really a mood; it is a display/activity override.

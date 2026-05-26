@@ -18,6 +18,15 @@ import {
   moodForStats,
 } from "./pet";
 import { PET_MOOD_RULES, resolvePetMood } from "./petMoodRules";
+import {
+  EXHAUSTED_ENERGY_THRESHOLD,
+  HAPPY_ENERGY_THRESHOLD,
+  HAPPY_HAPPINESS_THRESHOLD,
+  HAPPY_HUNGER_THRESHOLD,
+  HUNGRY_HUNGER_THRESHOLD,
+  SAD_HAPPINESS_THRESHOLD,
+  TIRED_ENERGY_THRESHOLD,
+} from "./balance/v1Profile";
 import { makePet, makeSession } from "../test/factories";
 
 describe("pet domain logic", () => {
@@ -50,6 +59,17 @@ describe("pet domain logic", () => {
       name: "Moowi",
       customName: null,
     });
+  });
+
+  it("derives mood safely when a persisted pet contains an obsolete mood value", () => {
+    const persistedPet = makePet({
+      energy: 5,
+      happiness: 90,
+      hunger: 80,
+      mood: "legacy_mood" as never,
+    });
+
+    expect(normalizePetState(persistedPet).mood).toBe("exhausted");
   });
 
   it("changes species without changing progress or pet identity", () => {
@@ -282,6 +302,7 @@ describe("pet domain logic", () => {
     expect(displayMoodForSession("happy", "running")).toBe("working");
     expect(displayMoodForSession("happy", "awaiting_confirmation")).toBe("happy");
     expect(displayMoodForSession("happy", null, true)).toBe("sleeping");
+    expect(displayMoodForSession("happy", "running", true)).toBe("sleeping");
     expect(displayMoodForSession("tired", null)).toBe("tired");
   });
 
@@ -390,7 +411,7 @@ describe("pet domain logic", () => {
       "2026-05-22T14:00:00.000Z",
     );
 
-    expect(result.pet.mood).toBe("hungry");
+    expect(result.pet.mood).toBe("tired");
   });
 
   it("previews sleep recovery without mutating the pet", () => {
@@ -410,59 +431,75 @@ describe("pet domain logic", () => {
     expect(pet.hunger).toBe(100);
   });
 
-  it("derives actionable moods from care stats", () => {
-    expect(moodForStats({ happiness: 80, hunger: 20, energy: 80 })).toBe(
-      "hungry",
-    );
-    expect(moodForStats({ happiness: 80, hunger: 80, energy: 10 })).toBe(
-      "tired",
-    );
-    expect(moodForStats({ happiness: 20, hunger: 80, energy: 80 })).toBe("sad");
-    expect(moodForStats({ happiness: 80, hunger: 80, energy: 80 })).toBe(
-      "happy",
-    );
-    expect(moodForStats({ happiness: 50, hunger: 80, energy: 80 })).toBe(
-      "calm",
-    );
-  });
+  it.each([
+    { hunger: 80, energy: 80, happiness: 80, expected: "happy" },
+    { hunger: 10, energy: 80, happiness: 90, expected: "hungry" },
+    { hunger: 80, energy: 5, happiness: 90, expected: "exhausted" },
+    { hunger: 80, energy: 20, happiness: 90, expected: "tired" },
+    { hunger: 80, energy: 80, happiness: 15, expected: "sad" },
+    { hunger: 35, energy: 35, happiness: 65, expected: "calm" },
+  ] as const)(
+    "derives $expected from hunger $hunger, energy $energy, happiness $happiness",
+    ({ expected, ...stats }) => {
+      expect(moodForStats(stats)).toBe(expected);
+      expect(resolvePetMood(stats)).toBe(expected);
+    },
+  );
 
   it("keeps pet mood rule priorities explicit", () => {
     expect(
       PET_MOOD_RULES.map(({ mood, priority }) => ({ mood, priority })),
     ).toEqual([
+      { mood: "exhausted", priority: 110 },
       { mood: "hungry", priority: 100 },
-      { mood: "tired", priority: 90 },
-      { mood: "sad", priority: 80 },
+      { mood: "sad", priority: 90 },
+      { mood: "tired", priority: 80 },
       { mood: "happy", priority: 40 },
       { mood: "calm", priority: 0 },
     ]);
   });
 
-  it("resolves pet moods at documented thresholds", () => {
-    expect(resolvePetMood({ happiness: 50, hunger: 25, energy: 50 })).toBe(
-      "hungry",
-    );
-    expect(resolvePetMood({ happiness: 50, hunger: 26, energy: 15 })).toBe(
-      "tired",
-    );
-    expect(resolvePetMood({ happiness: 25, hunger: 26, energy: 16 })).toBe("sad");
-    expect(resolvePetMood({ happiness: 60, hunger: 26, energy: 16 })).toBe(
-      "happy",
-    );
-    expect(resolvePetMood({ happiness: 59, hunger: 26, energy: 16 })).toBe(
-      "calm",
-    );
+  it.each([
+    {
+      stats: { happiness: 90, hunger: 80, energy: EXHAUSTED_ENERGY_THRESHOLD },
+      expected: "exhausted",
+    },
+    {
+      stats: { happiness: 90, hunger: HUNGRY_HUNGER_THRESHOLD, energy: 80 },
+      expected: "hungry",
+    },
+    {
+      stats: { happiness: SAD_HAPPINESS_THRESHOLD, hunger: 80, energy: 80 },
+      expected: "sad",
+    },
+    {
+      stats: { happiness: 90, hunger: 80, energy: TIRED_ENERGY_THRESHOLD },
+      expected: "tired",
+    },
+    {
+      stats: {
+        happiness: HAPPY_HAPPINESS_THRESHOLD,
+        hunger: HAPPY_HUNGER_THRESHOLD,
+        energy: HAPPY_ENERGY_THRESHOLD,
+      },
+      expected: "happy",
+    },
+  ] as const)("resolves $expected at its configured threshold", ({ stats, expected }) => {
+    expect(resolvePetMood(stats)).toBe(expected);
   });
 
   it("uses priority order when multiple pet mood rules match", () => {
-    expect(resolvePetMood({ happiness: 20, hunger: 20, energy: 10 })).toBe(
+    expect(resolvePetMood({ happiness: 10, hunger: 10, energy: 5 })).toBe(
+      "exhausted",
+    );
+    expect(resolvePetMood({ happiness: 10, hunger: 10, energy: 20 })).toBe(
       "hungry",
     );
-    expect(resolvePetMood({ happiness: 20, hunger: 26, energy: 10 })).toBe(
-      "tired",
-    );
-    expect(resolvePetMood({ happiness: 20, hunger: 26, energy: 16 })).toBe(
+    expect(resolvePetMood({ happiness: 10, hunger: 80, energy: 20 })).toBe(
       "sad",
+    );
+    expect(resolvePetMood({ happiness: 90, hunger: 80, energy: 20 })).toBe(
+      "tired",
     );
   });
 });

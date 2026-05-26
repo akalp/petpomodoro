@@ -38,20 +38,14 @@ function moodRuleMatches(
   rule: BalanceMoodRuleConfig,
   stats: PetMoodStats,
 ): boolean {
-  if (rule.comparison === "always") {
-    return true;
-  }
+  return rule.conditions.every((condition) => {
+    const statValue = stats[condition.metric];
 
-  if (!rule.metric || rule.value === null) {
-    return false;
-  }
-
-  const statValue = stats[rule.metric];
-
-  switch (rule.comparison) {
-    case "lte":
-      return statValue <= rule.value;
-    case "gte":
-      return statValue >= rule.value;
-  }
+    switch (condition.comparison) {
+      case "lte":
+        return statValue <= condition.value;
+      case "gte":
+        return statValue >= condition.value;
+    }
+  });
 }

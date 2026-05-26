@@ -10,7 +10,7 @@ export type BalanceFoodItemId =
 export type BalanceShopItemCategory = "food";
 
 export type MoodMetric = "happiness" | "hunger" | "energy";
-export type MoodComparison = "lte" | "gte" | "always";
+export type MoodComparison = "lte" | "gte";
 
 export interface BalanceStatAdjustments {
   xp: number;
@@ -100,12 +100,16 @@ export interface BalanceHonestyConfig {
   limits: BalanceHonestyLimits;
 }
 
+export interface BalanceMoodConditionConfig {
+  metric: MoodMetric;
+  comparison: MoodComparison;
+  value: number;
+}
+
 export interface BalanceMoodRuleConfig {
   mood: PetMood;
   priority: number;
-  metric: MoodMetric | null;
-  comparison: MoodComparison;
-  value: number | null;
+  conditions: readonly BalanceMoodConditionConfig[];
 }
 
 export interface BalanceMoodConfig {

@@ -361,12 +361,12 @@ export function calculateMoodForStats(
   activityState: MoodActivityState | null = null,
   profile: BalanceProfile = ACTIVE_BALANCE_PROFILE,
 ): PetDisplayMood {
-  if (activityState?.isWorking) {
-    return "working";
-  }
-
   if (activityState?.isSleeping) {
     return "sleeping";
+  }
+
+  if (activityState?.isWorking) {
+    return "working";
   }
 
   const matchingRule = [...profile.mood.rules]
@@ -468,22 +468,16 @@ function moodRuleMatches(
   rule: BalanceMoodRuleConfig,
   stats: Pick<PetState, "happiness" | "hunger" | "energy">,
 ): boolean {
-  if (rule.comparison === "always") {
-    return true;
-  }
+  return rule.conditions.every((condition) => {
+    const statValue = stats[condition.metric];
 
-  if (!rule.metric || rule.value === null) {
-    return false;
-  }
-
-  const statValue = stats[rule.metric];
-
-  switch (rule.comparison) {
-    case "lte":
-      return statValue <= rule.value;
-    case "gte":
-      return statValue >= rule.value;
-  }
+    switch (condition.comparison) {
+      case "lte":
+        return statValue <= condition.value;
+      case "gte":
+        return statValue >= condition.value;
+    }
+  });
 }
 
 function unchangedIdleCareImpact(

@@ -5,6 +5,7 @@ export const PET_MOOD_COPY = {
   calm: "moodCalm",
   happy: "moodHappy",
   hungry: "moodHungry",
+  exhausted: "moodExhausted",
   tired: "moodTired",
   sad: "moodSad",
   working: "moodWorking",

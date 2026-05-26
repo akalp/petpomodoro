@@ -191,7 +191,7 @@ describe("active balance profile", () => {
         priority,
       })),
     );
-    expect(resolvePetMood({ happiness: 80, hunger: 20, energy: 80 })).toBe(
+    expect(resolvePetMood({ happiness: 80, hunger: 10, energy: 80 })).toBe(
       "hungry",
     );
     expect(FOOD_CATALOG).toBe(ACTIVE_BALANCE_PROFILE.shop.foodCatalog);

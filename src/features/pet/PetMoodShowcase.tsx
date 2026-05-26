@@ -8,6 +8,7 @@ const SHOWCASE_MOODS = [
   "calm",
   "happy",
   "hungry",
+  "exhausted",
   "tired",
   "sad",
   "working",

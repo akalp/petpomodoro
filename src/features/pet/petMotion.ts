@@ -20,9 +20,13 @@ export const PET_MOTION_BY_MOOD = {
     animate: { rotate: [0, 1, 0], y: [0, 2, 0] },
     transition: { duration: 3, repeat: Infinity },
   },
-  tired: {
+  exhausted: {
     animate: { rotate: [0, 1, 0], y: [0, 2, 0] },
     transition: { duration: 3, repeat: Infinity },
+  },
+  tired: {
+    animate: { rotate: [0, 0.5, 0], y: [0, 1, 0] },
+    transition: { duration: 3.6, repeat: Infinity },
   },
   sad: {
     animate: { rotate: [0, 1, 0], y: [0, 2, 0] },

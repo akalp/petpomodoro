@@ -354,7 +354,8 @@ describe("metric calculations with the active balance profile", () => {
   });
 
   it.each([
-    { expectedMood: "hungry", happiness: 80, hunger: 20, energy: 80 },
+    { expectedMood: "exhausted", happiness: 90, hunger: 80, energy: 5 },
+    { expectedMood: "hungry", happiness: 80, hunger: 10, energy: 80 },
     { expectedMood: "tired", happiness: 80, hunger: 80, energy: 10 },
     { expectedMood: "sad", happiness: 20, hunger: 80, energy: 80 },
     { expectedMood: "happy", happiness: 80, hunger: 80, energy: 80 },
@@ -374,7 +375,7 @@ describe("metric calculations with the active balance profile", () => {
         { happiness: 80, hunger: 20, energy: 10 },
         { isWorking: true, isSleeping: true },
       ),
-    ).toBe("working");
+    ).toBe("sleeping");
     expect(
       calculateMoodForStats(
         { happiness: 80, hunger: 20, energy: 10 },
