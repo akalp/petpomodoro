@@ -150,20 +150,36 @@ describe("metric calculations with the active balance profile", () => {
 
   it.each([
     {
-      energyGained: 18,
-      expectedEnergy: 38,
+      energyGained: 10,
+      expectedEnergy: 30,
+      expectedHappiness: 50,
+      expectedHunger: 98,
+      sleepStartedAt: "2026-05-22T13:00:00.000Z",
+      wakeAt: "2026-05-22T13:30:00.000Z",
+    },
+    {
+      energyGained: 20,
+      expectedEnergy: 40,
       expectedHappiness: 51,
       expectedHunger: 96,
       sleepStartedAt: "2026-05-22T13:00:00.000Z",
       wakeAt: "2026-05-22T14:00:00.000Z",
     },
     {
-      energyGained: 54,
-      expectedEnergy: 74,
+      energyGained: 60,
+      expectedEnergy: 80,
       expectedHappiness: 53,
-      expectedHunger: 84,
+      expectedHunger: 88,
       sleepStartedAt: "2026-05-22T13:00:00.000Z",
-      wakeAt: "2026-05-22T17:00:00.000Z",
+      wakeAt: "2026-05-22T16:00:00.000Z",
+    },
+    {
+      energyGained: 80,
+      expectedEnergy: 100,
+      expectedHappiness: 54,
+      expectedHunger: 68,
+      sleepStartedAt: "2026-05-22T13:00:00.000Z",
+      wakeAt: "2026-05-22T21:00:00.000Z",
     },
   ])(
     "calculates wake effects from $sleepStartedAt to $wakeAt",
@@ -187,6 +203,9 @@ describe("metric calculations with the active balance profile", () => {
         happiness: expectedHappiness,
         hunger: expectedHunger,
       });
+      expect(result.elapsedMinutes).toBe(
+        (Date.parse(wakeAt) - Date.parse(sleepStartedAt)) / (60 * 1000),
+      );
     },
   );
 

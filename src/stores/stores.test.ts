@@ -473,7 +473,14 @@ describe("store workflows", () => {
 
   it("starts and wakes pet sleep through the pet store", async () => {
     const repo = createInMemoryRepositories({
-      pet: makePet({ energy: 20, hunger: 100 }),
+      pet: makePet({
+        coins: 9,
+        energy: 20,
+        honestyHearts: 2,
+        hunger: 100,
+        streak: 3,
+        xp: 42,
+      }),
     });
     const petStore = createPetStore({
       ...repo.petDependencies,
@@ -493,14 +500,19 @@ describe("store workflows", () => {
       .wakeSleep("2026-05-22T14:00:00.000Z");
 
     expect(result.pet).toMatchObject({
-      energy: 38,
+      coins: 9,
+      energy: 40,
+      honestyHearts: 2,
       hunger: 96,
       sleepStartedAt: null,
+      streak: 3,
+      xp: 42,
     });
     expect(petStore.getState().lastSleepSummary).toMatchObject({
-      energyGained: 18,
+      energyGained: 20,
       hungerChanged: -4,
     });
+    expect(repo.rewardLedger.size).toBe(0);
   });
 
   it("uses rescue actions through the pet store without granting rewards", async () => {

@@ -35,12 +35,13 @@ export const FOCUS_COIN_MINUTES =
   ACTIVE_BALANCE_PROFILE.focus.baseCoinIntervalMinutes;
 export const SLEEP_ENERGY_GAIN_PER_HOUR =
   ACTIVE_BALANCE_PROFILE.sleep.energyGainPerHour;
-export const MAX_SLEEP_ENERGY_GAIN =
-  ACTIVE_BALANCE_PROFILE.sleep.maxEnergyGain;
+export const SLEEP_HUNGER_DECAY_PER_HOUR =
+  ACTIVE_BALANCE_PROFILE.sleep.hungerDecayPerHour;
 export const SLEEP_HAPPINESS_ENERGY_STEP =
   ACTIVE_BALANCE_PROFILE.sleep.happinessEnergyStep;
-export const MAX_SLEEP_HAPPINESS_GAIN =
+export const SLEEP_HAPPINESS_MAX_GAIN =
   ACTIVE_BALANCE_PROFILE.sleep.maxHappinessGain;
+export const MAX_SLEEP_HAPPINESS_GAIN = SLEEP_HAPPINESS_MAX_GAIN;
 export const PET_ALREADY_SLEEPING_ERROR = "pet_already_sleeping";
 export const PET_NOT_SLEEPING_ERROR = "pet_not_sleeping";
 export const PET_SLEEPING_CANNOT_FOCUS_ERROR = "pet_sleeping_cannot_focus";

@@ -248,7 +248,7 @@ describe("pet domain logic", () => {
     );
 
     expect(result.pet).toMatchObject({
-      energy: 38,
+      energy: 40,
       happiness: 51,
       hunger: 96,
       sleepStartedAt: null,
@@ -258,27 +258,38 @@ describe("pet domain logic", () => {
     });
     expect(result.summary).toMatchObject({
       elapsedMinutes: 60,
-      energyGained: 18,
+      energyGained: 20,
       hungerChanged: -4,
       happinessGained: 1,
     });
   });
 
-  it("caps long sleep energy recovery", () => {
+  it("fills energy after long sleep without granting progress or currency", () => {
     const result = wakePetFromSleep(
       makePet({
+        coins: 7,
         energy: 10,
         happiness: 50,
+        honestyHearts: 2,
         hunger: 100,
+        streak: 3,
         sleepStartedAt: "2026-05-22T13:00:00.000Z",
+        xp: 42,
       }),
-      "2026-05-22T17:00:00.000Z",
+      "2026-05-22T18:00:00.000Z",
     );
 
-    expect(result.pet.energy).toBe(64);
-    expect(result.pet.hunger).toBe(84);
-    expect(result.pet.happiness).toBe(53);
-    expect(result.summary.energyGained).toBe(54);
+    expect(result.pet).toMatchObject({
+      coins: 7,
+      energy: 100,
+      happiness: 54,
+      honestyHearts: 2,
+      hunger: 80,
+      streak: 3,
+      xp: 42,
+    });
+    expect(result.summary.energyGained).toBe(90);
+    expect(result.summary.happinessGained).toBe(4);
   });
 
   it("clamps sleep stat changes at pet stat bounds", () => {
@@ -323,7 +334,7 @@ describe("pet domain logic", () => {
     const summary = previewPetSleep(pet, "2026-05-22T14:00:00.000Z");
 
     expect(summary.nextStats).toMatchObject({
-      energy: 38,
+      energy: 40,
       hunger: 96,
     });
     expect(pet.energy).toBe(20);

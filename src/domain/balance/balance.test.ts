@@ -10,9 +10,9 @@ import {
   FOCUS_HUNGER_DECAY_PER_MINUTE,
   MAX_APP_OPEN_HAPPINESS_DECAY,
   MAX_PET_STAT,
-  MAX_SLEEP_ENERGY_GAIN,
-  MAX_SLEEP_HAPPINESS_GAIN,
   SLEEP_ENERGY_GAIN_PER_HOUR,
+  SLEEP_HAPPINESS_MAX_GAIN,
+  SLEEP_HUNGER_DECAY_PER_HOUR,
   SLEEP_HAPPINESS_ENERGY_STEP,
   XP_PER_LEVEL,
 } from "../pet";
@@ -68,15 +68,29 @@ describe("active balance profile", () => {
     expect(SLEEP_ENERGY_GAIN_PER_HOUR).toBe(
       ACTIVE_BALANCE_PROFILE.sleep.energyGainPerHour,
     );
-    expect(MAX_SLEEP_ENERGY_GAIN).toBe(
-      ACTIVE_BALANCE_PROFILE.sleep.maxEnergyGain,
+    expect(SLEEP_HUNGER_DECAY_PER_HOUR).toBe(
+      ACTIVE_BALANCE_PROFILE.sleep.hungerDecayPerHour,
     );
     expect(SLEEP_HAPPINESS_ENERGY_STEP).toBe(
       ACTIVE_BALANCE_PROFILE.sleep.happinessEnergyStep,
     );
-    expect(MAX_SLEEP_HAPPINESS_GAIN).toBe(
+    expect(SLEEP_HAPPINESS_MAX_GAIN).toBe(
       ACTIVE_BALANCE_PROFILE.sleep.maxHappinessGain,
     );
+  });
+
+  it("uses sleep as energy recovery without turning it into a reward", () => {
+    expect({
+      energyGainPerHour: SLEEP_ENERGY_GAIN_PER_HOUR,
+      hungerDecayPerHour: SLEEP_HUNGER_DECAY_PER_HOUR,
+      happinessEnergyStep: SLEEP_HAPPINESS_ENERGY_STEP,
+      maxHappinessGain: SLEEP_HAPPINESS_MAX_GAIN,
+    }).toEqual({
+      energyGainPerHour: 20,
+      hungerDecayPerHour: 4,
+      happinessEnergyStep: 20,
+      maxHappinessGain: 8,
+    });
   });
 
   it("mirrors current reward constants", () => {

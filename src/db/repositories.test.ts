@@ -354,12 +354,12 @@ describe("Dexie repositories", () => {
     );
 
     expect(result.pet).toMatchObject({
-      energy: 38,
+      energy: 40,
       hunger: 96,
       sleepStartedAt: null,
     });
     await expect(database.pets.get("pet-1")).resolves.toMatchObject({
-      energy: 38,
+      energy: 40,
       hunger: 96,
       sleepStartedAt: null,
     });

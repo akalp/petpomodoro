@@ -69,11 +69,10 @@ export const BALANCE_PROFILE_V1 = {
     maxLowCareHappinessDecayPerHour: 1,
   },
   sleep: {
-    energyGainPerHour: 18,
-    maxEnergyGain: 54,
+    energyGainPerHour: 20,
     hungerDecayPerHour: 4,
-    happinessEnergyStep: 15,
-    maxHappinessGain: 4,
+    happinessEnergyStep: 20,
+    maxHappinessGain: 8,
   },
   rescue: {
     powerNap: {

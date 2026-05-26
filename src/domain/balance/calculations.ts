@@ -249,8 +249,7 @@ export function calculateWakeUpEffects(
   const elapsedMs = Math.max(0, Date.parse(wakeAt) - Date.parse(sleepStartedAt));
   const elapsedHours = elapsedMs / (60 * 60 * 1000);
   const energy = clampPetStat(
-    pet.energy +
-      Math.min(elapsedHours * profile.sleep.energyGainPerHour, profile.sleep.maxEnergyGain),
+    pet.energy + elapsedHours * profile.sleep.energyGainPerHour,
     profile,
   );
   const energyGained = energy - pet.energy;

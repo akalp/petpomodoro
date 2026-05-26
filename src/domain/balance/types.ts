@@ -51,7 +51,6 @@ export interface BalanceCareConfig {
 
 export interface BalanceSleepConfig {
   energyGainPerHour: number;
-  maxEnergyGain: number;
   hungerDecayPerHour: number;
   happinessEnergyStep: number;
   maxHappinessGain: number;
