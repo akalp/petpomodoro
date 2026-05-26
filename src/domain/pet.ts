@@ -23,8 +23,22 @@ export const MAX_PET_STAT = ACTIVE_BALANCE_PROFILE.progression.maxPetStat;
 export const MAX_HUNGER = MAX_PET_STAT;
 export const DEFAULT_HUNGER_DECAY_PER_HOUR =
   ACTIVE_BALANCE_PROFILE.care.hungerDecayPerHour;
+export const BASE_HAPPINESS_DECAY_PER_HOUR =
+  ACTIVE_BALANCE_PROFILE.care.baseHappinessDecayPerHour;
 export const APP_OPEN_HAPPINESS_DECAY_PER_HOUR =
-  ACTIVE_BALANCE_PROFILE.care.appOpenHappinessDecayPerHour;
+  BASE_HAPPINESS_DECAY_PER_HOUR;
+export const LOW_HUNGER_HAPPINESS_THRESHOLD =
+  ACTIVE_BALANCE_PROFILE.care.lowHungerHappinessThreshold;
+export const LOW_HUNGER_HAPPINESS_DECAY_PER_HOUR =
+  ACTIVE_BALANCE_PROFILE.care.lowHungerHappinessDecayPerHour;
+export const LOW_ENERGY_HAPPINESS_THRESHOLD =
+  ACTIVE_BALANCE_PROFILE.care.lowEnergyHappinessThreshold;
+export const LOW_ENERGY_HAPPINESS_DECAY_PER_HOUR =
+  ACTIVE_BALANCE_PROFILE.care.lowEnergyHappinessDecayPerHour;
+export const CRITICAL_HUNGER_ENERGY_THRESHOLD =
+  ACTIVE_BALANCE_PROFILE.care.criticalHungerEnergyThreshold;
+export const CRITICAL_HUNGER_ENERGY_DECAY_PER_HOUR =
+  ACTIVE_BALANCE_PROFILE.care.criticalHungerEnergyDecayPerHour;
 export const MAX_APP_OPEN_HAPPINESS_DECAY =
   ACTIVE_BALANCE_PROFILE.care.maxAppOpenHappinessDecay;
 export const FOCUS_HUNGER_DECAY_PER_MINUTE =
@@ -151,6 +165,7 @@ export function applyIdlePetDecay(
     ...pet,
     hunger,
     happiness,
+    energy,
     mood: moodForStats({ happiness, hunger, energy }),
     lastHungerUpdatedAt: now,
     updatedAt: now,

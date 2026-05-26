@@ -207,18 +207,40 @@ export function calculateIdleCareImpact(
   const elapsedHours = elapsedMs / (60 * 60 * 1000);
   const hungerDecayPerHour =
     options.hungerDecayPerHour ?? profile.care.hungerDecayPerHour;
-
-  if (hungerDecayPerHour <= 0) {
-    return unchangedIdleCareImpact(pet, elapsedHours);
-  }
+  const effectiveHungerDecayPerHour = Math.max(0, hungerDecayPerHour);
+  const lowHungerHours = hoursAtOrBelowThreshold(
+    pet.hunger,
+    profile.care.lowHungerHappinessThreshold,
+    elapsedHours,
+    effectiveHungerDecayPerHour,
+  );
+  const criticalHungerHours = hoursAtOrBelowThreshold(
+    pet.hunger,
+    profile.care.criticalHungerEnergyThreshold,
+    elapsedHours,
+    effectiveHungerDecayPerHour,
+  );
 
   const hunger = clampPetStat(
-    pet.hunger - elapsedHours * hungerDecayPerHour,
+    pet.hunger - elapsedHours * effectiveHungerDecayPerHour,
     profile,
+  );
+  const energy = clampPetStat(
+    pet.energy -
+      criticalHungerHours * profile.care.criticalHungerEnergyDecayPerHour,
+    profile,
+  );
+  const lowEnergyHours = hoursAtOrBelowThreshold(
+    pet.energy,
+    profile.care.lowEnergyHappinessThreshold,
+    elapsedHours,
+    profile.care.criticalHungerEnergyDecayPerHour,
+    elapsedHours - criticalHungerHours,
   );
   const happiness = clampPetStat(
     pet.happiness -
-      calculateLowCareHappinessDecay(hunger, pet.energy, elapsedHours, profile),
+      lowHungerHours * profile.care.lowHungerHappinessDecayPerHour -
+      lowEnergyHours * profile.care.lowEnergyHappinessDecayPerHour,
     profile,
   );
 
@@ -226,7 +248,7 @@ export function calculateIdleCareImpact(
     elapsedHours,
     hungerChanged: hunger - pet.hunger,
     happinessChanged: happiness - pet.happiness,
-    energyChanged: 0,
+    energyChanged: energy - pet.energy,
     previousStats: {
       hunger: pet.hunger,
       happiness: pet.happiness,
@@ -235,7 +257,7 @@ export function calculateIdleCareImpact(
     nextStats: {
       hunger,
       happiness,
-      energy: pet.energy,
+      energy,
     },
   };
 }
@@ -409,14 +431,37 @@ export function calculateLowCareHappinessDecay(
   elapsedHours: number,
   profile: BalanceProfile,
 ): number {
-  const threshold = profile.care.lowCareHappinessThreshold;
-  const lowCarePressure =
-    (Math.max(0, threshold - hunger) + Math.max(0, threshold - energy)) / 100;
+  const lowHungerDecayPerHour =
+    hunger <= profile.care.lowHungerHappinessThreshold
+      ? profile.care.lowHungerHappinessDecayPerHour
+      : 0;
+  const lowEnergyDecayPerHour =
+    energy <= profile.care.lowEnergyHappinessThreshold
+      ? profile.care.lowEnergyHappinessDecayPerHour
+      : 0;
 
-  return Math.min(
-    elapsedHours * lowCarePressure,
-    elapsedHours * profile.care.maxLowCareHappinessDecayPerHour,
-  );
+  return elapsedHours * (lowHungerDecayPerHour + lowEnergyDecayPerHour);
+}
+
+function hoursAtOrBelowThreshold(
+  initialValue: number,
+  threshold: number,
+  elapsedHours: number,
+  decayPerHour: number,
+  decayStartsAfterHours = 0,
+): number {
+  if (initialValue <= threshold) {
+    return elapsedHours;
+  }
+
+  if (decayPerHour <= 0) {
+    return 0;
+  }
+
+  const reachesThresholdAfterHours =
+    decayStartsAfterHours + (initialValue - threshold) / decayPerHour;
+
+  return Math.max(0, elapsedHours - reachesThresholdAfterHours);
 }
 
 function moodRuleMatches(

@@ -8,6 +8,14 @@ export const FOCUS_HAPPINESS_PER_5_MINUTES = 1;
 export const FOCUS_HAPPINESS_MAX = 10;
 export const FOCUS_HUNGER_DECAY_PER_MINUTE = 0.2;
 export const FOCUS_ENERGY_DECAY_PER_MINUTE = 0.28;
+export const HUNGER_DECAY_PER_HOUR = 4;
+export const BASE_HAPPINESS_DECAY_PER_HOUR = 0.25;
+export const LOW_HUNGER_HAPPINESS_THRESHOLD = 35;
+export const LOW_HUNGER_HAPPINESS_DECAY_PER_HOUR = 1;
+export const LOW_ENERGY_HAPPINESS_THRESHOLD = 25;
+export const LOW_ENERGY_HAPPINESS_DECAY_PER_HOUR = 0.5;
+export const CRITICAL_HUNGER_ENERGY_THRESHOLD = 20;
+export const CRITICAL_HUNGER_ENERGY_DECAY_PER_HOUR = 2;
 export const MIN_START_ENERGY_BASE = 5;
 export const MIN_START_ENERGY_PER_MINUTE = 0.8;
 export const MIN_START_HUNGER_BASE = 8;
@@ -62,11 +70,15 @@ export const BALANCE_PROFILE_V1 = {
     },
   },
   care: {
-    hungerDecayPerHour: 4,
-    appOpenHappinessDecayPerHour: 0.25,
+    hungerDecayPerHour: HUNGER_DECAY_PER_HOUR,
+    baseHappinessDecayPerHour: BASE_HAPPINESS_DECAY_PER_HOUR,
     maxAppOpenHappinessDecay: 6,
-    lowCareHappinessThreshold: 50,
-    maxLowCareHappinessDecayPerHour: 1,
+    lowHungerHappinessThreshold: LOW_HUNGER_HAPPINESS_THRESHOLD,
+    lowHungerHappinessDecayPerHour: LOW_HUNGER_HAPPINESS_DECAY_PER_HOUR,
+    lowEnergyHappinessThreshold: LOW_ENERGY_HAPPINESS_THRESHOLD,
+    lowEnergyHappinessDecayPerHour: LOW_ENERGY_HAPPINESS_DECAY_PER_HOUR,
+    criticalHungerEnergyThreshold: CRITICAL_HUNGER_ENERGY_THRESHOLD,
+    criticalHungerEnergyDecayPerHour: CRITICAL_HUNGER_ENERGY_DECAY_PER_HOUR,
   },
   sleep: {
     energyGainPerHour: 20,

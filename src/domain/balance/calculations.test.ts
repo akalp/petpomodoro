@@ -120,33 +120,93 @@ describe("metric calculations with the active balance profile", () => {
 
   it.each([
     {
-      expectedHappiness: 48,
-      expectedHunger: 0,
-      from: "2026-05-22T08:00:00.000Z",
-      hunger: 10,
-      to: "2026-05-22T12:00:00.000Z",
+      description: "keeps well-fed energy stable",
+      energy: 80,
+      expectedEnergy: 80,
+      expectedHappiness: 50,
+      expectedHunger: 96,
+      happiness: 50,
+      hunger: 100,
     },
     {
-      expectedHappiness: 50,
-      expectedHunger: 100,
-      from: "2026-05-22T12:00:00.000Z",
+      description: "adds happiness decay for low hunger",
+      energy: 80,
+      expectedEnergy: 80,
+      expectedHappiness: 49,
+      expectedHunger: 31,
+      happiness: 50,
+      hunger: 35,
+    },
+    {
+      description: "adds a smaller happiness decay for low energy",
+      energy: 25,
+      expectedEnergy: 25,
+      expectedHappiness: 49.5,
+      expectedHunger: 96,
+      happiness: 50,
       hunger: 100,
-      to: "2026-05-22T12:00:00.000Z",
+    },
+    {
+      description: "decays energy only for critical hunger",
+      energy: 80,
+      expectedEnergy: 78,
+      expectedHappiness: 49,
+      expectedHunger: 16,
+      happiness: 50,
+      hunger: 20,
     },
   ])(
-    "calculates idle care impact from $from to $to",
-    ({ expectedHappiness, expectedHunger, from, hunger, to }) => {
+    "$description",
+    ({ energy, expectedEnergy, expectedHappiness, expectedHunger, happiness, hunger }) => {
       const result = calculateIdleCareImpact(
-        makePet({ happiness: 50, hunger, energy: 80 }),
-        from,
-        to,
+        makePet({ happiness, hunger, energy }),
+        "2026-05-22T12:00:00.000Z",
+        "2026-05-22T13:00:00.000Z",
       );
 
       expect(result.nextStats.hunger).toBe(expectedHunger);
       expect(result.nextStats.happiness).toBe(expectedHappiness);
-      expect(result.nextStats.energy).toBe(80);
+      expect(result.nextStats.energy).toBe(expectedEnergy);
     },
   );
+
+  it("combines low hunger and low energy happiness pressure and clamps all stats", () => {
+    const linkedImpact = calculateIdleCareImpact(
+      makePet({ happiness: 50, hunger: 20, energy: 25 }),
+      "2026-05-22T12:00:00.000Z",
+      "2026-05-22T13:00:00.000Z",
+    );
+    const clampedImpact = calculateIdleCareImpact(
+      makePet({ happiness: 1, hunger: 0, energy: 1 }),
+      "2026-05-22T12:00:00.000Z",
+      "2026-05-22T16:00:00.000Z",
+    );
+
+    expect(linkedImpact.nextStats).toEqual({
+      hunger: 16,
+      happiness: 48.5,
+      energy: 23,
+    });
+    expect(clampedImpact.nextStats).toEqual({
+      hunger: 0,
+      happiness: 0,
+      energy: 0,
+    });
+  });
+
+  it("applies critical hunger energy loss only after hunger reaches the threshold", () => {
+    const result = calculateIdleCareImpact(
+      makePet({ happiness: 50, hunger: 100, energy: 80 }),
+      "2026-05-22T12:00:00.000Z",
+      "2026-05-23T09:00:00.000Z",
+    );
+
+    expect(result.nextStats).toEqual({
+      hunger: 16,
+      happiness: 45.25,
+      energy: 78,
+    });
+  });
 
   it.each([
     {

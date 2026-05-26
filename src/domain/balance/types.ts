@@ -43,10 +43,14 @@ export interface BalanceFocusConfig {
 
 export interface BalanceCareConfig {
   hungerDecayPerHour: number;
-  appOpenHappinessDecayPerHour: number;
+  baseHappinessDecayPerHour: number;
   maxAppOpenHappinessDecay: number;
-  lowCareHappinessThreshold: number;
-  maxLowCareHappinessDecayPerHour: number;
+  lowHungerHappinessThreshold: number;
+  lowHungerHappinessDecayPerHour: number;
+  lowEnergyHappinessThreshold: number;
+  lowEnergyHappinessDecayPerHour: number;
+  criticalHungerEnergyThreshold: number;
+  criticalHungerEnergyDecayPerHour: number;
 }
 
 export interface BalanceSleepConfig {

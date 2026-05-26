@@ -129,6 +129,53 @@ describe("pet domain logic", () => {
     expect(updated.updatedAt).toBe("2026-05-22T12:00:00.000Z");
   });
 
+  it.each([
+    {
+      description: "healthy pets keep energy and only receive gentle base happiness decay",
+      energy: 80,
+      expectedEnergy: 80,
+      expectedHappiness: 49.75,
+      hunger: 100,
+    },
+    {
+      description: "low hunger increases happiness decay",
+      energy: 80,
+      expectedEnergy: 80,
+      expectedHappiness: 48.75,
+      hunger: 35,
+    },
+    {
+      description: "low energy slightly increases happiness decay",
+      energy: 25,
+      expectedEnergy: 25,
+      expectedHappiness: 49.25,
+      hunger: 100,
+    },
+    {
+      description: "critical hunger drains energy slowly",
+      energy: 80,
+      expectedEnergy: 78,
+      expectedHappiness: 48.75,
+      hunger: 20,
+    },
+  ])("$description", ({ energy, expectedEnergy, expectedHappiness, hunger }) => {
+    const pet = makePet({
+      happiness: 50,
+      hunger,
+      energy,
+      lastAppOpenedAt: "2026-05-22T12:00:00.000Z",
+      lastHungerUpdatedAt: "2026-05-22T12:00:00.000Z",
+    });
+    const appOpenDecayed = applyAppOpenDecay(pet, "2026-05-22T13:00:00.000Z");
+    const updated = applyHungerDecay(
+      appOpenDecayed,
+      "2026-05-22T13:00:00.000Z",
+    );
+
+    expect(updated.happiness).toBe(expectedHappiness);
+    expect(updated.energy).toBe(expectedEnergy);
+  });
+
   it("applies focus impact from elapsed minutes once", () => {
     const result = applyFocusSessionImpact(
       makePet(),
