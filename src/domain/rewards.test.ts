@@ -3,9 +3,6 @@ import { DomainError } from "./errors";
 import {
   claimFocusReward,
   claimSessionReward,
-  FOCUS_SESSION_COIN_REWARD,
-  FOCUS_SESSION_HAPPINESS_REWARD,
-  FOCUS_SESSION_XP_REWARD,
   HONESTY_HEART_REWARD,
   HONESTY_HAPPINESS_REWARD,
   HONESTY_ENERGY_REWARD,
@@ -13,9 +10,10 @@ import {
 import { makePet, makeReward, makeSession } from "../test/factories";
 
 describe("focus rewards", () => {
-  it("claims a reward for a completed session once", () => {
+  it("claims a duration-based reward for a completed session once", () => {
     const pet = makePet({ xp: 90, level: 1 });
     const session = makeSession({
+      plannedDurationMinutes: 25,
       status: "completed",
       confirmedAt: "2026-05-22T12:30:00.000Z",
     });
@@ -29,10 +27,10 @@ describe("focus rewards", () => {
     });
 
     expect(result.pet).toMatchObject({
-      xp: 90 + FOCUS_SESSION_XP_REWARD,
+      xp: 115,
       level: 2,
-      coins: FOCUS_SESSION_COIN_REWARD,
-      happiness: 50 + FOCUS_SESSION_HAPPINESS_REWARD,
+      coins: 2,
+      happiness: 55,
       hunger: 100,
       energy: 80,
       streak: 1,
@@ -46,9 +44,9 @@ describe("focus rewards", () => {
       sessionId: "session-1",
       petId: "pet-1",
       rewardType: "focus_completed",
-      xpAwarded: FOCUS_SESSION_XP_REWARD,
-      coinsAwarded: FOCUS_SESSION_COIN_REWARD,
-      happinessAwarded: FOCUS_SESSION_HAPPINESS_REWARD,
+      xpAwarded: 25,
+      coinsAwarded: 2,
+      happinessAwarded: 5,
       hungerAwarded: 0,
       energyAwarded: 0,
       streakAwarded: 1,
@@ -57,12 +55,45 @@ describe("focus rewards", () => {
     });
     expect(result.summary).toMatchObject({
       rewardType: "focus_completed",
-      xpAwarded: FOCUS_SESSION_XP_REWARD,
+      xpAwarded: 25,
       previousLevel: 1,
       newLevel: 2,
       leveledUp: true,
     });
   });
+
+  it.each([
+    { coinsAwarded: 0, happinessAwarded: 1, minutes: 5, xpAwarded: 5 },
+    { coinsAwarded: 0, happinessAwarded: 3, minutes: 15, xpAwarded: 15 },
+    { coinsAwarded: 2, happinessAwarded: 5, minutes: 25, xpAwarded: 25 },
+    { coinsAwarded: 4, happinessAwarded: 10, minutes: 50, xpAwarded: 50 },
+  ])(
+    "uses v1 completion reward values for $minutes minutes",
+    ({ coinsAwarded, happinessAwarded, minutes, xpAwarded }) => {
+      const result = claimFocusReward({
+        pet: makePet(),
+        session: makeSession({
+          plannedDurationMinutes: minutes,
+          status: "completed",
+        }),
+        existingRewards: [],
+        now: "2026-05-22T12:31:00.000Z",
+        rewardId: "reward-1",
+      });
+
+      expect(result.summary).toMatchObject({
+        rewardType: "focus_completed",
+        xpAwarded,
+        coinsAwarded,
+        happinessAwarded,
+      });
+      expect(result.reward).toMatchObject({
+        xpAwarded,
+        coinsAwarded,
+        happinessAwarded,
+      });
+    },
+  );
 
   it("applies a small honesty heart reward for abandoned sessions", () => {
     const result = claimSessionReward({

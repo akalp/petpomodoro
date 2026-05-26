@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makePet, makeSession } from "../../test/factories";
 import {
+  calculateFocusStartEligibility,
   calculateFocusCareImpact,
   calculateFocusReward,
   calculateFocusStartRequirements,
@@ -12,25 +13,46 @@ import {
   calculateWakeUpEffects,
   canStartFocus,
 } from "./calculations";
-import { ACTIVE_BALANCE_PROFILE } from "./activeProfile";
-import type { BalanceProfile } from "./types";
 
 describe("metric calculations with the active balance profile", () => {
   it.each([
-    { minutes: 5 },
-    { minutes: 25 },
-    { minutes: 90 },
-  ])("keeps current fixed completion reward for $minutes minutes", ({ minutes }) => {
+    { coins: 0, happiness: 1, minutes: 5, xp: 5 },
+    { coins: 0, happiness: 3, minutes: 15, xp: 15 },
+    { coins: 2, happiness: 5, minutes: 25, xp: 25 },
+    { coins: 4, happiness: 10, minutes: 50, xp: 50 },
+  ])("calculates duration-based completion reward for $minutes minutes", ({
+    coins,
+    happiness,
+    minutes,
+    xp,
+  }) => {
     expect(calculateFocusReward(minutes)).toEqual({
-      xp: 25,
-      coins: 10,
-      happiness: 8,
+      xp,
+      coins,
+      happiness,
       hunger: 0,
       energy: 0,
       streak: 1,
       honestyHearts: 0,
     });
   });
+
+  it.each([
+    { baseCoins: 1, bonusCoins: 0, minutes: 5, totalCoins: 1 },
+    { baseCoins: 3, bonusCoins: 0, minutes: 15, totalCoins: 3 },
+    { baseCoins: 5, bonusCoins: 2, minutes: 25, totalCoins: 7 },
+    { baseCoins: 10, bonusCoins: 4, minutes: 50, totalCoins: 14 },
+  ])(
+    "keeps total focus coins calibrated for $minutes minutes",
+    ({ baseCoins, bonusCoins, minutes, totalCoins }) => {
+      expect(calculateFocusCareImpact(minutes).coinsEarned).toBe(baseCoins);
+      expect(calculateFocusReward(minutes).coins).toBe(bonusCoins);
+      expect(
+        calculateFocusCareImpact(minutes).coinsEarned +
+          calculateFocusReward(minutes).coins,
+      ).toBe(totalCoins);
+    },
+  );
 
   it.each([
     {
@@ -65,35 +87,35 @@ describe("metric calculations with the active balance profile", () => {
     },
   );
 
-  it("keeps current focus start requirements disabled", () => {
-    expect(calculateFocusStartRequirements(25)).toEqual({
-      enabled: false,
-      requiredEnergy: 0,
-      requiredHunger: 0,
-    });
-    expect(canStartFocus(makePet({ energy: 0, hunger: 0 }), 180)).toBe(true);
-  });
+  it.each([
+    { minutes: 5, requiredEnergy: 5, requiredHunger: 8 },
+    { minutes: 15, requiredEnergy: 12, requiredHunger: 8 },
+    { minutes: 25, requiredEnergy: 20, requiredHunger: 13 },
+    { minutes: 50, requiredEnergy: 40, requiredHunger: 25 },
+  ])(
+    "calculates focus start requirements for $minutes minutes",
+    ({ minutes, requiredEnergy, requiredHunger }) => {
+      expect(calculateFocusStartRequirements(minutes)).toEqual({
+        enabled: true,
+        requiredEnergy,
+        requiredHunger,
+      });
+    },
+  );
 
-  it("supports profile-injected focus start requirements without activating them", () => {
-    const profile = withStartRequirements({
-      enabled: true,
-      minEnergyBase: 5,
-      minEnergyPerMinute: 0.8,
-      minHungerBase: 8,
-      minHungerPerMinute: 0.5,
-    });
-
-    expect(calculateFocusStartRequirements(25, profile)).toEqual({
-      enabled: true,
+  it("blocks focus start when energy or hunger is too low", () => {
+    expect(canStartFocus(makePet({ energy: 19, hunger: 100 }), 25)).toBe(false);
+    expect(canStartFocus(makePet({ energy: 20, hunger: 12 }), 25)).toBe(false);
+    expect(canStartFocus(makePet({ energy: 20, hunger: 13 }), 25)).toBe(true);
+    expect(
+      calculateFocusStartEligibility(makePet({ energy: 19, hunger: 12 }), 25),
+    ).toMatchObject({
+      canStart: false,
+      hasEnoughEnergy: false,
+      hasEnoughHunger: false,
       requiredEnergy: 20,
       requiredHunger: 13,
     });
-    expect(canStartFocus(makePet({ energy: 19, hunger: 100 }), 25, profile)).toBe(
-      false,
-    );
-    expect(canStartFocus(makePet({ energy: 20, hunger: 13 }), 25, profile)).toBe(
-      true,
-    );
   });
 
   it.each([
@@ -297,18 +319,5 @@ describe("metric calculations with the active balance profile", () => {
 });
 
 describe("target configurable v1 balance examples (inactive)", () => {
-  it.todo("can make focus rewards duration-based without changing active profile");
   it.todo("can activate daily honesty limits without changing active profile");
 });
-
-function withStartRequirements(
-  startRequirements: BalanceProfile["focus"]["startRequirements"],
-): BalanceProfile {
-  return {
-    ...ACTIVE_BALANCE_PROFILE,
-    focus: {
-      ...ACTIVE_BALANCE_PROFILE.focus,
-      startRequirements,
-    },
-  };
-}

@@ -31,9 +31,13 @@ export interface BalanceFocusStartRequirements {
 
 export interface BalanceFocusConfig {
   baseCoinIntervalMinutes: number;
+  xpPerFocusMinute: number;
+  completionBonusPer25Minutes: number;
+  happinessPer5Minutes: number;
+  happinessMax: number;
   hungerDecayPerMinute: number;
   energyDecayPerMinute: number;
-  completedReward: BalanceStatAdjustments;
+  completedReward: Omit<BalanceStatAdjustments, "xp" | "coins" | "happiness">;
   startRequirements: BalanceFocusStartRequirements;
 }
 

@@ -13,11 +13,11 @@ import type {
 } from "./types";
 
 export const FOCUS_SESSION_XP_REWARD =
-  ACTIVE_BALANCE_PROFILE.focus.completedReward.xp;
+  ACTIVE_BALANCE_PROFILE.focus.xpPerFocusMinute;
 export const FOCUS_SESSION_COIN_REWARD =
-  ACTIVE_BALANCE_PROFILE.focus.completedReward.coins;
+  ACTIVE_BALANCE_PROFILE.focus.completionBonusPer25Minutes;
 export const FOCUS_SESSION_HAPPINESS_REWARD =
-  ACTIVE_BALANCE_PROFILE.focus.completedReward.happiness;
+  ACTIVE_BALANCE_PROFILE.focus.happinessPer5Minutes;
 export const FOCUS_SESSION_HUNGER_REWARD =
   ACTIVE_BALANCE_PROFILE.focus.completedReward.hunger;
 export const FOCUS_SESSION_ENERGY_REWARD =
@@ -51,7 +51,7 @@ export function claimFocusReward({
   existingRewards,
   now,
   rewardId,
-  xpAwarded = FOCUS_SESSION_XP_REWARD,
+  xpAwarded,
 }: ClaimFocusRewardInput): ClaimFocusRewardResult {
   return claimSessionReward({
     pet,
@@ -78,7 +78,7 @@ export function claimSessionReward({
   existingRewards,
   now,
   rewardId,
-  completedXpAwarded = FOCUS_SESSION_XP_REWARD,
+  completedXpAwarded,
 }: ClaimSessionRewardInput): ClaimFocusRewardResult {
   if (session.status !== "completed" && session.status !== "abandoned") {
     throw new DomainError("Only completed or abandoned sessions can claim rewards.");
@@ -158,17 +158,19 @@ export function claimSessionReward({
 
 function rewardValuesForSession(
   session: FocusSession,
-  completedXpAwarded: number,
+  completedXpAwarded: number | undefined,
 ): Omit<RewardSummary, "previousLevel" | "newLevel" | "leveledUp"> {
   if (session.status === "completed") {
-    if (!Number.isFinite(completedXpAwarded) || completedXpAwarded <= 0) {
+    const reward = calculateFocusReward(session.plannedDurationMinutes);
+    const xpAwarded = completedXpAwarded ?? reward.xp;
+
+    if (!Number.isFinite(xpAwarded) || xpAwarded <= 0) {
       throw new DomainError("Completed session XP must be greater than zero.");
     }
-    const reward = calculateFocusReward(session.plannedDurationMinutes);
 
     return {
       rewardType: "focus_completed",
-      xpAwarded: completedXpAwarded,
+      xpAwarded,
       coinsAwarded: reward.coins,
       happinessAwarded: reward.happiness,
       hungerAwarded: reward.hunger,

@@ -25,6 +25,13 @@ export interface FocusStartRequirementsCalculation {
   requiredHunger: number;
 }
 
+export interface FocusStartEligibilityCalculation
+  extends FocusStartRequirementsCalculation {
+  canStart: boolean;
+  hasEnoughEnergy: boolean;
+  hasEnoughHunger: boolean;
+}
+
 export interface IdleCareImpactCalculation {
   elapsedHours: number;
   hungerChanged: number;
@@ -85,8 +92,25 @@ export function calculateFocusReward(
   minutes: number,
   profile: BalanceProfile = ACTIVE_BALANCE_PROFILE,
 ): BalanceStatAdjustments {
-  void minutes;
-  return { ...profile.focus.completedReward };
+  const completedMinutes = Math.max(0, minutes);
+  const fullBaseCoinIntervals =
+    profile.focus.baseCoinIntervalMinutes > 0
+      ? Math.floor(completedMinutes / profile.focus.baseCoinIntervalMinutes)
+      : 0;
+  const completedDailyGoals =
+    profile.streak.dailyFocusGoalMinutes > 0
+      ? Math.floor(completedMinutes / profile.streak.dailyFocusGoalMinutes)
+      : 0;
+
+  return {
+    ...profile.focus.completedReward,
+    xp: completedMinutes * profile.focus.xpPerFocusMinute,
+    coins: completedDailyGoals * profile.focus.completionBonusPer25Minutes,
+    happiness: Math.min(
+      fullBaseCoinIntervals * profile.focus.happinessPer5Minutes,
+      profile.focus.happinessMax,
+    ),
+  };
 }
 
 export function calculateFocusCareImpact(
@@ -137,16 +161,34 @@ export function canStartFocus(
   minutes: number,
   profile: BalanceProfile = ACTIVE_BALANCE_PROFILE,
 ): boolean {
+  return calculateFocusStartEligibility(pet, minutes, profile).canStart;
+}
+
+export function calculateFocusStartEligibility(
+  pet: Pick<PetState, "energy" | "hunger">,
+  minutes: number,
+  profile: BalanceProfile = ACTIVE_BALANCE_PROFILE,
+): FocusStartEligibilityCalculation {
   const requirements = calculateFocusStartRequirements(minutes, profile);
 
   if (!requirements.enabled) {
-    return true;
+    return {
+      ...requirements,
+      canStart: true,
+      hasEnoughEnergy: true,
+      hasEnoughHunger: true,
+    };
   }
 
-  return (
-    pet.energy >= requirements.requiredEnergy &&
-    pet.hunger >= requirements.requiredHunger
-  );
+  const hasEnoughEnergy = pet.energy >= requirements.requiredEnergy;
+  const hasEnoughHunger = pet.hunger >= requirements.requiredHunger;
+
+  return {
+    ...requirements,
+    canStart: hasEnoughEnergy && hasEnoughHunger,
+    hasEnoughEnergy,
+    hasEnoughHunger,
+  };
 }
 
 export function calculateIdleCareImpact(

@@ -13,6 +13,7 @@ import { Card } from "./components/ui/Card";
 import { Sheet } from "./components/ui/Sheet";
 import { resetLocalData } from "./db";
 import {
+  calculateFocusStartEligibility,
   DEFAULT_FOCUS_DURATION_MINUTES,
   displayMoodForSession,
   isPetSleeping,
@@ -164,6 +165,13 @@ export function App() {
     activeSession?.status === "running" ||
     activeSession?.status === "awaiting_confirmation";
   const petIsSleeping = pet ? isPetSleeping(pet) : false;
+  const focusStartEligibility = pet
+    ? calculateFocusStartEligibility(pet, selectedDuration)
+    : null;
+  const focusNeedsCare =
+    !petIsSleeping &&
+    focusStartEligibility !== null &&
+    !focusStartEligibility.canStart;
   const displayMood = pet
     ? displayMoodForSession(
         pet.mood,
@@ -367,7 +375,7 @@ export function App() {
   const error = uiError ?? petError ?? pomodoroError ?? settingsError;
 
   const handleStart = (duration: number) => {
-    if (petIsSleeping) {
+    if (petIsSleeping || focusNeedsCare) {
       return;
     }
 
@@ -490,6 +498,24 @@ export function App() {
           {t("focusUnavailableDuringSleep", { pet: pet.name })}
         </Card>
       ) : null}
+      {focusNeedsCare && pet && focusStartEligibility ? (
+        <Card className="border-amber-100 bg-amber-50 text-sm font-medium leading-6 text-amber-950">
+          <p>
+            {focusStartCareMessage(
+              t,
+              pet.name,
+              focusStartEligibility.hasEnoughEnergy,
+              focusStartEligibility.hasEnoughHunger,
+            )}
+          </p>
+          <p className="mt-1 text-xs leading-5 text-amber-800">
+            {t("focusRequirementSummary", {
+              requiredEnergy: focusStartEligibility.requiredEnergy,
+              requiredHunger: focusStartEligibility.requiredHunger,
+            })}
+          </p>
+        </Card>
+      ) : null}
       <FocusSessionSwitcher
         activeSession={activeSession}
         countdownLabel={
@@ -506,7 +532,7 @@ export function App() {
         onEnd={handleEnd}
         onStart={handleStart}
         selectedDuration={selectedDuration}
-        startDisabled={isBusy || !hasHydrated || petIsSleeping}
+        startDisabled={isBusy || !hasHydrated || petIsSleeping || focusNeedsCare}
         t={t}
       />
     </>
@@ -615,6 +641,23 @@ export function App() {
       </Sheet>
     </AppShell>
   );
+}
+
+function focusStartCareMessage(
+  t: Translator,
+  petName: string,
+  hasEnoughEnergy: boolean,
+  hasEnoughHunger: boolean,
+): string {
+  if (!hasEnoughEnergy && !hasEnoughHunger) {
+    return t("focusUnavailableCareBoth", { pet: petName });
+  }
+
+  if (!hasEnoughEnergy) {
+    return t("focusUnavailableCareEnergy", { pet: petName });
+  }
+
+  return t("focusUnavailableCareHunger", { pet: petName });
 }
 
 function runStartNativeTimerShortcut(

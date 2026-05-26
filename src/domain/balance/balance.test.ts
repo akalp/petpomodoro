@@ -69,13 +69,13 @@ describe("active balance profile", () => {
 
   it("mirrors current reward constants", () => {
     expect(FOCUS_SESSION_XP_REWARD).toBe(
-      ACTIVE_BALANCE_PROFILE.focus.completedReward.xp,
+      ACTIVE_BALANCE_PROFILE.focus.xpPerFocusMinute,
     );
     expect(FOCUS_SESSION_COIN_REWARD).toBe(
-      ACTIVE_BALANCE_PROFILE.focus.completedReward.coins,
+      ACTIVE_BALANCE_PROFILE.focus.completionBonusPer25Minutes,
     );
     expect(FOCUS_SESSION_HAPPINESS_REWARD).toBe(
-      ACTIVE_BALANCE_PROFILE.focus.completedReward.happiness,
+      ACTIVE_BALANCE_PROFILE.focus.happinessPer5Minutes,
     );
     expect(FOCUS_SESSION_HUNGER_REWARD).toBe(
       ACTIVE_BALANCE_PROFILE.focus.completedReward.hunger,
@@ -125,10 +125,10 @@ describe("active balance profile", () => {
     });
 
     expect(result.summary).toMatchObject({
-      xpAwarded: ACTIVE_BALANCE_PROFILE.focus.completedReward.xp,
-      coinsAwarded: ACTIVE_BALANCE_PROFILE.focus.completedReward.coins,
-      happinessAwarded:
-        ACTIVE_BALANCE_PROFILE.focus.completedReward.happiness,
+      xpAwarded:
+        25 * ACTIVE_BALANCE_PROFILE.focus.xpPerFocusMinute,
+      coinsAwarded: ACTIVE_BALANCE_PROFILE.focus.completionBonusPer25Minutes,
+      happinessAwarded: 5 * ACTIVE_BALANCE_PROFILE.focus.happinessPer5Minutes,
       streakAwarded: ACTIVE_BALANCE_PROFILE.focus.completedReward.streak,
     });
   });

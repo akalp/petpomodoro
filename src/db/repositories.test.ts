@@ -120,7 +120,7 @@ describe("Dexie repositories", () => {
     );
 
     expect(first.pet.xp).toBe(25);
-    expect(first.pet.coins).toBe(15);
+    expect(first.pet.coins).toBe(7);
     expect(first.pet.hunger).toBeCloseTo(94.6);
     expect(first.pet.energy).toBe(73);
     expect(second.reward).toBeNull();

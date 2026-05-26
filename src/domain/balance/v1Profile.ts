@@ -1,5 +1,18 @@
 import type { BalanceProfile } from "./types";
 
+export const DAILY_FOCUS_GOAL_MINUTES = 25;
+export const XP_PER_FOCUS_MINUTE = 1;
+export const FOCUS_BASE_COIN_INTERVAL_MINUTES = 5;
+export const FOCUS_COMPLETION_BONUS_PER_25_MINUTES = 2;
+export const FOCUS_HAPPINESS_PER_5_MINUTES = 1;
+export const FOCUS_HAPPINESS_MAX = 10;
+export const FOCUS_HUNGER_DECAY_PER_MINUTE = 0.2;
+export const FOCUS_ENERGY_DECAY_PER_MINUTE = 0.28;
+export const MIN_START_ENERGY_BASE = 5;
+export const MIN_START_ENERGY_PER_MINUTE = 0.8;
+export const MIN_START_HUNGER_BASE = 8;
+export const MIN_START_HUNGER_PER_MINUTE = 0.5;
+
 const NO_REWARD = {
   xp: 0,
   coins: 0,
@@ -17,24 +30,25 @@ export const BALANCE_PROFILE_V1 = {
     maxPetStat: 100,
   },
   focus: {
-    baseCoinIntervalMinutes: 5,
-    hungerDecayPerMinute: 0.2,
-    energyDecayPerMinute: 0.28,
+    baseCoinIntervalMinutes: FOCUS_BASE_COIN_INTERVAL_MINUTES,
+    xpPerFocusMinute: XP_PER_FOCUS_MINUTE,
+    completionBonusPer25Minutes: FOCUS_COMPLETION_BONUS_PER_25_MINUTES,
+    happinessPer5Minutes: FOCUS_HAPPINESS_PER_5_MINUTES,
+    happinessMax: FOCUS_HAPPINESS_MAX,
+    hungerDecayPerMinute: FOCUS_HUNGER_DECAY_PER_MINUTE,
+    energyDecayPerMinute: FOCUS_ENERGY_DECAY_PER_MINUTE,
     completedReward: {
-      xp: 25,
-      coins: 10,
-      happiness: 8,
       hunger: 0,
       energy: 0,
       streak: 1,
       honestyHearts: 0,
     },
     startRequirements: {
-      enabled: false,
-      minEnergyBase: 0,
-      minEnergyPerMinute: 0,
-      minHungerBase: 0,
-      minHungerPerMinute: 0,
+      enabled: true,
+      minEnergyBase: MIN_START_ENERGY_BASE,
+      minEnergyPerMinute: MIN_START_ENERGY_PER_MINUTE,
+      minHungerBase: MIN_START_HUNGER_BASE,
+      minHungerPerMinute: MIN_START_HUNGER_PER_MINUTE,
     },
   },
   care: {
@@ -71,7 +85,7 @@ export const BALANCE_PROFILE_V1 = {
   },
   streak: {
     mode: "per_completed_session",
-    dailyFocusGoalMinutes: 25,
+    dailyFocusGoalMinutes: DAILY_FOCUS_GOAL_MINUTES,
     freeze: {
       enabled: false,
       costHonestyHearts: 0,

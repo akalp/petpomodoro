@@ -2,6 +2,7 @@ import {
   FOOD_NOT_FOUND_ERROR,
   INSUFFICIENT_COINS_ERROR,
   PET_ALREADY_SLEEPING_ERROR,
+  PET_FOCUS_NEEDS_CARE_ERROR,
   PET_NOT_SLEEPING_ERROR,
   PET_SLEEPING_CANNOT_EAT_ERROR,
   PET_SLEEPING_CANNOT_FOCUS_ERROR,
@@ -28,6 +29,8 @@ const englishMessages = {
   errorPetSleepingCannotEat: "Snacks wait until your pet wakes up.",
   errorPetSleepingCannotFocus:
     "Your pet is resting. Wake them before starting focus.",
+  errorPetFocusNeedsCare:
+    "Your pet needs a little more care before starting focus.",
   continue: "Continue",
   close: "Close",
   store: "Store",
@@ -84,6 +87,14 @@ const englishMessages = {
     "Energy {energy}, hunger {hunger}, happiness {happiness}.",
   focusUnavailableDuringSleep:
     "{pet} is resting. Wake them before starting focus.",
+  focusUnavailableCareBoth:
+    "{pet} needs a little food and rest before this focus.",
+  focusUnavailableCareEnergy:
+    "{pet} needs a little rest before this focus.",
+  focusUnavailableCareHunger:
+    "{pet} needs a small snack before this focus.",
+  focusRequirementSummary:
+    "Needs energy {requiredEnergy} and hunger {requiredHunger}.",
   shopUnavailableDuringSleep:
     "Snacks wait until {pet} wakes up.",
   totalXp: "Total XP",
@@ -236,6 +247,8 @@ const turkishMessages: Record<MessageKey, string> = {
   errorPetSleepingCannotEat: "Atıştırmalıklar dostun uyanana kadar bekler.",
   errorPetSleepingCannotFocus:
     "Dostun dinleniyor. Odağa başlamadan önce uyandır.",
+  errorPetFocusNeedsCare:
+    "Dostunun odağa başlamadan önce biraz bakıma ihtiyacı var.",
   continue: "Devam et",
   close: "Kapat",
   store: "Dükkan",
@@ -292,6 +305,14 @@ const turkishMessages: Record<MessageKey, string> = {
     "Enerji {energy}, tokluk {hunger}, mutluluk {happiness}.",
   focusUnavailableDuringSleep:
     "{pet} dinleniyor. Odağa başlamadan önce uyandır.",
+  focusUnavailableCareBoth:
+    "{pet} bu odak için biraz yemek ve dinlenmeye ihtiyaç duyuyor.",
+  focusUnavailableCareEnergy:
+    "{pet} bu odak için biraz dinlenmeye ihtiyaç duyuyor.",
+  focusUnavailableCareHunger:
+    "{pet} bu odak için küçük bir atıştırmalığa ihtiyaç duyuyor.",
+  focusRequirementSummary:
+    "Gerekli enerji {requiredEnergy}, tokluk {requiredHunger}.",
   shopUnavailableDuringSleep:
     "Atıştırmalıklar {pet} uyanana kadar bekler.",
   totalXp: "Toplam XP",
@@ -473,6 +494,10 @@ export function localizeErrorMessage(message: string, t: Translator): string {
 
   if (message === PET_SLEEPING_CANNOT_FOCUS_ERROR) {
     return t("errorPetSleepingCannotFocus");
+  }
+
+  if (message === PET_FOCUS_NEEDS_CARE_ERROR) {
+    return t("errorPetFocusNeedsCare");
   }
 
   if (message === INSUFFICIENT_COINS_ERROR) {

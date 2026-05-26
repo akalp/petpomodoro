@@ -1,6 +1,7 @@
 import { DomainError } from "./errors";
 import {
   ACTIVE_BALANCE_PROFILE,
+  calculateFocusStartEligibility,
   calculateFocusCareImpact,
   calculateIdleCareImpact,
   calculateLowCareHappinessDecay,
@@ -43,6 +44,7 @@ export const MAX_SLEEP_HAPPINESS_GAIN =
 export const PET_ALREADY_SLEEPING_ERROR = "pet_already_sleeping";
 export const PET_NOT_SLEEPING_ERROR = "pet_not_sleeping";
 export const PET_SLEEPING_CANNOT_FOCUS_ERROR = "pet_sleeping_cannot_focus";
+export const PET_FOCUS_NEEDS_CARE_ERROR = "pet_focus_needs_care";
 export const DEFAULT_PET_SPECIES_ID = "momo" satisfies PetSpeciesId;
 export const PET_DEFAULT_NAME_BY_SPECIES = {
   momo: "Momo",
@@ -281,6 +283,13 @@ export function displayMoodForSession(
   }
 
   return mood;
+}
+
+export function canPetStartFocus(
+  pet: Pick<PetState, "energy" | "hunger">,
+  minutes: number,
+): boolean {
+  return calculateFocusStartEligibility(pet, minutes).canStart;
 }
 
 export function moodForStats({

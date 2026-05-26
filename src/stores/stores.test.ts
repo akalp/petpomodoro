@@ -7,6 +7,7 @@ import {
   claimSessionReward,
   createDefaultSettings,
   INSUFFICIENT_COINS_ERROR,
+  PET_FOCUS_NEEDS_CARE_ERROR,
   PET_SLEEPING_CANNOT_EAT_ERROR,
   PET_SLEEPING_CANNOT_FOCUS_ERROR,
   startPetSleep,
@@ -220,6 +221,26 @@ describe("store workflows", () => {
     expect(repo.sessions.size).toBe(0);
   });
 
+  it("rejects starting a focus session when care stats are too low", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet({ energy: 19, hunger: 12 }),
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    await petStore.getState().initializePet(now);
+
+    await expect(
+      pomodoroStore.getState().startSession(25, now),
+    ).rejects.toThrow(PET_FOCUS_NEEDS_CARE_ERROR);
+    expect(repo.sessions.size).toBe(0);
+  });
+
   it("cancels a running session without a reward", async () => {
     const repo = createInMemoryRepositories({
       pet: makePet(),
@@ -308,7 +329,7 @@ describe("store workflows", () => {
     expect(session.status).toBe("completed");
     expect(session.confirmedAt).toBe(now);
     expect(repo.pet?.xp).toBe(25);
-    expect(repo.pet?.coins).toBe(15);
+    expect(repo.pet?.coins).toBe(7);
     expect(repo.pet?.streak).toBe(1);
     expect(repo.rewardLedger.size).toBe(1);
   });
@@ -390,7 +411,7 @@ describe("store workflows", () => {
     expect(firstConfirmation.status).toBe("completed");
     expect(secondConfirmation.status).toBe("completed");
     expect(repo.pet?.xp).toBe(25);
-    expect(repo.pet?.coins).toBe(15);
+    expect(repo.pet?.coins).toBe(7);
     expect(repo.rewardLedger.size).toBe(1);
   });
 

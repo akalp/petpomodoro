@@ -2,10 +2,12 @@ import { create, type StoreApi, type UseBoundStore } from "zustand";
 
 import {
   abandonFocusSession,
+  canPetStartFocus,
   confirmFocusSession,
   createRunningSession,
   DomainError,
   isPetSleeping,
+  PET_FOCUS_NEEDS_CARE_ERROR,
   PET_SLEEPING_CANNOT_FOCUS_ERROR,
   moveRunningSessionToAwaitingConfirmation,
   shouldPersistFocusSessionImpact,
@@ -128,6 +130,10 @@ export function createPomodoroStore(
 
         if (pet && isPetSleeping(pet)) {
           throw new DomainError(PET_SLEEPING_CANNOT_FOCUS_ERROR);
+        }
+
+        if (pet && !canPetStartFocus(pet, plannedDurationMinutes)) {
+          throw new DomainError(PET_FOCUS_NEEDS_CARE_ERROR);
         }
 
         const currentStatus = activeStatus(get().activeSession);

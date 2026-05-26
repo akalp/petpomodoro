@@ -4,6 +4,7 @@ import {
   FOOD_NOT_FOUND_ERROR,
   INSUFFICIENT_COINS_ERROR,
   PET_ALREADY_SLEEPING_ERROR,
+  PET_FOCUS_NEEDS_CARE_ERROR,
   PET_NOT_SLEEPING_ERROR,
   PET_SLEEPING_CANNOT_EAT_ERROR,
   PET_SLEEPING_CANNOT_FOCUS_ERROR,
@@ -63,6 +64,9 @@ describe("offline translations", () => {
     );
     expect(localizeErrorMessage(PET_SLEEPING_CANNOT_FOCUS_ERROR, t)).toBe(
       "Dostun dinleniyor. Odağa başlamadan önce uyandır.",
+    );
+    expect(localizeErrorMessage(PET_FOCUS_NEEDS_CARE_ERROR, t)).toBe(
+      "Dostunun odağa başlamadan önce biraz bakıma ihtiyacı var.",
     );
   });
 });
