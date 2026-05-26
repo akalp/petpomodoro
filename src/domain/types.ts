@@ -17,6 +17,7 @@ export interface PetState {
   energy: number;
   streak: number;
   honestyHearts: number;
+  lastFreezeUsedAt: string | null;
   sleepStartedAt: string | null;
   lastHungerUpdatedAt: string;
   lastAppOpenedAt: string;
@@ -65,6 +66,8 @@ export interface DailyFocusState {
   completedFocusMinutes: number;
   dailyGoalAwarded: boolean;
   honestyHeartsAwarded: number;
+  streakFreezesUsed: number;
+  lastStreakFreezeAt: string | null;
   powerNapsUsed: number;
   emergencySnacksUsed: number;
   lastPowerNapAt: string | null;

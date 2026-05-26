@@ -87,10 +87,10 @@ export const BALANCE_PROFILE_V1 = {
     mode: "daily_focus_minutes",
     dailyFocusGoalMinutes: DAILY_FOCUS_GOAL_MINUTES,
     freeze: {
-      enabled: false,
-      costHonestyHearts: 0,
-      cooldownDays: 0,
-      maxFreezesPerMissedDay: 0,
+      enabled: true,
+      costHonestyHearts: 3,
+      cooldownDays: 7,
+      maxFreezesPerMissedDay: 1,
     },
   },
   honesty: {

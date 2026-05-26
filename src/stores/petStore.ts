@@ -16,9 +16,11 @@ import {
   type PetSpeciesId,
   type PetState,
   type RewardSummary,
+  type StreakFreezeResult,
 } from "../domain";
 import {
   applyStoredSessionImpact,
+  applyStoredStreakFreeze,
   buyFoodForStoredPet,
   claimStoredSessionReward,
   getCurrentPet,
@@ -36,6 +38,7 @@ export interface PetStoreDependencies {
   updatePet: typeof updatePet;
   claimStoredSessionReward: typeof claimStoredSessionReward;
   applyStoredSessionImpact: typeof applyStoredSessionImpact;
+  applyStoredStreakFreeze: typeof applyStoredStreakFreeze;
   buyFoodForStoredPet: typeof buyFoodForStoredPet;
   startStoredPetSleep: typeof startStoredPetSleep;
   wakeStoredPetFromSleep: typeof wakeStoredPetFromSleep;
@@ -64,6 +67,10 @@ export interface PetStoreState {
     session: FocusSession,
     now?: string,
   ) => Promise<{ pet: PetState; session: FocusSession }>;
+  useStreakFreeze: (
+    dateKey: string,
+    now?: string,
+  ) => Promise<StreakFreezeResult>;
   buyFood: (
     foodId: FoodItemId | string,
     now?: string,
@@ -86,6 +93,7 @@ const defaultDependencies: PetStoreDependencies = {
   updatePet,
   claimStoredSessionReward,
   applyStoredSessionImpact,
+  applyStoredStreakFreeze,
   buyFoodForStoredPet,
   startStoredPetSleep,
   wakeStoredPetFromSleep,
@@ -205,6 +213,24 @@ export function createPetStore(
         const result = await dependencies.applyStoredSessionImpact({
           petId: pet.id,
           session,
+          now,
+        });
+        set({ pet: result.pet, isLoading: false });
+        return result;
+      } catch (error) {
+        set({ error: errorMessage(error), isLoading: false });
+        throw error;
+      }
+    },
+
+    useStreakFreeze: async (dateKey, now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().initializePet(now));
+      set({ isLoading: true, error: null });
+
+      try {
+        const result = await dependencies.applyStoredStreakFreeze({
+          petId: pet.id,
+          dateKey,
           now,
         });
         set({ pet: result.pet, isLoading: false });

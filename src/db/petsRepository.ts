@@ -41,6 +41,7 @@ export function createInitialPet({
     energy: 80,
     streak: 0,
     honestyHearts: 0,
+    lastFreezeUsedAt: null,
     sleepStartedAt: null,
     lastHungerUpdatedAt: now,
     lastAppOpenedAt: now,

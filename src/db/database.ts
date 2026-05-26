@@ -217,6 +217,31 @@ export class PetPomodoroDatabase extends Dexie {
           ),
         );
       });
+
+    this.version(9)
+      .stores({
+        pets: "id, createdAt, updatedAt",
+        sessions: "id, status, startedAt, expectedEndAt, rewardClaimedAt",
+        rewardLedger: "id, &sessionId, petId, createdAt",
+        settings: "id, updatedAt",
+        dailyFocus: "[petId+dateKey], petId, dateKey, dailyGoalAwarded",
+      })
+      .upgrade(async (transaction) => {
+        await transaction
+          .table("pets")
+          .toCollection()
+          .modify((pet: Partial<PetState>) => {
+            pet.lastFreezeUsedAt ??= null;
+          });
+
+        await transaction
+          .table("dailyFocus")
+          .toCollection()
+          .modify((dailyFocusState: Partial<DailyFocusState>) => {
+            dailyFocusState.streakFreezesUsed ??= 0;
+            dailyFocusState.lastStreakFreezeAt ??= null;
+          });
+      });
   }
 }
 

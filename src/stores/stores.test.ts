@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyFocusSessionImpact,
   applyIdlePetDecay,
+  applyStreakFreeze,
   buyFoodForPet,
   claimSessionReward,
   createDailyFocusState,
@@ -443,6 +444,31 @@ describe("store workflows", () => {
     });
   });
 
+  it("applies a confirmed streak freeze through the pet store", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet({ streak: 2, honestyHearts: 3 }),
+    });
+    const petStore = createPetStore({
+      ...repo.petDependencies,
+      now: () => now,
+    });
+
+    await petStore.getState().initializePet(now);
+    const result = await petStore.getState().useStreakFreeze("2026-05-21", now);
+
+    expect(result.pet).toMatchObject({
+      streak: 2,
+      honestyHearts: 0,
+      lastFreezeUsedAt: now,
+    });
+    expect(result.dailyFocusState).toMatchObject({
+      dateKey: "2026-05-21",
+      completedFocusMinutes: 0,
+      streakFreezesUsed: 1,
+    });
+    expect(petStore.getState().pet).toEqual(result.pet);
+  });
+
   it("starts and wakes pet sleep through the pet store", async () => {
     const repo = createInMemoryRepositories({
       pet: makePet({ energy: 20, hunger: 100 }),
@@ -717,6 +743,21 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
       const result = applyStoredImpactValues(pet, session, impactNow);
       pet = result.pet;
       sessions.set(session.id, result.session);
+      return result;
+    },
+    applyStoredStreakFreeze: async ({ petId, dateKey, now: freezeNow }) => {
+      if (!pet || pet.id !== petId) {
+        throw new Error("Pet not found.");
+      }
+
+      const dailyFocusKey = `${petId}:${dateKey}`;
+      const dailyFocusState =
+        dailyFocus.get(dailyFocusKey) ??
+        createDailyFocusState({ petId, dateKey });
+      const result = applyStreakFreeze(pet, dailyFocusState, freezeNow);
+
+      pet = result.pet;
+      dailyFocus.set(dailyFocusKey, result.dailyFocusState);
       return result;
     },
     buyFoodForStoredPet: async ({ petId, foodId, now: foodNow }) => {

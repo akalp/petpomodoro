@@ -10,6 +10,7 @@ import {
   startStoredPetSleep,
   wakeStoredPetFromSleep,
 } from "./petsRepository";
+import { applyStoredStreakFreeze } from "./dailyFocusRepository";
 import { claimStoredSessionReward } from "./rewardsRepository";
 import { loadOrCreateSettings, updateSettings } from "./settingsRepository";
 import { buyFoodForStoredPet } from "./shopRepository";
@@ -217,6 +218,54 @@ describe("Dexie repositories", () => {
       streak: 1,
     });
     expect(await database.rewardLedger.count()).toBe(5);
+  });
+
+  it("persists a streak freeze once for a missed day", async () => {
+    const database = makeDatabase("streak-freeze");
+    await database.pets.add(makePet({ streak: 3, honestyHearts: 4 }));
+
+    const result = await applyStoredStreakFreeze(
+      {
+        petId: "pet-1",
+        dateKey: "2026-05-21",
+        now: "2026-05-22T12:31:00.000Z",
+      },
+      database,
+    );
+
+    expect(result.pet).toMatchObject({
+      streak: 3,
+      honestyHearts: 1,
+      xp: 0,
+      coins: 0,
+      lastFreezeUsedAt: "2026-05-22T12:31:00.000Z",
+    });
+    expect(result.dailyFocusState).toMatchObject({
+      completedFocusMinutes: 0,
+      dailyGoalAwarded: false,
+      streakFreezesUsed: 1,
+      lastStreakFreezeAt: "2026-05-22T12:31:00.000Z",
+    });
+    await expect(database.pets.get("pet-1")).resolves.toMatchObject({
+      streak: 3,
+      honestyHearts: 1,
+      lastFreezeUsedAt: "2026-05-22T12:31:00.000Z",
+    });
+    await expect(database.dailyFocus.get(["pet-1", "2026-05-21"])).resolves.toMatchObject({
+      streakFreezesUsed: 1,
+      lastStreakFreezeAt: "2026-05-22T12:31:00.000Z",
+    });
+
+    await expect(
+      applyStoredStreakFreeze(
+        {
+          petId: "pet-1",
+          dateKey: "2026-05-21",
+          now: "2026-05-22T12:32:00.000Z",
+        },
+        database,
+      ),
+    ).rejects.toThrow();
   });
 
   it("persists pet sleep start and wake actions", async () => {

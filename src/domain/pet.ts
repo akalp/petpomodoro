@@ -327,6 +327,7 @@ export function normalizePetState(pet: PetState): PetState {
     energy,
     streak: Math.max(0, pet.streak ?? 0),
     honestyHearts: Math.max(0, pet.honestyHearts ?? 0),
+    lastFreezeUsedAt: pet.lastFreezeUsedAt ?? null,
     sleepStartedAt: pet.sleepStartedAt ?? null,
     lastHungerUpdatedAt: pet.lastHungerUpdatedAt ?? pet.updatedAt,
     lastAppOpenedAt:

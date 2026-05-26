@@ -66,6 +66,7 @@ describe("PetPomodoroDatabase", () => {
     delete legacySession.focusCoinsAwarded;
     const legacyPet: Record<string, unknown> = { ...makePet() };
     delete legacyPet.lastAppOpenedAt;
+    delete legacyPet.lastFreezeUsedAt;
     delete legacyPet.sleepStartedAt;
     delete legacyPet.speciesId;
     delete legacyPet.customName;
@@ -95,6 +96,7 @@ describe("PetPomodoroDatabase", () => {
       id: "pet-1",
       speciesId: "momo",
       customName: null,
+      lastFreezeUsedAt: null,
       lastAppOpenedAt: "2026-05-22T12:00:00.000Z",
       sleepStartedAt: null,
     });
@@ -171,6 +173,8 @@ describe("PetPomodoroDatabase", () => {
     await expect(database.dailyFocus.get(["pet-1", "2026-05-22"])).resolves.toMatchObject({
       completedFocusMinutes: 25,
       dailyGoalAwarded: true,
+      streakFreezesUsed: 0,
+      lastStreakFreezeAt: null,
     });
     await expect(database.dailyFocus.get(["pet-1", "2026-05-23"])).resolves.toMatchObject({
       completedFocusMinutes: 25,

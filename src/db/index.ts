@@ -1,4 +1,5 @@
 export * from "./database";
+export * from "./dailyFocusRepository";
 export * from "./errors";
 export * from "./petsRepository";
 export * from "./rewardsRepository";
