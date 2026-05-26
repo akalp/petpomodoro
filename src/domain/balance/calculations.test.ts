@@ -26,15 +26,15 @@ describe("metric calculations with the active balance profile", () => {
     minutes,
     xp,
   }) => {
-    expect(calculateFocusReward(minutes)).toEqual({
-      xp,
-      coins,
-      happiness,
-      hunger: 0,
-      energy: 0,
-      streak: 1,
-      honestyHearts: 0,
-    });
+      expect(calculateFocusReward(minutes)).toEqual({
+        xp,
+        coins,
+        happiness,
+        hunger: 0,
+        energy: 0,
+        streak: 0,
+        honestyHearts: 0,
+      });
   });
 
   it.each([

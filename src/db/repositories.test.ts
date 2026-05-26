@@ -148,6 +148,77 @@ describe("Dexie repositories", () => {
     expect(honesty.reward?.rewardType).toBe("honesty");
   });
 
+  it("persists daily focus progress and awards streak once per local day", async () => {
+    const database = makeDatabase("daily-focus");
+    await database.pets.add(makePet());
+    await database.sessions.bulkAdd(
+      Array.from({ length: 5 }, (_, index) =>
+        makeSession({
+          id: `session-${index + 1}`,
+          plannedDurationMinutes: 5,
+          status: "completed",
+          expectedEndAt: `2026-05-22T12:${String((index + 1) * 5).padStart(
+            2,
+            "0",
+          )}:00.000Z`,
+          confirmedAt: now,
+        }),
+      ),
+    );
+
+    for (let index = 0; index < 4; index += 1) {
+      const result = await claimStoredSessionReward(
+        {
+          petId: "pet-1",
+          sessionId: `session-${index + 1}`,
+          now,
+          rewardId: `reward-${index + 1}`,
+        },
+        database,
+      );
+
+      expect(result.reward?.streakAwarded).toBe(0);
+    }
+
+    await expect(database.dailyFocus.get(["pet-1", "2026-05-22"])).resolves.toMatchObject({
+      completedFocusMinutes: 20,
+      dailyGoalAwarded: false,
+    });
+    await expect(database.pets.get("pet-1")).resolves.toMatchObject({
+      streak: 0,
+    });
+
+    const fifth = await claimStoredSessionReward(
+      {
+        petId: "pet-1",
+        sessionId: "session-5",
+        now,
+        rewardId: "reward-5",
+      },
+      database,
+    );
+    const duplicate = await claimStoredSessionReward(
+      {
+        petId: "pet-1",
+        sessionId: "session-5",
+        now: "2026-05-22T12:32:00.000Z",
+        rewardId: "reward-duplicate",
+      },
+      database,
+    );
+
+    expect(fifth.reward?.streakAwarded).toBe(1);
+    expect(duplicate.reward).toBeNull();
+    await expect(database.dailyFocus.get(["pet-1", "2026-05-22"])).resolves.toMatchObject({
+      completedFocusMinutes: 25,
+      dailyGoalAwarded: true,
+    });
+    await expect(database.pets.get("pet-1")).resolves.toMatchObject({
+      streak: 1,
+    });
+    expect(await database.rewardLedger.count()).toBe(5);
+  });
+
   it("persists pet sleep start and wake actions", async () => {
     const database = makeDatabase("pet-sleep");
     await database.pets.add(makePet({ energy: 20, hunger: 100 }));

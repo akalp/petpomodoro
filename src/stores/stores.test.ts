@@ -5,14 +5,17 @@ import {
   applyIdlePetDecay,
   buyFoodForPet,
   claimSessionReward,
+  createDailyFocusState,
   createDefaultSettings,
   INSUFFICIENT_COINS_ERROR,
   PET_FOCUS_NEEDS_CARE_ERROR,
   PET_SLEEPING_CANNOT_EAT_ERROR,
   PET_SLEEPING_CANNOT_FOCUS_ERROR,
+  rewardDateKeyForSession,
   startPetSleep,
   wakePetFromSleep,
   type AppSettings,
+  type DailyFocusState,
   type FocusSession,
   type PetState,
   type RewardLedger,
@@ -627,6 +630,7 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
     (state.sessions ?? []).map((session) => [session.id, session]),
   );
   const rewardLedger = new Map<string, RewardLedger>();
+  const dailyFocus = new Map<string, DailyFocusState>();
 
   const petDependencies: PetStoreDependencies = {
     getCurrentPet: async () => pet,
@@ -660,12 +664,18 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
 
       const rewardSession = nextSession ?? session;
       const existingReward = rewardLedger.get(sessionId);
+      const dateKey = rewardDateKeyForSession(rewardSession, rewardNow);
+      const dailyFocusKey = `${petId}:${dateKey}`;
+      const dailyFocusState =
+        dailyFocus.get(dailyFocusKey) ??
+        createDailyFocusState({ petId, dateKey });
 
       if (rewardSession.rewardClaimedAt !== null || existingReward) {
         const result = claimSessionReward({
           pet,
           session: rewardSession,
           existingRewards: existingReward ? [existingReward] : [],
+          dailyFocusState: existingReward ? null : dailyFocusState,
           now: rewardNow,
           rewardId: `reward-${sessionId}`,
         });
@@ -678,6 +688,7 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
         pet: impactResult.pet,
         session: impactResult.session,
         existingRewards: existingReward ? [existingReward] : [],
+        dailyFocusState,
         now: rewardNow,
         rewardId: `reward-${sessionId}`,
       });
@@ -686,6 +697,9 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
       sessions.set(sessionId, result.session);
 
       if (result.reward) {
+        if (result.dailyFocusState) {
+          dailyFocus.set(dailyFocusKey, result.dailyFocusState);
+        }
         rewardLedger.set(sessionId, result.reward);
       }
 
@@ -772,6 +786,7 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
     },
     sessions,
     rewardLedger,
+    dailyFocus,
     petDependencies,
     pomodoroDependencies,
   };

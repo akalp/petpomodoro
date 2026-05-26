@@ -1,11 +1,16 @@
 import Dexie, { type Table } from "dexie";
 
 import {
+  DAILY_FOCUS_GOAL_MINUTES,
   DEFAULT_PET_SPECIES_ID,
+  createDailyFocusState,
   defaultPetNameForSpecies,
+  rewardDateKeyForSession,
+  toLocalDateKey,
 } from "../domain";
 import type {
   AppSettings,
+  DailyFocusState,
   FocusSession,
   PetState,
   RewardLedger,
@@ -18,6 +23,7 @@ export class PetPomodoroDatabase extends Dexie {
   sessions!: Table<FocusSession, string>;
   rewardLedger!: Table<RewardLedger, string>;
   settings!: Table<AppSettings, string>;
+  dailyFocus!: Table<DailyFocusState, [string, string]>;
 
   constructor(name = DATABASE_NAME) {
     super(name);
@@ -138,6 +144,79 @@ export class PetPomodoroDatabase extends Dexie {
             settings.motivationalMessages ??= [];
           }),
       );
+
+    this.version(8)
+      .stores({
+        pets: "id, createdAt, updatedAt",
+        sessions: "id, status, startedAt, expectedEndAt, rewardClaimedAt",
+        rewardLedger: "id, &sessionId, petId, createdAt",
+        settings: "id, updatedAt",
+        dailyFocus: "[petId+dateKey], petId, dateKey, dailyGoalAwarded",
+      })
+      .upgrade(async (transaction) => {
+        const [pets, sessions, rewards] = await Promise.all([
+          transaction.table("pets").toArray() as Promise<PetState[]>,
+          transaction.table("sessions").toArray() as Promise<FocusSession[]>,
+          transaction.table("rewardLedger").toArray() as Promise<RewardLedger[]>,
+        ]);
+        const sessionsById = new Map(
+          sessions.map((session) => [session.id, session]),
+        );
+        const dailyStates = new Map<string, DailyFocusState>();
+
+        for (const reward of rewards) {
+          const session = sessionsById.get(reward.sessionId);
+          const dateKey = session
+            ? rewardDateKeyForSession(session, reward.createdAt)
+            : toLocalDateKey(new Date(reward.createdAt));
+          const stateKey = `${reward.petId}:${dateKey}`;
+          const dailyState =
+            dailyStates.get(stateKey) ??
+            createDailyFocusState({ petId: reward.petId, dateKey });
+
+          if (reward.rewardType === "focus_completed" && session) {
+            dailyState.completedFocusMinutes += Math.max(
+              0,
+              session.plannedDurationMinutes ?? 0,
+            );
+          }
+
+          if (reward.rewardType === "honesty") {
+            dailyState.honestyHeartsAwarded += Math.max(
+              0,
+              reward.honestyHeartsAwarded ?? 0,
+            );
+          }
+
+          dailyState.dailyGoalAwarded =
+            DAILY_FOCUS_GOAL_MINUTES > 0 &&
+            dailyState.completedFocusMinutes >= DAILY_FOCUS_GOAL_MINUTES;
+          dailyStates.set(stateKey, dailyState);
+        }
+
+        if (dailyStates.size > 0) {
+          await transaction.table("dailyFocus").bulkPut([...dailyStates.values()]);
+        }
+
+        const successfulDaysByPetId = new Map<string, number>();
+        for (const dailyState of dailyStates.values()) {
+          if (dailyState.dailyGoalAwarded) {
+            successfulDaysByPetId.set(
+              dailyState.petId,
+              (successfulDaysByPetId.get(dailyState.petId) ?? 0) + 1,
+            );
+          }
+        }
+
+        await Promise.all(
+          pets.map((pet) =>
+            transaction.table("pets").put({
+              ...pet,
+              streak: successfulDaysByPetId.get(pet.id) ?? 0,
+            }),
+          ),
+        );
+      });
   }
 }
 

@@ -1,4 +1,9 @@
-import type { FocusSession, PetState, RewardLedger } from "../domain";
+import type {
+  DailyFocusState,
+  FocusSession,
+  PetState,
+  RewardLedger,
+} from "../domain";
 
 export const baseNow = "2026-05-22T12:00:00.000Z";
 
@@ -61,6 +66,22 @@ export function makeReward(
     streakAwarded: 1,
     honestyHeartsAwarded: 0,
     createdAt: "2026-05-22T12:30:00.000Z",
+    ...overrides,
+  };
+}
+
+export function makeDailyFocusState(
+  overrides: Partial<DailyFocusState> = {},
+): DailyFocusState {
+  return {
+    petId: "pet-1",
+    dateKey: "2026-05-22",
+    completedFocusMinutes: 0,
+    dailyGoalAwarded: false,
+    honestyHeartsAwarded: 0,
+    powerNapsUsed: 0,
+    emergencySnacksUsed: 0,
+    lastPowerNapAt: null,
     ...overrides,
   };
 }

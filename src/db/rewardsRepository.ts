@@ -2,7 +2,11 @@ import {
   applyFocusSessionImpact,
   applyIdlePetDecay,
   claimSessionReward,
+  createDailyFocusState,
+  normalizeDailyFocusState,
+  rewardDateKeyForSession,
   type ClaimFocusRewardResult,
+  type DailyFocusState,
   type FocusSession,
   type PetState,
   type RewardLedger,
@@ -50,6 +54,7 @@ export async function claimStoredSessionReward(
     database.pets,
     database.sessions,
     database.rewardLedger,
+    database.dailyFocus,
     async () => {
       const [pet, session, existingReward] = await Promise.all([
         database.pets.get(petId),
@@ -72,12 +77,16 @@ export async function claimStoredSessionReward(
       }
 
       const existingRewardList = existingReward ? [existingReward] : [];
+      const dailyFocusState = existingReward
+        ? null
+        : await getOrCreateDailyFocusState(pet.id, rewardSession, now, database);
 
       if (rewardSession.rewardClaimedAt !== null || existingReward) {
         const result = claimSessionReward({
           pet,
           session: rewardSession,
           existingRewards: existingRewardList,
+          dailyFocusState,
           now,
           rewardId,
           completedXpAwarded: xpAwarded,
@@ -92,6 +101,7 @@ export async function claimStoredSessionReward(
         pet: impactResult.pet,
         session: impactResult.session,
         existingRewards: existingRewardList,
+        dailyFocusState,
         now,
         rewardId,
         completedXpAwarded: xpAwarded,
@@ -101,11 +111,28 @@ export async function claimStoredSessionReward(
       await database.sessions.put(result.session);
 
       if (result.reward) {
+        if (result.dailyFocusState) {
+          await database.dailyFocus.put(result.dailyFocusState);
+        }
         await database.rewardLedger.add(result.reward);
       }
 
       return result;
     },
+  );
+}
+
+async function getOrCreateDailyFocusState(
+  petId: string,
+  session: FocusSession,
+  now: string,
+  database: PetPomodoroDatabase,
+): Promise<DailyFocusState> {
+  const dateKey = rewardDateKeyForSession(session, now);
+  const existingDailyState = await database.dailyFocus.get([petId, dateKey]);
+
+  return normalizeDailyFocusState(
+    existingDailyState ?? createDailyFocusState({ petId, dateKey }),
   );
 }
 

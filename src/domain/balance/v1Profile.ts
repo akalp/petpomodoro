@@ -40,7 +40,7 @@ export const BALANCE_PROFILE_V1 = {
     completedReward: {
       hunger: 0,
       energy: 0,
-      streak: 1,
+      streak: 0,
       honestyHearts: 0,
     },
     startRequirements: {
@@ -84,7 +84,7 @@ export const BALANCE_PROFILE_V1 = {
     },
   },
   streak: {
-    mode: "per_completed_session",
+    mode: "daily_focus_minutes",
     dailyFocusGoalMinutes: DAILY_FOCUS_GOAL_MINUTES,
     freeze: {
       enabled: false,

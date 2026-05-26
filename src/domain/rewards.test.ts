@@ -7,7 +7,13 @@ import {
   HONESTY_HAPPINESS_REWARD,
   HONESTY_ENERGY_REWARD,
 } from "./rewards";
-import { makePet, makeReward, makeSession } from "../test/factories";
+import {
+  makeDailyFocusState,
+  makePet,
+  makeReward,
+  makeSession,
+} from "../test/factories";
+import type { DailyFocusState, PetState } from "./types";
 
 describe("focus rewards", () => {
   it("claims a duration-based reward for a completed session once", () => {
@@ -63,13 +69,37 @@ describe("focus rewards", () => {
   });
 
   it.each([
-    { coinsAwarded: 0, happinessAwarded: 1, minutes: 5, xpAwarded: 5 },
-    { coinsAwarded: 0, happinessAwarded: 3, minutes: 15, xpAwarded: 15 },
-    { coinsAwarded: 2, happinessAwarded: 5, minutes: 25, xpAwarded: 25 },
-    { coinsAwarded: 4, happinessAwarded: 10, minutes: 50, xpAwarded: 50 },
+    {
+      coinsAwarded: 0,
+      happinessAwarded: 1,
+      minutes: 5,
+      streakAwarded: 0,
+      xpAwarded: 5,
+    },
+    {
+      coinsAwarded: 0,
+      happinessAwarded: 3,
+      minutes: 15,
+      streakAwarded: 0,
+      xpAwarded: 15,
+    },
+    {
+      coinsAwarded: 2,
+      happinessAwarded: 5,
+      minutes: 25,
+      streakAwarded: 1,
+      xpAwarded: 25,
+    },
+    {
+      coinsAwarded: 4,
+      happinessAwarded: 10,
+      minutes: 50,
+      streakAwarded: 1,
+      xpAwarded: 50,
+    },
   ])(
     "uses v1 completion reward values for $minutes minutes",
-    ({ coinsAwarded, happinessAwarded, minutes, xpAwarded }) => {
+    ({ coinsAwarded, happinessAwarded, minutes, streakAwarded, xpAwarded }) => {
       const result = claimFocusReward({
         pet: makePet(),
         session: makeSession({
@@ -86,14 +116,102 @@ describe("focus rewards", () => {
         xpAwarded,
         coinsAwarded,
         happinessAwarded,
+        streakAwarded,
       });
       expect(result.reward).toMatchObject({
         xpAwarded,
         coinsAwarded,
         happinessAwarded,
+        streakAwarded,
       });
     },
   );
+
+  it("keeps a 5 minute focus session as daily progress without a streak", () => {
+    const result = claimCompletedSession({
+      pet: makePet(),
+      minutes: 5,
+      sessionId: "session-1",
+    });
+
+    expect(result.pet.streak).toBe(0);
+    expect(result.reward?.streakAwarded).toBe(0);
+    expect(result.dailyFocusState).toMatchObject({
+      completedFocusMinutes: 5,
+      dailyGoalAwarded: false,
+    });
+  });
+
+  it("awards one streak after five 5 minute sessions on the same day", () => {
+    let pet = makePet();
+    let dailyFocusState: DailyFocusState | null = null;
+    const streakAwards: number[] = [];
+
+    for (let index = 0; index < 5; index += 1) {
+      const result = claimCompletedSession({
+        pet,
+        dailyFocusState,
+        minutes: 5,
+        sessionId: `session-${index + 1}`,
+      });
+      pet = result.pet;
+      dailyFocusState = result.dailyFocusState;
+      streakAwards.push(result.reward?.streakAwarded ?? 0);
+    }
+
+    expect(dailyFocusState).toMatchObject({
+      completedFocusMinutes: 25,
+      dailyGoalAwarded: true,
+    });
+    expect(pet.streak).toBe(1);
+    expect(streakAwards).toEqual([0, 0, 0, 0, 1]);
+  });
+
+  it("awards one streak for a 25 minute session", () => {
+    const result = claimCompletedSession({
+      pet: makePet(),
+      minutes: 25,
+      sessionId: "session-25",
+    });
+
+    expect(result.pet.streak).toBe(1);
+    expect(result.reward?.streakAwarded).toBe(1);
+    expect(result.dailyFocusState?.completedFocusMinutes).toBe(25);
+  });
+
+  it("awards one streak for a 50 minute session", () => {
+    const result = claimCompletedSession({
+      pet: makePet(),
+      minutes: 50,
+      sessionId: "session-50",
+    });
+
+    expect(result.pet.streak).toBe(1);
+    expect(result.reward?.streakAwarded).toBe(1);
+    expect(result.dailyFocusState?.completedFocusMinutes).toBe(50);
+  });
+
+  it("keeps streak to one award for two 25 minute sessions on the same day", () => {
+    const first = claimCompletedSession({
+      pet: makePet(),
+      minutes: 25,
+      sessionId: "session-1",
+    });
+    const second = claimCompletedSession({
+      pet: first.pet,
+      dailyFocusState: first.dailyFocusState,
+      minutes: 25,
+      sessionId: "session-2",
+    });
+
+    expect(first.reward?.streakAwarded).toBe(1);
+    expect(second.reward?.streakAwarded).toBe(0);
+    expect(second.pet.streak).toBe(1);
+    expect(second.dailyFocusState).toMatchObject({
+      completedFocusMinutes: 50,
+      dailyGoalAwarded: true,
+    });
+  });
 
   it("applies a small honesty heart reward for abandoned sessions", () => {
     const result = claimSessionReward({
@@ -188,6 +306,7 @@ describe("focus rewards", () => {
 
     expect(result.pet).toBe(pet);
     expect(result.session.rewardClaimedAt).toBe("2026-05-22T12:31:00.000Z");
+    expect(result.dailyFocusState).toBeNull();
     expect(result.reward).toBeNull();
     expect(result.summary).toBeNull();
   });
@@ -209,7 +328,34 @@ describe("focus rewards", () => {
 
     expect(result.pet).toBe(pet);
     expect(result.session.rewardClaimedAt).toBe("2026-05-22T12:31:00.000Z");
+    expect(result.dailyFocusState).toBeNull();
     expect(result.reward).toBeNull();
     expect(result.summary).toBeNull();
   });
 });
+
+function claimCompletedSession({
+  pet,
+  dailyFocusState = makeDailyFocusState(),
+  minutes,
+  sessionId,
+}: {
+  pet: PetState;
+  dailyFocusState?: DailyFocusState | null;
+  minutes: number;
+  sessionId: string;
+}) {
+  return claimFocusReward({
+    pet,
+    session: makeSession({
+      id: sessionId,
+      plannedDurationMinutes: minutes,
+      status: "completed",
+      confirmedAt: "2026-05-22T12:31:00.000Z",
+    }),
+    existingRewards: [],
+    dailyFocusState,
+    now: "2026-05-22T12:31:00.000Z",
+    rewardId: `reward-${sessionId}`,
+  });
+}

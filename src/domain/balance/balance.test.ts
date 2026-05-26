@@ -129,7 +129,7 @@ describe("active balance profile", () => {
         25 * ACTIVE_BALANCE_PROFILE.focus.xpPerFocusMinute,
       coinsAwarded: ACTIVE_BALANCE_PROFILE.focus.completionBonusPer25Minutes,
       happinessAwarded: 5 * ACTIVE_BALANCE_PROFILE.focus.happinessPer5Minutes,
-      streakAwarded: ACTIVE_BALANCE_PROFILE.focus.completedReward.streak,
+      streakAwarded: 1,
     });
   });
 

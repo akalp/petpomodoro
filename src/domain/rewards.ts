@@ -3,9 +3,17 @@ import {
   calculateFocusReward,
   calculateHonestyReward,
 } from "./balance";
+import {
+  applyCompletedFocusMinutesToDailyState,
+  applyHonestyHeartToDailyState,
+  createDailyFocusState,
+  normalizeDailyFocusState,
+} from "./dailyFocus";
+import { toLocalDateKey } from "./dateKeys";
 import { DomainError } from "./errors";
 import { applyPetStatAdjustments } from "./pet";
 import type {
+  DailyFocusState,
   FocusSession,
   PetState,
   RewardLedger,
@@ -33,6 +41,7 @@ export interface ClaimFocusRewardInput {
   pet: PetState;
   session: FocusSession;
   existingRewards: readonly RewardLedger[];
+  dailyFocusState?: DailyFocusState | null;
   now: string;
   rewardId: string;
   xpAwarded?: number;
@@ -41,6 +50,7 @@ export interface ClaimFocusRewardInput {
 export interface ClaimFocusRewardResult {
   pet: PetState;
   session: FocusSession;
+  dailyFocusState: DailyFocusState | null;
   reward: RewardLedger | null;
   summary: RewardSummary | null;
 }
@@ -49,6 +59,7 @@ export function claimFocusReward({
   pet,
   session,
   existingRewards,
+  dailyFocusState,
   now,
   rewardId,
   xpAwarded,
@@ -57,6 +68,7 @@ export function claimFocusReward({
     pet,
     session,
     existingRewards,
+    dailyFocusState,
     now,
     rewardId,
     completedXpAwarded: xpAwarded,
@@ -67,6 +79,7 @@ export interface ClaimSessionRewardInput {
   pet: PetState;
   session: FocusSession;
   existingRewards: readonly RewardLedger[];
+  dailyFocusState?: DailyFocusState | null;
   now: string;
   rewardId: string;
   completedXpAwarded?: number;
@@ -76,6 +89,7 @@ export function claimSessionReward({
   pet,
   session,
   existingRewards,
+  dailyFocusState,
   now,
   rewardId,
   completedXpAwarded,
@@ -95,6 +109,7 @@ export function claimSessionReward({
         ...session,
         rewardClaimedAt: session.rewardClaimedAt ?? existingReward?.createdAt ?? null,
       },
+      dailyFocusState: dailyFocusState ?? null,
       reward: null,
       summary: null,
     };
@@ -107,8 +122,16 @@ export function claimSessionReward({
     throw new DomainError("Only honestly declined sessions can claim honesty rewards.");
   }
 
-  const rewardValues = rewardValuesForSession(
+  const baseDailyFocusState = normalizeDailyFocusState(
+    dailyFocusState ??
+      createDailyFocusState({
+        petId: pet.id,
+        dateKey: rewardDateKeyForSession(session, now),
+      }),
+  );
+  const { rewardValues, nextDailyFocusState } = rewardValuesForSession(
     session,
+    baseDailyFocusState,
     completedXpAwarded,
   );
   const nextPet = applyPetStatAdjustments(
@@ -146,6 +169,7 @@ export function claimSessionReward({
       ...session,
       rewardClaimedAt: now,
     },
+    dailyFocusState: nextDailyFocusState,
     reward,
     summary: {
       ...rewardValues,
@@ -158,8 +182,12 @@ export function claimSessionReward({
 
 function rewardValuesForSession(
   session: FocusSession,
+  dailyFocusState: DailyFocusState,
   completedXpAwarded: number | undefined,
-): Omit<RewardSummary, "previousLevel" | "newLevel" | "leveledUp"> {
+): {
+  rewardValues: Omit<RewardSummary, "previousLevel" | "newLevel" | "leveledUp">;
+  nextDailyFocusState: DailyFocusState;
+} {
   if (session.status === "completed") {
     const reward = calculateFocusReward(session.plannedDurationMinutes);
     const xpAwarded = completedXpAwarded ?? reward.xp;
@@ -168,15 +196,23 @@ function rewardValuesForSession(
       throw new DomainError("Completed session XP must be greater than zero.");
     }
 
+    const dailyResult = applyCompletedFocusMinutesToDailyState(
+      dailyFocusState,
+      session.plannedDurationMinutes,
+    );
+
     return {
-      rewardType: "focus_completed",
-      xpAwarded,
-      coinsAwarded: reward.coins,
-      happinessAwarded: reward.happiness,
-      hungerAwarded: reward.hunger,
-      energyAwarded: reward.energy,
-      streakAwarded: reward.streak,
-      honestyHeartsAwarded: reward.honestyHearts,
+      rewardValues: {
+        rewardType: "focus_completed",
+        xpAwarded,
+        coinsAwarded: reward.coins,
+        happinessAwarded: reward.happiness,
+        hungerAwarded: reward.hunger,
+        energyAwarded: reward.energy,
+        streakAwarded: dailyResult.streakAwarded,
+        honestyHeartsAwarded: reward.honestyHearts,
+      },
+      nextDailyFocusState: dailyResult.dailyFocusState,
     };
   }
 
@@ -185,15 +221,34 @@ function rewardValuesForSession(
   }
 
   const honestyReward = calculateHonestyReward(session).reward;
+  const nextDailyFocusState = applyHonestyHeartToDailyState(
+    dailyFocusState,
+    honestyReward.honestyHearts,
+  );
 
   return {
-    rewardType: "honesty",
-    xpAwarded: honestyReward.xp,
-    coinsAwarded: honestyReward.coins,
-    happinessAwarded: honestyReward.happiness,
-    hungerAwarded: honestyReward.hunger,
-    energyAwarded: honestyReward.energy,
-    streakAwarded: honestyReward.streak,
-    honestyHeartsAwarded: honestyReward.honestyHearts,
+    rewardValues: {
+      rewardType: "honesty",
+      xpAwarded: honestyReward.xp,
+      coinsAwarded: honestyReward.coins,
+      happinessAwarded: honestyReward.happiness,
+      hungerAwarded: honestyReward.hunger,
+      energyAwarded: honestyReward.energy,
+      streakAwarded: honestyReward.streak,
+      honestyHeartsAwarded: honestyReward.honestyHearts,
+    },
+    nextDailyFocusState,
   };
+}
+
+export function rewardDateKeyForSession(
+  session: FocusSession,
+  now: string,
+): string {
+  const rewardDate =
+    session.status === "completed"
+      ? session.expectedEndAt
+      : session.abandonedAt ?? now;
+
+  return toLocalDateKey(new Date(rewardDate));
 }

@@ -59,6 +59,17 @@ export interface AppSettings {
   updatedAt: string;
 }
 
+export interface DailyFocusState {
+  petId: string;
+  dateKey: string;
+  completedFocusMinutes: number;
+  dailyGoalAwarded: boolean;
+  honestyHeartsAwarded: number;
+  powerNapsUsed: number;
+  emergencySnacksUsed: number;
+  lastPowerNapAt: string | null;
+}
+
 export interface RewardLedger {
   id: string;
   sessionId: string;
