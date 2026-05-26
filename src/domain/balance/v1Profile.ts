@@ -30,6 +30,10 @@ export const EMERGENCY_SNACK_HUNGER_GAIN = 12;
 export const EMERGENCY_SNACK_HAPPINESS_GAIN = 0;
 export const EMERGENCY_SNACK_ENERGY_GAIN = 0;
 export const MAX_EMERGENCY_SNACKS_PER_DAY = 1;
+export const HONESTY_HAPPINESS_REWARD = 2;
+export const HONESTY_HEART_REWARD = 1;
+export const MIN_HONESTY_SESSION_MINUTES = 15;
+export const MAX_HONESTY_HEARTS_PER_DAY = 2;
 
 const NO_REWARD = {
   xp: 0,
@@ -42,7 +46,7 @@ const NO_REWARD = {
 } as const;
 
 export const BALANCE_PROFILE_V1 = {
-  version: "v1-current-baseline",
+  version: "v1-cozy-balanced",
   progression: {
     xpPerLevel: 100,
     maxPetStat: 100,
@@ -119,13 +123,13 @@ export const BALANCE_PROFILE_V1 = {
   honesty: {
     reward: {
       ...NO_REWARD,
-      happiness: 3,
-      honestyHearts: 1,
+      happiness: HONESTY_HAPPINESS_REWARD,
+      honestyHearts: HONESTY_HEART_REWARD,
     },
     limits: {
-      enabled: false,
-      minSessionMinutes: 0,
-      maxHeartsPerDay: Number.POSITIVE_INFINITY,
+      enabled: true,
+      minSessionMinutes: MIN_HONESTY_SESSION_MINUTES,
+      maxHeartsPerDay: MAX_HONESTY_HEARTS_PER_DAY,
     },
   },
   mood: {

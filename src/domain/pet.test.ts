@@ -237,6 +237,28 @@ describe("pet domain logic", () => {
     expect(second.session.focusCoinsAwarded).toBe(2);
   });
 
+  it("removes elapsed focus coins when an awaiting session is honestly declined", () => {
+    const waiting = applyFocusSessionImpact(
+      makePet({ coins: 4 }),
+      makeSession({ status: "awaiting_confirmation" }),
+      "2026-05-22T12:25:00.000Z",
+    );
+    const abandoned = applyFocusSessionImpact(
+      waiting.pet,
+      {
+        ...waiting.session,
+        status: "abandoned",
+        abandonedAt: "2026-05-22T12:30:00.000Z",
+        abandonmentReason: "honest_confirmation",
+      },
+      "2026-05-22T12:30:00.000Z",
+    );
+
+    expect(waiting.pet.coins).toBe(9);
+    expect(abandoned.pet.coins).toBe(4);
+    expect(abandoned.session.focusCoinsAwarded).toBe(0);
+  });
+
   it("applies capped app-open happiness decay", () => {
     const updated = applyAppOpenDecay(
       makePet({

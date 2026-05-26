@@ -231,7 +231,7 @@ Supporting:
 - Thanks for being honest with your pet.
 - Some sessions do not go as planned.
 
-For an early cancellation, do not show reward language. After "Not this time" from the confirmation prompt, the honesty reward copy may be shown.
+For an early cancellation, do not show reward language. After "Not this time" from the confirmation prompt, show honesty reward copy only when an eligible Honesty Heart reward is granted.
 
 Action:
 
@@ -265,6 +265,7 @@ Supporting:
 
 - No points lost. No scolding.
 - Your honesty heart was saved.
+- Honesty Hearts are earned for sessions of at least 15 minutes, up to two per day.
 
 Short labels:
 

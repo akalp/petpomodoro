@@ -10,6 +10,7 @@ import {
   clampPetStat as clampBalancePetStat,
 } from "./balance";
 import type {
+  AbandonmentReason,
   FocusSessionStatus,
   PetDisplayMood,
   PetMood,
@@ -208,6 +209,7 @@ export type FocusSessionWithImpact = PetFocusSessionFields & {
 };
 
 interface PetFocusSessionFields {
+  abandonmentReason: AbandonmentReason | null;
   focusImpactAppliedUntil: string;
   focusCoinsAwarded: number;
 }
@@ -218,18 +220,19 @@ export function applyFocusSessionImpact<
   const impactUntil = focusImpactUntil(session, now);
   const appliedUntil = session.focusImpactAppliedUntil || session.startedAt;
   const elapsedMs = Date.parse(impactUntil) - Date.parse(appliedUntil);
+  const totalFocusMinutes =
+    (Date.parse(impactUntil) - Date.parse(session.startedAt)) / (60 * 1000);
+  const totalCoinsEarned = calculateFocusCareImpact(totalFocusMinutes).coinsEarned;
+  const totalCoinsAllowed =
+    session.abandonmentReason === "honest_confirmation" ? 0 : totalCoinsEarned;
+  const coinsChanged = totalCoinsAllowed - session.focusCoinsAwarded;
 
-  if (elapsedMs <= 0) {
+  if (elapsedMs <= 0 && coinsChanged === 0) {
     return { pet, session };
   }
 
-  const elapsedMinutes = elapsedMs / (60 * 1000);
-  const elapsedHours = elapsedMs / (60 * 60 * 1000);
-  const totalFocusMinutes =
-    (Date.parse(impactUntil) - Date.parse(session.startedAt)) / (60 * 1000);
-  const totalCoinsEarned =
-    calculateFocusCareImpact(totalFocusMinutes).coinsEarned;
-  const coinsToAward = Math.max(0, totalCoinsEarned - session.focusCoinsAwarded);
+  const elapsedMinutes = Math.max(0, elapsedMs / (60 * 1000));
+  const elapsedHours = Math.max(0, elapsedMs / (60 * 60 * 1000));
   const focusImpact = calculateFocusCareImpact(elapsedMinutes);
   const hunger = clampPetStat(pet.hunger + focusImpact.hungerChanged);
   const energy = clampPetStat(pet.energy + focusImpact.energyChanged);
@@ -244,7 +247,7 @@ export function applyFocusSessionImpact<
   );
   const nextPet = {
     ...pet,
-    coins: Math.max(0, pet.coins + coinsToAward),
+    coins: Math.max(0, pet.coins + coinsChanged),
     happiness,
     hunger,
     energy,
@@ -255,7 +258,7 @@ export function applyFocusSessionImpact<
   const nextSession = {
     ...session,
     focusImpactAppliedUntil: impactUntil,
-    focusCoinsAwarded: session.focusCoinsAwarded + coinsToAward,
+    focusCoinsAwarded: totalCoinsAllowed,
   };
 
   return { pet: nextPet, session: nextSession };

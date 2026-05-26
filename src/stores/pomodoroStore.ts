@@ -258,11 +258,11 @@ export function createPomodoroStore(
       set({ isLoading: true, error: null });
 
       try {
-        const abandonedSession = abandonFocusSession(
-          activeSession,
-          "honest_confirmation",
-          now,
-        );
+        const abandonedSession =
+          activeSession.status === "abandoned" &&
+          activeSession.abandonmentReason === "honest_confirmation"
+            ? activeSession
+            : abandonFocusSession(activeSession, "honest_confirmation", now);
         const rewardResult = await dependencies.petStore
           .getState()
           .applySessionReward(abandonedSession, now);

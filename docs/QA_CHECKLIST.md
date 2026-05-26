@@ -100,9 +100,12 @@ Use this checklist before the first MVP deployment and again after every release
 
 - [ ] Choose "Not this time" from awaiting confirmation.
 - [ ] The session becomes `abandoned`.
-- [ ] No completion XP is applied.
+- [ ] No XP, coins, or streak progress is applied.
 - [ ] Any honesty-only reward behavior remains non-punitive.
-- [ ] One honesty reward is saved and cannot be claimed twice.
+- [ ] A declined session shorter than 15 minutes grants no Honesty Heart.
+- [ ] A declined session of at least 15 minutes grants at most one Honesty Heart and `+2` happiness when eligible.
+- [ ] The third eligible declined session in the same local day grants no additional Honesty Heart.
+- [ ] Any saved honesty claim cannot be applied twice.
 - [ ] Copy says there are no points lost and no scolding.
 - [ ] Session history records the abandoned session.
 

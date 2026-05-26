@@ -30,12 +30,12 @@ The first version should be optimized for one-handed mobile use and iOS Home Scr
    > Your pet waited for you. Did you really finish this focus session?
 
 7. If the user confirms, the session is completed and the pet receives XP once.
-8. If the user selects "Not this time", the session is abandoned without punishment and receives one small honesty-heart reward.
+8. If the user selects "Not this time", the session is abandoned without punishment. A session of at least 15 minutes can grant `+1` Honesty Heart and `+2` happiness, capped at two hearts per local day.
 9. The user can spend earned coins in the Shop tab on food that immediately helps the pet's hunger, happiness, and energy.
 10. The user can let the pet rest to recover energy when no focus session is active.
 11. The user can review recent sessions in the Journal tab and start another session when ready.
 
-Ending a running session before it reaches confirmation abandons it without a completion reward. Elapsed focus care impact and base focus coins still apply because the pet spent that time working with the user.
+Ending a running session before it reaches confirmation abandons it without a completion reward. Elapsed focus care impact and base focus coins still apply because the pet spent that time working with the user. Choosing "Not this time" grants no XP, coins, or streak progress.
 
 ## MVP Features
 
@@ -49,7 +49,8 @@ Ending a running session before it reaches confirmation abandons it without a co
 - Honesty confirmation with two choices:
   - Yes, we did it
   - Not this time
-- Multi-stat reward application for completed sessions and a small honesty reward for declined confirmation.
+- Multi-stat reward application for completed sessions and an eligibility-limited honesty reward for declined confirmation.
+- Honesty Hearts support achievements and streak freeze only; they are not XP, coins, shop currency, or mini-game currency.
 - Duration-based focus care impact and base focus coins for elapsed focus time.
 - A local feeding shop with four foods, each with a different coin cost and care-stat impact.
 - A local pet rest flow that restores energy over elapsed local time and may affect hunger and happiness.

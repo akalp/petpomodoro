@@ -36,6 +36,10 @@ export const HONESTY_ENERGY_REWARD =
   ACTIVE_BALANCE_PROFILE.honesty.reward.energy;
 export const HONESTY_HEART_REWARD =
   ACTIVE_BALANCE_PROFILE.honesty.reward.honestyHearts;
+export const MIN_HONESTY_SESSION_MINUTES =
+  ACTIVE_BALANCE_PROFILE.honesty.limits.minSessionMinutes;
+export const MAX_HONESTY_HEARTS_PER_DAY =
+  ACTIVE_BALANCE_PROFILE.honesty.limits.maxHeartsPerDay;
 
 export interface ClaimFocusRewardInput {
   pet: PetState;
@@ -171,13 +175,29 @@ export function claimSessionReward({
     },
     dailyFocusState: nextDailyFocusState,
     reward,
-    summary: {
-      ...rewardValues,
-      previousLevel: pet.level,
-      newLevel: nextPet.level,
-      leveledUp: nextPet.level > pet.level,
-    },
+    summary: hasPresentedReward(rewardValues)
+      ? {
+          ...rewardValues,
+          previousLevel: pet.level,
+          newLevel: nextPet.level,
+          leveledUp: nextPet.level > pet.level,
+        }
+      : null,
   };
+}
+
+function hasPresentedReward(
+  rewardValues: Omit<RewardSummary, "previousLevel" | "newLevel" | "leveledUp">,
+): boolean {
+  return (
+    rewardValues.xpAwarded !== 0 ||
+    rewardValues.coinsAwarded !== 0 ||
+    rewardValues.happinessAwarded !== 0 ||
+    rewardValues.hungerAwarded !== 0 ||
+    rewardValues.energyAwarded !== 0 ||
+    rewardValues.streakAwarded !== 0 ||
+    rewardValues.honestyHeartsAwarded !== 0
+  );
 }
 
 function rewardValuesForSession(
@@ -220,7 +240,7 @@ function rewardValuesForSession(
     throw new DomainError("Only completed or abandoned sessions can claim rewards.");
   }
 
-  const honestyReward = calculateHonestyReward(session).reward;
+  const honestyReward = calculateHonestyReward(session, dailyFocusState).reward;
   const nextDailyFocusState = applyHonestyHeartToDailyState(
     dailyFocusState,
     honestyReward.honestyHearts,

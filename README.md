@@ -132,7 +132,7 @@ The MVP should include:
 - Multi-stat completion rewards, duration-based focus care impact, and hunger decay between visits.
 - A local feeding shop where focus coins can buy food that immediately improves hunger, energy, and happiness.
 - A local rest flow where the pet can sleep to recover energy; focus and feeding wait until the pet wakes.
-- An honesty-heart reward only when the user declines completion from the confirmation prompt; ending a running session early gives no completion reward, but elapsed focus care impact and base coins still apply.
+- An eligibility-limited honesty reward when the user declines completion after a session of at least 15 minutes: at most two Honesty Hearts per local day, with `+2` happiness and no XP, coins, or streak progress. Ending a running session early gives no completion reward, but elapsed focus care impact and base coins still apply.
 - Idempotent rewards so the same session cannot reward the pet twice.
 - Local session history and local-only shop purchases.
 - Offline support after first load.

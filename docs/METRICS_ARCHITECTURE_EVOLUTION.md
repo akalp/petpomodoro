@@ -12,9 +12,9 @@ The target product feel is:
 - fully local-first and offline-first;
 - easy to tune through centralized configuration rather than scattered magic numbers.
 
-## Current baseline inventory
+## Historical baseline inventory
 
-This section records the current runtime behavior before the configurable balance work begins. It is intentionally descriptive only; these values are not the target balance.
+This section records runtime behavior before the configurable balance work began. It is intentionally descriptive only; these values are not the active balance after the completed evolution phases below.
 
 ### Current PetState metrics
 
@@ -891,7 +891,7 @@ Acceptance criteria:
 - Low hunger and low energy make happiness decline faster.
 - All values are capped safely at 0 and 100.
 
-### Phase 9 — Rework Honesty Heart rules
+### Phase 9 — Rework Honesty Heart rules (implemented)
 
 Goal: preserve honesty as a trust mechanic while preventing farming.
 

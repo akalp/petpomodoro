@@ -6,6 +6,8 @@ import {
   HONESTY_HEART_REWARD,
   HONESTY_HAPPINESS_REWARD,
   HONESTY_ENERGY_REWARD,
+  MAX_HONESTY_HEARTS_PER_DAY,
+  MIN_HONESTY_SESSION_MINUTES,
 } from "./rewards";
 import {
   makeDailyFocusState,
@@ -237,8 +239,10 @@ describe("focus rewards", () => {
     expect(result.reward).toMatchObject({
       rewardType: "honesty",
       xpAwarded: 0,
+      coinsAwarded: 0,
       happinessAwarded: HONESTY_HAPPINESS_REWARD,
       energyAwarded: HONESTY_ENERGY_REWARD,
+      streakAwarded: 0,
       honestyHeartsAwarded: HONESTY_HEART_REWARD,
     });
     expect(result.summary).toMatchObject({
@@ -246,6 +250,79 @@ describe("focus rewards", () => {
       honestyHeartsAwarded: HONESTY_HEART_REWARD,
       leveledUp: false,
     });
+  });
+
+  it("records short honest non-completion without granting rewards", () => {
+    const result = claimSessionReward({
+      pet: makePet(),
+      session: makeSession({
+        plannedDurationMinutes: MIN_HONESTY_SESSION_MINUTES - 1,
+        status: "abandoned",
+        abandonedAt: "2026-05-22T12:14:00.000Z",
+        abandonmentReason: "honest_confirmation",
+      }),
+      existingRewards: [],
+      dailyFocusState: makeDailyFocusState(),
+      now: "2026-05-22T12:15:00.000Z",
+      rewardId: "reward-short",
+    });
+
+    expect(result.pet).toMatchObject({
+      xp: 0,
+      coins: 0,
+      happiness: 50,
+      streak: 0,
+      honestyHearts: 0,
+    });
+    expect(result.reward).toMatchObject({
+      rewardType: "honesty",
+      xpAwarded: 0,
+      coinsAwarded: 0,
+      happinessAwarded: 0,
+      streakAwarded: 0,
+      honestyHeartsAwarded: 0,
+    });
+    expect(result.summary).toBeNull();
+    expect(result.dailyFocusState?.honestyHeartsAwarded).toBe(0);
+  });
+
+  it("caps eligible honesty hearts at two per local day", () => {
+    let pet = makePet();
+    let dailyFocusState = makeDailyFocusState();
+    const heartAwards: number[] = [];
+
+    for (let index = 0; index < MAX_HONESTY_HEARTS_PER_DAY + 1; index += 1) {
+      const result = claimSessionReward({
+        pet,
+        session: makeSession({
+          id: `honesty-session-${index}`,
+          plannedDurationMinutes: MIN_HONESTY_SESSION_MINUTES,
+          status: "abandoned",
+          abandonedAt: "2026-05-22T12:30:00.000Z",
+          abandonmentReason: "honest_confirmation",
+        }),
+        existingRewards: [],
+        dailyFocusState,
+        now: "2026-05-22T12:31:00.000Z",
+        rewardId: `honesty-reward-${index}`,
+      });
+
+      pet = result.pet;
+      dailyFocusState = result.dailyFocusState ?? dailyFocusState;
+      heartAwards.push(result.reward?.honestyHeartsAwarded ?? 0);
+    }
+
+    expect(heartAwards).toEqual([1, 1, 0]);
+    expect(pet).toMatchObject({
+      xp: 0,
+      coins: 0,
+      happiness: 50 + HONESTY_HAPPINESS_REWARD * 2,
+      streak: 0,
+      honestyHearts: MAX_HONESTY_HEARTS_PER_DAY,
+    });
+    expect(dailyFocusState.honestyHeartsAwarded).toBe(
+      MAX_HONESTY_HEARTS_PER_DAY,
+    );
   });
 
   it("does not reward sessions cancelled before confirmation", () => {

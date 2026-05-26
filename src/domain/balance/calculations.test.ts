@@ -274,6 +274,7 @@ describe("metric calculations with the active balance profile", () => {
       eligible: true,
       reason: null,
       session: makeSession({
+        plannedDurationMinutes: 15,
         abandonmentReason: "honest_confirmation",
         status: "abandoned",
       }),
@@ -301,7 +302,7 @@ describe("metric calculations with the active balance profile", () => {
         ? {
             xp: 0,
             coins: 0,
-            happiness: 3,
+            happiness: 2,
             hunger: 0,
             energy: 0,
             streak: 0,
@@ -317,6 +318,39 @@ describe("metric calculations with the active balance profile", () => {
             honestyHearts: 0,
           },
     );
+  });
+
+  it("requires a 15 minute honesty session and limits hearts to two per day", () => {
+    const shortSession = makeSession({
+      plannedDurationMinutes: 5,
+      abandonmentReason: "honest_confirmation",
+      status: "abandoned",
+    });
+    const eligibleSession = makeSession({
+      plannedDurationMinutes: 15,
+      abandonmentReason: "honest_confirmation",
+      status: "abandoned",
+    });
+
+    expect(calculateHonestyReward(shortSession)).toMatchObject({
+      eligible: false,
+      reason: "below_minimum_duration",
+      reward: { happiness: 0, honestyHearts: 0 },
+    });
+    expect(
+      calculateHonestyReward(eligibleSession, { honestyHeartsAwarded: 1 }),
+    ).toMatchObject({
+      eligible: true,
+      reason: null,
+      reward: { happiness: 2, honestyHearts: 1 },
+    });
+    expect(
+      calculateHonestyReward(eligibleSession, { honestyHeartsAwarded: 2 }),
+    ).toMatchObject({
+      eligible: false,
+      reason: "daily_limit_reached",
+      reward: { happiness: 0, honestyHearts: 0 },
+    });
   });
 
   it.each([
@@ -395,8 +429,4 @@ describe("metric calculations with the active balance profile", () => {
       });
     },
   );
-});
-
-describe("target configurable v1 balance examples (inactive)", () => {
-  it.todo("can activate daily honesty limits without changing active profile");
 });

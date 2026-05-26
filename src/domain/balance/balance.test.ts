@@ -34,6 +34,8 @@ import {
   HONESTY_ENERGY_REWARD,
   HONESTY_HAPPINESS_REWARD,
   HONESTY_HEART_REWARD,
+  MAX_HONESTY_HEARTS_PER_DAY,
+  MIN_HONESTY_SESSION_MINUTES,
 } from "../rewards";
 import { FOOD_CATALOG } from "../shop";
 import {
@@ -135,6 +137,10 @@ describe("active balance profile", () => {
     expect(HONESTY_HEART_REWARD).toBe(
       ACTIVE_BALANCE_PROFILE.honesty.reward.honestyHearts,
     );
+    expect(HONESTY_HAPPINESS_REWARD).toBe(2);
+    expect(HONESTY_HEART_REWARD).toBe(1);
+    expect(MIN_HONESTY_SESSION_MINUTES).toBe(15);
+    expect(MAX_HONESTY_HEARTS_PER_DAY).toBe(2);
   });
 
   it("uses the active profile for focus impact math", () => {

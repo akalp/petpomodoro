@@ -177,7 +177,7 @@ Initial schema:
 
 The unique `rewardLedger.sessionId` index is required. It is the persistence-level guard that prevents one Pomodoro session from rewarding the pet more than once, for completion or honest declined confirmation.
 
-Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`. Version 6 backfills `customName`, preserving user-supplied names while allowing an unnamed pet to display its selected species name. Version 7 backfills `motivationalMessages = []` on existing settings.
+Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`. Version 6 backfills `customName`, preserving user-supplied names while allowing an unnamed pet to display its selected species name. Version 7 backfills `motivationalMessages = []` on existing settings. Version 8 adds `dailyFocus`, including `honestyHeartsAwarded` for local-day caps. Version 9 adds streak-freeze metadata.
 
 The feeding shop v1 uses a bundled static food catalog and does not need a new IndexedDB table. Buying food runs in a Dexie transaction that reads the current pet, applies the pure purchase function, and writes the updated pet. Failed purchases, such as insufficient coins or an unknown food id, must leave the stored pet unchanged.
 
@@ -275,7 +275,7 @@ Domain tests:
 - Awaiting confirmation can become completed.
 - Awaiting confirmation can become abandoned.
 - Cancelled running sessions cannot receive rewards.
-- An honestly declined confirmation can receive one idempotent honesty reward.
+- An honestly declined confirmation of at least 15 minutes can receive one idempotent honesty reward while the two-heart local-day cap allows it.
 - Completed sessions cannot receive duplicate rewards.
 - XP and level calculations are deterministic.
 - Pet mood rules preserve priority thresholds.
@@ -299,7 +299,7 @@ Store tests:
 - Hydration restores active running or awaiting confirmation sessions.
 - Confirm completion updates session, pet, and reward ledger.
 - Cancelling a running session applies elapsed focus care impact and base focus coins, but no completion reward or reward-ledger row.
-- Declining confirmation applies one honesty reward.
+- Declining confirmation applies no XP, coins, or streak progress, and applies an eligible honesty reward only within the duration and daily-heart limits.
 - Hydration migrates and restores settings.
 - Pet sleep state persists through hydration.
 - Buying food and starting focus surface sleeping-state errors.

@@ -97,7 +97,7 @@ Current implemented architecture includes:
 ## Phase 6: Pet Rewards
 
 - Apply multi-stat reward on honest completion.
-- Apply a small honesty reward only after declined confirmation.
+- Apply an eligibility-limited honesty reward after declined confirmation: minimum 15 minutes, two hearts per local day, and no XP, coins, or streak progress.
 - Update pet level when XP crosses level thresholds.
 - Save reward ledger entry for each rewarded session.
 - Prevent duplicate reward from double tap or retry.
@@ -143,7 +143,7 @@ Current implemented architecture includes:
 - Test fresh load in desktop browser.
 - Test starting a session.
 - Test cancelling a running session with elapsed focus care impact and no completion reward.
-- Test declining confirmation with one honesty reward.
+- Test declined confirmation eligibility, daily heart cap, idempotency, and absence of XP, coins, or streak progress.
 - Test custom durations and settings migration/reset.
 - Test reaching awaiting confirmation while the app remains open.
 - Test closing the app and reopening after `expectedEndAt`.

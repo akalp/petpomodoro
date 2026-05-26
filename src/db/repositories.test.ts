@@ -149,12 +149,104 @@ describe("Dexie repositories", () => {
       { petId: "pet-1", sessionId: "session-1", now, rewardId: "reward-1" },
       honestyDatabase,
     );
+    const duplicateHonesty = await claimStoredSessionReward(
+      {
+        petId: "pet-1",
+        sessionId: "session-1",
+        now: "2026-05-22T12:32:00.000Z",
+        rewardId: "reward-2",
+      },
+      honestyDatabase,
+    );
 
-    expect(honesty.pet.coins).toBe(5);
+    expect(honesty.pet.xp).toBe(0);
+    expect(honesty.pet.coins).toBe(0);
+    expect(honesty.pet.happiness).toBe(52);
     expect(honesty.pet.hunger).toBeCloseTo(94.6);
     expect(honesty.pet.energy).toBe(73);
+    expect(honesty.pet.streak).toBe(0);
     expect(honesty.pet.honestyHearts).toBe(1);
-    expect(honesty.reward?.rewardType).toBe("honesty");
+    expect(honesty.reward).toMatchObject({
+      rewardType: "honesty",
+      xpAwarded: 0,
+      coinsAwarded: 0,
+      streakAwarded: 0,
+      honestyHeartsAwarded: 1,
+    });
+    expect(duplicateHonesty.reward).toBeNull();
+    expect(await honestyDatabase.rewardLedger.count()).toBe(1);
+  });
+
+  it("persists honesty eligibility and caps daily heart gain", async () => {
+    const database = makeDatabase("honesty-daily-cap");
+    await database.pets.add(makePet());
+    await database.sessions.bulkAdd([
+      makeSession({
+        id: "honesty-short",
+        plannedDurationMinutes: 5,
+        expectedEndAt: "2026-05-22T12:05:00.000Z",
+        status: "abandoned",
+        abandonedAt: "2026-05-22T12:06:00.000Z",
+        abandonmentReason: "honest_confirmation",
+      }),
+      ...Array.from({ length: 3 }, (_, index) =>
+        makeSession({
+          id: `honesty-eligible-${index + 1}`,
+          plannedDurationMinutes: 15,
+          expectedEndAt: `2026-05-22T12:${String(15 + index).padStart(
+            2,
+            "0",
+          )}:00.000Z`,
+          status: "abandoned",
+          abandonedAt: `2026-05-22T12:${String(20 + index).padStart(
+            2,
+            "0",
+          )}:00.000Z`,
+          abandonmentReason: "honest_confirmation",
+        }),
+      ),
+    ]);
+
+    const short = await claimStoredSessionReward(
+      {
+        petId: "pet-1",
+        sessionId: "honesty-short",
+        now,
+        rewardId: "reward-short",
+      },
+      database,
+    );
+    const eligibleHeartAwards: number[] = [];
+
+    for (let index = 1; index <= 3; index += 1) {
+      const result = await claimStoredSessionReward(
+        {
+          petId: "pet-1",
+          sessionId: `honesty-eligible-${index}`,
+          now,
+          rewardId: `reward-eligible-${index}`,
+        },
+        database,
+      );
+      eligibleHeartAwards.push(result.reward?.honestyHeartsAwarded ?? 0);
+    }
+
+    expect(short.reward?.honestyHeartsAwarded).toBe(0);
+    expect(short.summary).toBeNull();
+    expect(eligibleHeartAwards).toEqual([1, 1, 0]);
+    await expect(database.pets.get("pet-1")).resolves.toMatchObject({
+      xp: 0,
+      coins: 0,
+      happiness: 54,
+      streak: 0,
+      honestyHearts: 2,
+    });
+    await expect(database.dailyFocus.get(["pet-1", "2026-05-22"])).resolves.toMatchObject({
+      honestyHeartsAwarded: 2,
+      completedFocusMinutes: 0,
+      dailyGoalAwarded: false,
+    });
+    expect(await database.rewardLedger.count()).toBe(4);
   });
 
   it("persists daily focus progress and awards streak once per local day", async () => {

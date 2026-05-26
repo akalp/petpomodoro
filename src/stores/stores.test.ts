@@ -300,14 +300,55 @@ describe("store workflows", () => {
 
     await pomodoroStore.getState().loadActiveSession();
     const session = await pomodoroStore.getState().confirmAbandoned(now);
+    const repeated = await pomodoroStore
+      .getState()
+      .confirmAbandoned("2026-05-22T12:31:00.000Z");
 
     expect(session.status).toBe("abandoned");
+    expect(repeated.status).toBe("abandoned");
     expect(session.abandonmentReason).toBe("honest_confirmation");
     expect(session.abandonedAt).toBe(now);
     expect(repo.pet?.xp).toBe(0);
-    expect(repo.pet?.coins).toBe(5);
+    expect(repo.pet?.coins).toBe(0);
+    expect(repo.pet?.happiness).toBe(52);
+    expect(repo.pet?.streak).toBe(0);
     expect(repo.pet?.honestyHearts).toBe(1);
     expect(repo.rewardLedger.size).toBe(1);
+  });
+
+  it("does not reward a five minute honest non-completion", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet(),
+      sessions: [
+        makeSession({
+          plannedDurationMinutes: 5,
+          expectedEndAt: "2026-05-22T12:05:00.000Z",
+          status: "awaiting_confirmation",
+        }),
+      ],
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    await pomodoroStore.getState().loadActiveSession();
+    await pomodoroStore.getState().confirmAbandoned(now);
+
+    expect(repo.pet).toMatchObject({
+      xp: 0,
+      coins: 0,
+      happiness: 50,
+      streak: 0,
+      honestyHearts: 0,
+    });
+    expect(petStore.getState().lastRewardSummary).toBeNull();
+    expect(repo.rewardLedger.get("session-1")).toMatchObject({
+      honestyHeartsAwarded: 0,
+    });
   });
 
   it("confirms completion and applies the existing honesty reward path", async () => {

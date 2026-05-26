@@ -16,7 +16,7 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
   - "Not this time"
 - Multi-stat completion rewards with idempotent reward protection.
 - Duration-based focus care impact and base focus coins for elapsed work time.
-- Neutral abandoned-session handling: early cancellation grants no completion reward, while honestly declining after the planned window grants one small honesty reward.
+- Neutral abandoned-session handling: early cancellation grants no completion reward, while honestly declining after at least 15 planned minutes may grant `+1` Honesty Heart and `+2` happiness, capped at two hearts per local day and never granting XP, coins, or streak progress.
 - Local pet rest/sleep behavior that can restore energy and blocks focus or feeding until the pet wakes.
 - Hash-routed Pet, Focus, Shop, and Journal screens with mobile bottom tabs and desktop side navigation.
 - Header Settings sheet kept outside primary navigation.
