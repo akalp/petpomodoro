@@ -113,7 +113,7 @@ describe("emergency snack rescue action", () => {
     ).toBe(true);
     expect(() =>
       applyEmergencySnack(
-        makePet({ coins: 3, hunger: 8 }),
+        makePet({ coins: 8, hunger: 8 }),
         makeDailyFocusState(),
         now,
       ),

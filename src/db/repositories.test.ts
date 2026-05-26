@@ -488,7 +488,7 @@ describe("Dexie repositories", () => {
   it("persists food purchases in a pet transaction", async () => {
     const database = makeDatabase("food-purchase");
     await database.pets.add(
-      makePet({ coins: 10, hunger: 40, happiness: 30, energy: 20 }),
+      makePet({ coins: 20, hunger: 40, happiness: 30, energy: 20 }),
     );
 
     const result = await buyFoodForStoredPet(
@@ -499,20 +499,20 @@ describe("Dexie repositories", () => {
     expect(result.pet).toMatchObject({
       coins: 4,
       hunger: 54,
-      happiness: 40,
-      energy: 24,
+      happiness: 38,
+      energy: 22,
     });
     await expect(database.pets.get("pet-1")).resolves.toMatchObject({
       coins: 4,
       hunger: 54,
-      happiness: 40,
-      energy: 24,
+      happiness: 38,
+      energy: 22,
     });
   });
 
   it("leaves the saved pet unchanged when food coins are insufficient", async () => {
     const database = makeDatabase("food-rollback");
-    await database.pets.add(makePet({ coins: 2, hunger: 40 }));
+    await database.pets.add(makePet({ coins: 11, hunger: 40 }));
 
     await expect(
       buyFoodForStoredPet(
@@ -522,7 +522,7 @@ describe("Dexie repositories", () => {
     ).rejects.toThrow(INSUFFICIENT_COINS_ERROR);
 
     await expect(database.pets.get("pet-1")).resolves.toMatchObject({
-      coins: 2,
+      coins: 11,
       hunger: 40,
     });
   });

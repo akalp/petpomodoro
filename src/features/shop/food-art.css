@@ -316,6 +316,82 @@
     0.34rem 0.46rem 0 -0.05rem #9f9bd3;
 }
 
+.food-visual[data-food="cozy-stew"] {
+  --food-halo: #fde4c0;
+  --food-steam: #d49864;
+}
+
+.food-visual[data-food="cozy-stew"] .food-visual__steam {
+  left: 1.38rem;
+  opacity: 0.72;
+}
+
+.food-visual[data-food="cozy-stew"] .food-visual__vessel {
+  bottom: 0.46rem;
+  left: 0.64rem;
+  width: 2.75rem;
+  height: 1.52rem;
+  border: 0.12rem solid #a95136;
+  border-radius: 0.3rem 0.3rem 0.85rem 0.85rem;
+  background: linear-gradient(135deg, #d76844, #b84b35);
+  box-shadow: 0 0.18rem 0.24rem rgb(113 44 31 / 18%);
+}
+
+.food-visual[data-food="cozy-stew"] .food-visual__fill {
+  top: 0.18rem;
+  right: 0.12rem;
+  left: 0.12rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: #a6452d;
+  opacity: 1;
+}
+
+.food-visual[data-food="cozy-stew"] .food-visual__morsel {
+  top: 0.22rem;
+  width: 0.38rem;
+  height: 0.3rem;
+  border-radius: 0.16rem;
+  opacity: 1;
+}
+
+.food-visual[data-food="cozy-stew"] .food-visual__morsel--one {
+  left: 0.5rem;
+  background: #f2a440;
+}
+
+.food-visual[data-food="cozy-stew"] .food-visual__morsel--two {
+  left: 1.18rem;
+  background: #8cb85b;
+}
+
+.food-visual[data-food="cozy-stew"] .food-visual__morsel--three {
+  left: 1.82rem;
+  background: #f7cf80;
+}
+
+.food-visual[data-food="cozy-stew"] .food-visual__garnish {
+  top: 0.06rem;
+  left: 1.44rem;
+  width: 0.5rem;
+  height: 0.18rem;
+  border-radius: 99px;
+  background: #6ca14c;
+  opacity: 1;
+  transform: rotate(-14deg);
+}
+
+.food-visual[data-food="cozy-stew"] .food-visual__side-detail {
+  top: 2.03rem;
+  left: 0.38rem;
+  width: 0.38rem;
+  height: 0.18rem;
+  border-radius: 99px;
+  background: #a95136;
+  opacity: 1;
+  box-shadow: 2.92rem 0 0 #a95136;
+}
+
 @keyframes food-steam {
   0%,
   100% {

@@ -475,15 +475,15 @@ describe("store workflows", () => {
     const result = await petStore.getState().buyFood("berry-bowl", now);
 
     expect(result.pet).toMatchObject({
-      coins: 7,
-      hunger: 52,
-      happiness: 36,
+      coins: 2,
+      hunger: 50,
+      happiness: 34,
       energy: 20,
     });
     expect(petStore.getState().pet).toEqual(result.pet);
     expect(petStore.getState().lastFoodPurchase).toMatchObject({
       item: { id: "berry-bowl" },
-      coinsSpent: 3,
+      coinsSpent: 8,
     });
   });
 
@@ -591,7 +591,7 @@ describe("store workflows", () => {
   it("surfaces food purchase errors while the pet is sleeping", async () => {
     const repo = createInMemoryRepositories({
       pet: makePet({
-        coins: 10,
+        coins: 20,
         sleepStartedAt: "2026-05-22T12:00:00.000Z",
       }),
     });
@@ -607,7 +607,7 @@ describe("store workflows", () => {
     ).rejects.toThrow(PET_SLEEPING_CANNOT_EAT_ERROR);
 
     expect(repo.pet).toMatchObject({
-      coins: 10,
+      coins: 20,
       sleepStartedAt: "2026-05-22T12:00:00.000Z",
     });
   });

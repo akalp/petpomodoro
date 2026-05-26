@@ -39,6 +39,7 @@ describe("offline translations", () => {
     expect(t("wakePet", { pet: "Momo" })).toBe("Momo uyansın");
     expect(t("sleepHungerLabel")).toBe("Tokluk");
     expect(t("foodMoonMilk")).toBe("Ay sütü");
+    expect(t("foodCozyStew")).toBe("Sıcacık yahni");
     expect(t("speciesMoowiName")).toBe("Moowi");
     expect(t("speciesMoowiDescription")).toContain("küçük bir inek");
     expect(t("speciesMoowiSelectionLabel")).toBe("Moowi'yi seç");

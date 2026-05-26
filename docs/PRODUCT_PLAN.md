@@ -52,7 +52,7 @@ Ending a running session before it reaches confirmation abandons it without a co
 - Multi-stat reward application for completed sessions and an eligibility-limited honesty reward for declined confirmation.
 - Honesty Hearts support achievements and streak freeze only; they are not XP, coins, shop currency, or mini-game currency.
 - Duration-based focus care impact and base focus coins for elapsed focus time.
-- A local feeding shop with four foods, each with a different coin cost and care-stat impact.
+- A local feeding shop with five foods, each with a different coin cost and care-stat impact.
 - A local pet rest flow that restores energy over elapsed local time and may affect hunger and happiness.
 - Idempotent reward protection per session.
 - Hunger decay based on locally stored timestamps.

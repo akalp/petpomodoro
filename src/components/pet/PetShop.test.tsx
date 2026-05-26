@@ -14,7 +14,7 @@ describe("PetShop", () => {
         lastFoodPurchase={null}
         onBuyFood={() => undefined}
         onClearPurchase={() => undefined}
-        pet={makePet({ coins: 4 })}
+        pet={makePet({ coins: 8 })}
         t={createTranslator("en")}
       />,
     );
@@ -23,11 +23,15 @@ describe("PetShop", () => {
     expect(html).toContain("Warm soup");
     expect(html).toContain("Honey toast");
     expect(html).toContain("Moon milk");
+    expect(html).toContain("Cozy stew");
     expect(html).toContain(
       'class="food-visual" data-food="berry-bowl" data-disabled="false"',
     );
     expect(html).toContain(
       'class="food-visual" data-food="warm-soup" data-disabled="true"',
+    );
+    expect(html).toContain(
+      'class="food-visual" data-food="cozy-stew" data-disabled="true"',
     );
     expect(html).toContain("data-testid=\"food-warm-soup\" disabled=\"\"");
     expect(html).toContain("Need more coins");
@@ -41,7 +45,7 @@ describe("PetShop", () => {
         lastFoodPurchase={null}
         onBuyFood={() => undefined}
         onClearPurchase={() => undefined}
-        pet={makePet({ coins: 10 })}
+        pet={makePet({ coins: 28 })}
         showCoinBalance={false}
         showHeader={false}
         t={createTranslator("en")}
@@ -50,8 +54,9 @@ describe("PetShop", () => {
 
     expect(html).toContain("data-testid=\"pet-shop\"");
     expect(html).not.toContain("Pet snack shop");
-    expect(html).not.toContain("Coins: 10");
+    expect(html).not.toContain("Coins: 28");
     expect(html).toContain("Moon milk");
+    expect(html).toContain("Cozy stew");
     expect(html).toContain("Feed");
   });
 });

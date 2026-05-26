@@ -308,6 +308,7 @@ Food:
 - Warm soup
 - Honey toast
 - Moon milk
+- Cozy stew
 
 Actions and labels:
 

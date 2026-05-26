@@ -143,6 +143,8 @@ const englishMessages = {
   foodHoneyToastDescription: "Sweet, cozy, and a bit energizing.",
   foodMoonMilk: "Moon milk",
   foodMoonMilkDescription: "A soft drink for tired focus friends.",
+  foodCozyStew: "Cozy stew",
+  foodCozyStewDescription: "A hearty bowl for a well-earned care moment.",
   shopUnavailableDuringFocus:
     "Snacks wait until this focus session is finished.",
   moodHappy: "Happy",
@@ -388,6 +390,8 @@ const turkishMessages: Record<MessageKey, string> = {
   foodHoneyToastDescription: "Tatlı, sıcak ve biraz enerji veren bir lokma.",
   foodMoonMilk: "Ay sütü",
   foodMoonMilkDescription: "Yorgun odak dostları için yumuşak bir içecek.",
+  foodCozyStew: "Sıcacık yahni",
+  foodCozyStewDescription: "Hak edilmiş bir bakım anı için doyurucu bir kase.",
   shopUnavailableDuringFocus:
     "Atıştırmalıklar bu odak oturumu bitene kadar bekler.",
   moodHappy: "Mutlu",

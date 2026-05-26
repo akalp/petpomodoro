@@ -205,6 +205,7 @@ const FOOD_PRESENTATION = {
   "warm-soup": { nameKey: "foodWarmSoup", descriptionKey: "foodWarmSoupDescription" },
   "honey-toast": { nameKey: "foodHoneyToast", descriptionKey: "foodHoneyToastDescription" },
   "moon-milk": { nameKey: "foodMoonMilk", descriptionKey: "foodMoonMilkDescription" },
+  "cozy-stew": { nameKey: "foodCozyStew", descriptionKey: "foodCozyStewDescription" },
 } satisfies Record<FoodItemId, FoodPresentation>;
 ```
 

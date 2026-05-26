@@ -4,7 +4,8 @@ export type BalanceFoodItemId =
   | "berry-bowl"
   | "warm-soup"
   | "honey-toast"
-  | "moon-milk";
+  | "moon-milk"
+  | "cozy-stew";
 
 export type BalanceShopItemCategory = "food";
 

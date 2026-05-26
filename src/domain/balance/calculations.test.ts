@@ -385,43 +385,56 @@ describe("metric calculations with the active balance profile", () => {
 
   it.each([
     {
+      cost: 8,
       energyGained: 0,
       foodId: "berry-bowl",
-      happinessGained: 6,
-      hungerGained: 12,
-      nextCoins: 7,
+      happinessGained: 4,
+      hungerGained: 10,
+      nextCoins: 32,
     },
     {
+      cost: 12,
       energyGained: 0,
       foodId: "warm-soup",
-      happinessGained: 4,
+      happinessGained: 3,
       hungerGained: 22,
-      nextCoins: 5,
+      nextCoins: 28,
     },
     {
-      energyGained: 4,
+      cost: 16,
+      energyGained: 2,
       foodId: "honey-toast",
-      happinessGained: 10,
+      happinessGained: 8,
       hungerGained: 14,
-      nextCoins: 4,
+      nextCoins: 24,
     },
     {
-      energyGained: 16,
+      cost: 20,
+      energyGained: 12,
       foodId: "moon-milk",
+      happinessGained: 4,
+      hungerGained: 6,
+      nextCoins: 20,
+    },
+    {
+      cost: 28,
+      energyGained: 4,
+      foodId: "cozy-stew",
       happinessGained: 6,
-      hungerGained: 8,
-      nextCoins: 3,
+      hungerGained: 30,
+      nextCoins: 12,
     },
   ])(
     "calculates current food effects for $foodId",
-    ({ energyGained, foodId, happinessGained, hungerGained, nextCoins }) => {
+    ({ cost, energyGained, foodId, happinessGained, hungerGained, nextCoins }) => {
       const result = calculateFoodEffects(
         foodId,
-        makePet({ coins: 10, hunger: 40, happiness: 30, energy: 20 }),
+        makePet({ coins: 40, hunger: 40, happiness: 30, energy: 20 }),
       );
 
       expect(result).toMatchObject({
         canAfford: true,
+        coinsSpent: cost,
         energyGained,
         happinessGained,
         hungerGained,

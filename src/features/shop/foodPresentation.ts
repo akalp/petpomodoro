@@ -23,4 +23,8 @@ export const FOOD_PRESENTATION = {
     nameKey: "foodMoonMilk",
     descriptionKey: "foodMoonMilkDescription",
   },
+  "cozy-stew": {
+    nameKey: "foodCozyStew",
+    descriptionKey: "foodCozyStewDescription",
+  },
 } satisfies Record<FoodItemId, FoodPresentation>;

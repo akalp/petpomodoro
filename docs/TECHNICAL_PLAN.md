@@ -148,7 +148,12 @@ interface AppSettings {
 }
 
 type ShopItemCategory = "food";
-type FoodItemId = "berry-bowl" | "warm-soup" | "honey-toast" | "moon-milk";
+type FoodItemId =
+  | "berry-bowl"
+  | "warm-soup"
+  | "honey-toast"
+  | "moon-milk"
+  | "cozy-stew";
 
 interface FoodItem {
   id: FoodItemId;
