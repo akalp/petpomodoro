@@ -6,6 +6,7 @@ export * from "./focusSessionMachine";
 export * from "./pet";
 export * from "./petMoodRules";
 export * from "./rewards";
+export * from "./rescue";
 export * from "./settings";
 export * from "./shop";
 export * from "./sessions";

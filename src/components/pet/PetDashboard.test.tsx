@@ -33,8 +33,14 @@ describe("PetDashboard", () => {
         displayMood="calm"
         isFocusActive={false}
         isSleepDisabled={false}
+        lastEmergencySnackSummary={null}
+        lastPowerNapSummary={null}
         lastSleepSummary={null}
+        onClearEmergencySnackSummary={() => undefined}
+        onClearPowerNapSummary={() => undefined}
         onClearSleepSummary={() => undefined}
+        onEmergencySnack={() => undefined}
+        onPowerNap={() => undefined}
         onStartSleep={() => undefined}
         onWakeSleep={() => undefined}
         pet={pet}
@@ -58,8 +64,14 @@ describe("PetDashboard", () => {
         displayMood="sleeping"
         isFocusActive={false}
         isSleepDisabled={false}
+        lastEmergencySnackSummary={null}
+        lastPowerNapSummary={null}
         lastSleepSummary={null}
+        onClearEmergencySnackSummary={() => undefined}
+        onClearPowerNapSummary={() => undefined}
         onClearSleepSummary={() => undefined}
+        onEmergencySnack={() => undefined}
+        onPowerNap={() => undefined}
         onStartSleep={() => undefined}
         onWakeSleep={() => undefined}
         pet={pet}
@@ -87,8 +99,14 @@ describe("PetDashboard", () => {
         displayMood="working"
         isFocusActive={true}
         isSleepDisabled={false}
+        lastEmergencySnackSummary={null}
+        lastPowerNapSummary={null}
         lastSleepSummary={null}
+        onClearEmergencySnackSummary={() => undefined}
+        onClearPowerNapSummary={() => undefined}
         onClearSleepSummary={() => undefined}
+        onEmergencySnack={() => undefined}
+        onPowerNap={() => undefined}
         onStartSleep={() => undefined}
         onWakeSleep={() => undefined}
         pet={pet}
@@ -109,8 +127,14 @@ describe("PetDashboard", () => {
         displayMood="calm"
         isFocusActive={false}
         isSleepDisabled={false}
+        lastEmergencySnackSummary={null}
+        lastPowerNapSummary={null}
         lastSleepSummary={sleepSummary}
+        onClearEmergencySnackSummary={() => undefined}
+        onClearPowerNapSummary={() => undefined}
         onClearSleepSummary={() => undefined}
+        onEmergencySnack={() => undefined}
+        onPowerNap={() => undefined}
         onStartSleep={() => undefined}
         onWakeSleep={() => undefined}
         pet={pet}
@@ -123,5 +147,34 @@ describe("PetDashboard", () => {
     expect(html).toContain("Momo had a good rest.");
     expect(html).toContain("Energy +19.5, hunger -4.3, happiness +1.");
     expect(html).toContain("Continue");
+  });
+
+  it("offers rescue actions when a no-coins pet needs care", () => {
+    const html = renderToStaticMarkup(
+      <PetDashboard
+        displayMood="hungry"
+        isFocusActive={false}
+        isSleepDisabled={false}
+        lastEmergencySnackSummary={null}
+        lastPowerNapSummary={null}
+        lastSleepSummary={null}
+        onClearEmergencySnackSummary={() => undefined}
+        onClearPowerNapSummary={() => undefined}
+        onClearSleepSummary={() => undefined}
+        onEmergencySnack={() => undefined}
+        onPowerNap={() => undefined}
+        onStartSleep={() => undefined}
+        onWakeSleep={() => undefined}
+        pet={makePet({ coins: 0, hunger: 5, energy: 2 })}
+        petMessage="A soft reset is here."
+        sleepPreview={null}
+        t={createTranslator("en")}
+      />,
+    );
+
+    expect(html).toContain("Power nap");
+    expect(html).toContain("Take power nap");
+    expect(html).toContain("Emergency snack");
+    expect(html).toContain("Offer snack");
   });
 });

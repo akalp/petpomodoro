@@ -85,6 +85,10 @@ export function App() {
   const lastRewardSummary = usePetStore((state) => state.lastRewardSummary);
   const lastFoodPurchase = usePetStore((state) => state.lastFoodPurchase);
   const lastSleepSummary = usePetStore((state) => state.lastSleepSummary);
+  const lastPowerNapSummary = usePetStore((state) => state.lastPowerNapSummary);
+  const lastEmergencySnackSummary = usePetStore(
+    (state) => state.lastEmergencySnackSummary,
+  );
   const isPetLoading = usePetStore((state) => state.isLoading);
   const clearLastRewardSummary = usePetStore(
     (state) => state.clearLastRewardSummary,
@@ -95,7 +99,17 @@ export function App() {
   const clearLastSleepSummary = usePetStore(
     (state) => state.clearLastSleepSummary,
   );
+  const clearLastPowerNapSummary = usePetStore(
+    (state) => state.clearLastPowerNapSummary,
+  );
+  const clearLastEmergencySnackSummary = usePetStore(
+    (state) => state.clearLastEmergencySnackSummary,
+  );
   const buyFood = usePetStore((state) => state.buyFood);
+  const applyPowerNapAction = usePetStore((state) => state.usePowerNap);
+  const applyEmergencySnackAction = usePetStore(
+    (state) => state.useEmergencySnack,
+  );
   const startSleep = usePetStore((state) => state.startSleep);
   const wakeSleep = usePetStore((state) => state.wakeSleep);
   const renamePet = usePetStore((state) => state.renamePet);
@@ -436,6 +450,22 @@ export function App() {
     void startSleep().catch(() => undefined);
   };
 
+  const handlePowerNap = () => {
+    if (isFocusActive || petIsSleeping) {
+      return;
+    }
+
+    void applyPowerNapAction().catch(() => undefined);
+  };
+
+  const handleEmergencySnack = () => {
+    if (isFocusActive || petIsSleeping) {
+      return;
+    }
+
+    void applyEmergencySnackAction().catch(() => undefined);
+  };
+
   const handleWakeSleep = () => {
     void wakeSleep().catch(() => undefined);
   };
@@ -466,6 +496,8 @@ export function App() {
           lastFoodPurchase: null,
           lastRewardSummary: null,
           lastSleepSummary: null,
+          lastPowerNapSummary: null,
+          lastEmergencySnackSummary: null,
           pet: null,
         });
         usePomodoroStore.setState({
@@ -543,8 +575,14 @@ export function App() {
       installHint={<InstallHint t={t} />}
       isFocusActive={isFocusActive}
       isSleepDisabled={isBusy || !hasHydrated}
+      lastEmergencySnackSummary={lastEmergencySnackSummary}
+      lastPowerNapSummary={lastPowerNapSummary}
       lastSleepSummary={lastSleepSummary}
+      onClearEmergencySnackSummary={clearLastEmergencySnackSummary}
+      onClearPowerNapSummary={clearLastPowerNapSummary}
       onClearSleepSummary={clearLastSleepSummary}
+      onEmergencySnack={handleEmergencySnack}
+      onPowerNap={handlePowerNap}
       onStartSleep={handleStartSleep}
       onWakeSleep={handleWakeSleep}
       pet={pet}

@@ -11,15 +11,19 @@ import {
   type FoodItemId,
   type FoodPurchaseResult,
   type FocusSession,
+  type EmergencySnackResult,
   type PetSleepResult,
   type PetSleepSummary,
   type PetSpeciesId,
   type PetState,
+  type PowerNapResult,
   type RewardSummary,
   type StreakFreezeResult,
 } from "../domain";
 import {
   applyStoredSessionImpact,
+  applyStoredEmergencySnack,
+  applyStoredPowerNap,
   applyStoredStreakFreeze,
   buyFoodForStoredPet,
   claimStoredSessionReward,
@@ -39,6 +43,8 @@ export interface PetStoreDependencies {
   claimStoredSessionReward: typeof claimStoredSessionReward;
   applyStoredSessionImpact: typeof applyStoredSessionImpact;
   applyStoredStreakFreeze: typeof applyStoredStreakFreeze;
+  applyStoredPowerNap: typeof applyStoredPowerNap;
+  applyStoredEmergencySnack: typeof applyStoredEmergencySnack;
   buyFoodForStoredPet: typeof buyFoodForStoredPet;
   startStoredPetSleep: typeof startStoredPetSleep;
   wakeStoredPetFromSleep: typeof wakeStoredPetFromSleep;
@@ -50,6 +56,8 @@ export interface PetStoreState {
   lastRewardSummary: RewardSummary | null;
   lastFoodPurchase: FoodPurchaseResult["summary"] | null;
   lastSleepSummary: PetSleepSummary | null;
+  lastPowerNapSummary: PowerNapResult["summary"] | null;
+  lastEmergencySnackSummary: EmergencySnackResult["summary"] | null;
   isLoading: boolean;
   error: string | null;
   initializePet: (now?: string) => Promise<PetState>;
@@ -71,6 +79,8 @@ export interface PetStoreState {
     dateKey: string,
     now?: string,
   ) => Promise<StreakFreezeResult>;
+  usePowerNap: (now?: string) => Promise<PowerNapResult>;
+  useEmergencySnack: (now?: string) => Promise<EmergencySnackResult>;
   buyFood: (
     foodId: FoodItemId | string,
     now?: string,
@@ -82,6 +92,8 @@ export interface PetStoreState {
   clearLastRewardSummary: () => void;
   clearLastFoodPurchase: () => void;
   clearLastSleepSummary: () => void;
+  clearLastPowerNapSummary: () => void;
+  clearLastEmergencySnackSummary: () => void;
   updateAppOpenDecay: (now?: string) => Promise<PetState | null>;
   updateDecayOnOpen: (now?: string) => Promise<PetState | null>;
   clearError: () => void;
@@ -94,6 +106,8 @@ const defaultDependencies: PetStoreDependencies = {
   claimStoredSessionReward,
   applyStoredSessionImpact,
   applyStoredStreakFreeze,
+  applyStoredPowerNap,
+  applyStoredEmergencySnack,
   buyFoodForStoredPet,
   startStoredPetSleep,
   wakeStoredPetFromSleep,
@@ -108,6 +122,8 @@ export function createPetStore(
     lastRewardSummary: null,
     lastFoodPurchase: null,
     lastSleepSummary: null,
+    lastPowerNapSummary: null,
+    lastEmergencySnackSummary: null,
     isLoading: false,
     error: null,
 
@@ -241,6 +257,48 @@ export function createPetStore(
       }
     },
 
+    usePowerNap: async (now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().initializePet(now));
+      set({ isLoading: true, error: null });
+
+      try {
+        const result = await dependencies.applyStoredPowerNap({
+          petId: pet.id,
+          now,
+        });
+        set({
+          pet: result.pet,
+          lastPowerNapSummary: result.summary,
+          isLoading: false,
+        });
+        return result;
+      } catch (error) {
+        set({ error: errorMessage(error), isLoading: false });
+        throw error;
+      }
+    },
+
+    useEmergencySnack: async (now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().initializePet(now));
+      set({ isLoading: true, error: null });
+
+      try {
+        const result = await dependencies.applyStoredEmergencySnack({
+          petId: pet.id,
+          now,
+        });
+        set({
+          pet: result.pet,
+          lastEmergencySnackSummary: result.summary,
+          isLoading: false,
+        });
+        return result;
+      } catch (error) {
+        set({ error: errorMessage(error), isLoading: false });
+        throw error;
+      }
+    },
+
     buyFood: async (foodId, now = dependencies.now()) => {
       const pet = get().pet ?? (await get().initializePet(now));
       set({ isLoading: true, error: null });
@@ -332,6 +390,11 @@ export function createPetStore(
     clearLastFoodPurchase: () => set({ lastFoodPurchase: null }),
 
     clearLastSleepSummary: () => set({ lastSleepSummary: null }),
+
+    clearLastPowerNapSummary: () => set({ lastPowerNapSummary: null }),
+
+    clearLastEmergencySnackSummary: () =>
+      set({ lastEmergencySnackSummary: null }),
 
     updateAppOpenDecay: async (now = dependencies.now()) => {
       const pet = get().pet ?? (await get().loadCurrentPet());

@@ -59,6 +59,7 @@ export interface BalanceSleepConfig {
 
 export interface BalanceRescueActionConfig {
   enabled: boolean;
+  durationMinutes: number | null;
   energyGain: number;
   hungerChange: number;
   happinessGain: number;

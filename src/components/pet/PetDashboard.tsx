@@ -1,9 +1,16 @@
-import type { PetDisplayMood, PetSleepSummary, PetState } from "../../domain";
+import type {
+  EmergencySnackSummary,
+  PetDisplayMood,
+  PetSleepSummary,
+  PetState,
+  PowerNapSummary,
+} from "../../domain";
 import type { Translator } from "../../i18n";
 import { Badge } from "../ui/Badge";
 import { Card } from "../ui/Card";
 
 import { PetAvatar } from "./PetAvatar";
+import { PetRescueControl } from "./PetRescueControl";
 import { PetSleepControl } from "./PetSleepControl";
 import { PetStats } from "./PetStats";
 
@@ -11,8 +18,14 @@ interface PetDashboardProps {
   displayMood: PetDisplayMood | null;
   isFocusActive: boolean;
   isSleepDisabled: boolean;
+  lastEmergencySnackSummary: EmergencySnackSummary | null;
+  lastPowerNapSummary: PowerNapSummary | null;
   lastSleepSummary: PetSleepSummary | null;
+  onClearEmergencySnackSummary: () => void;
+  onClearPowerNapSummary: () => void;
   onClearSleepSummary: () => void;
+  onEmergencySnack: () => void;
+  onPowerNap: () => void;
   onStartSleep: () => void;
   onWakeSleep: () => void;
   pet: PetState | null;
@@ -25,8 +38,14 @@ export function PetDashboard({
   displayMood,
   isFocusActive,
   isSleepDisabled,
+  lastEmergencySnackSummary,
+  lastPowerNapSummary,
   lastSleepSummary,
+  onClearEmergencySnackSummary,
+  onClearPowerNapSummary,
   onClearSleepSummary,
+  onEmergencySnack,
+  onPowerNap,
   onStartSleep,
   onWakeSleep,
   pet,
@@ -65,6 +84,18 @@ export function PetDashboard({
         t={t}
       />
       <PetStats displayMood={displayMood ?? pet.mood} pet={pet} t={t} />
+      <PetRescueControl
+        disabled={isSleepDisabled}
+        isFocusActive={isFocusActive}
+        lastEmergencySnackSummary={lastEmergencySnackSummary}
+        lastPowerNapSummary={lastPowerNapSummary}
+        onClearEmergencySnackSummary={onClearEmergencySnackSummary}
+        onClearPowerNapSummary={onClearPowerNapSummary}
+        onEmergencySnack={onEmergencySnack}
+        onPowerNap={onPowerNap}
+        pet={pet}
+        t={t}
+      />
       <PetSleepControl
         disabled={isSleepDisabled}
         isFocusActive={isFocusActive}

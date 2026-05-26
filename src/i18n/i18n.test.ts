@@ -3,11 +3,15 @@ import { describe, expect, it } from "vitest";
 import {
   FOOD_NOT_FOUND_ERROR,
   INSUFFICIENT_COINS_ERROR,
+  EMERGENCY_SNACK_DAILY_LIMIT_ERROR,
+  EMERGENCY_SNACK_NOT_NEEDED_ERROR,
   PET_ALREADY_SLEEPING_ERROR,
   PET_FOCUS_NEEDS_CARE_ERROR,
   PET_NOT_SLEEPING_ERROR,
   PET_SLEEPING_CANNOT_EAT_ERROR,
   PET_SLEEPING_CANNOT_FOCUS_ERROR,
+  POWER_NAP_COOLDOWN_ACTIVE_ERROR,
+  POWER_NAP_DAILY_LIMIT_ERROR,
 } from "../domain";
 import {
   createTranslator,
@@ -39,6 +43,8 @@ describe("offline translations", () => {
     expect(t("speciesMoowiDescription")).toContain("küçük bir inek");
     expect(t("speciesMoowiSelectionLabel")).toBe("Moowi'yi seç");
     expect(t("petNameSupport")).toContain("kendi adını");
+    expect(t("powerNapTitle")).toBe("Kısa uyku");
+    expect(t("emergencySnackTitle")).toBe("Destek atıştırmalığı");
   });
 
   it("localizes known persisted store error messages", () => {
@@ -67,6 +73,18 @@ describe("offline translations", () => {
     );
     expect(localizeErrorMessage(PET_FOCUS_NEEDS_CARE_ERROR, t)).toBe(
       "Dostunun odağa başlamadan önce biraz bakıma ihtiyacı var.",
+    );
+    expect(localizeErrorMessage(POWER_NAP_DAILY_LIMIT_ERROR, t)).toContain(
+      "iki kısa uyku",
+    );
+    expect(localizeErrorMessage(POWER_NAP_COOLDOWN_ACTIVE_ERROR, t)).toContain(
+      "biraz sonra",
+    );
+    expect(
+      localizeErrorMessage(EMERGENCY_SNACK_DAILY_LIMIT_ERROR, t),
+    ).toContain("zaten yedi");
+    expect(localizeErrorMessage(EMERGENCY_SNACK_NOT_NEEDED_ERROR, t)).toContain(
+      "daha aç",
     );
   });
 });

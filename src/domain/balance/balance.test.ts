@@ -29,6 +29,18 @@ import {
   HONESTY_HEART_REWARD,
 } from "../rewards";
 import { FOOD_CATALOG } from "../shop";
+import {
+  EMERGENCY_SNACK_ENERGY_GAIN,
+  EMERGENCY_SNACK_HAPPINESS_GAIN,
+  EMERGENCY_SNACK_HUNGER_GAIN,
+  MAX_EMERGENCY_SNACKS_PER_DAY,
+  MAX_POWER_NAPS_PER_DAY,
+  POWER_NAP_COOLDOWN_MINUTES,
+  POWER_NAP_DURATION_MINUTES,
+  POWER_NAP_ENERGY_GAIN,
+  POWER_NAP_HAPPINESS_GAIN,
+  POWER_NAP_HUNGER_COST,
+} from "../rescue";
 import { ACTIVE_BALANCE_PROFILE } from "./activeProfile";
 
 describe("active balance profile", () => {
@@ -146,5 +158,34 @@ describe("active balance profile", () => {
       "hungry",
     );
     expect(FOOD_CATALOG).toBe(ACTIVE_BALANCE_PROFILE.shop.foodCatalog);
+  });
+
+  it("exposes the active rescue configuration", () => {
+    expect({
+      durationMinutes: POWER_NAP_DURATION_MINUTES,
+      energyGain: POWER_NAP_ENERGY_GAIN,
+      happinessGain: POWER_NAP_HAPPINESS_GAIN,
+      hungerCost: POWER_NAP_HUNGER_COST,
+      maxUses: MAX_POWER_NAPS_PER_DAY,
+      cooldownMinutes: POWER_NAP_COOLDOWN_MINUTES,
+    }).toEqual({
+      durationMinutes: 15,
+      energyGain: 18,
+      happinessGain: 1,
+      hungerCost: 3,
+      maxUses: 2,
+      cooldownMinutes: 120,
+    });
+    expect({
+      hungerGain: EMERGENCY_SNACK_HUNGER_GAIN,
+      happinessGain: EMERGENCY_SNACK_HAPPINESS_GAIN,
+      energyGain: EMERGENCY_SNACK_ENERGY_GAIN,
+      maxUses: MAX_EMERGENCY_SNACKS_PER_DAY,
+    }).toEqual({
+      hungerGain: 12,
+      happinessGain: 0,
+      energyGain: 0,
+      maxUses: 1,
+    });
   });
 });

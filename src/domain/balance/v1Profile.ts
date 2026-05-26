@@ -12,6 +12,16 @@ export const MIN_START_ENERGY_BASE = 5;
 export const MIN_START_ENERGY_PER_MINUTE = 0.8;
 export const MIN_START_HUNGER_BASE = 8;
 export const MIN_START_HUNGER_PER_MINUTE = 0.5;
+export const POWER_NAP_DURATION_MINUTES = 15;
+export const POWER_NAP_ENERGY_GAIN = 18;
+export const POWER_NAP_HUNGER_COST = 3;
+export const POWER_NAP_HAPPINESS_GAIN = 1;
+export const MAX_POWER_NAPS_PER_DAY = 2;
+export const POWER_NAP_COOLDOWN_MINUTES = 120;
+export const EMERGENCY_SNACK_HUNGER_GAIN = 12;
+export const EMERGENCY_SNACK_HAPPINESS_GAIN = 0;
+export const EMERGENCY_SNACK_ENERGY_GAIN = 0;
+export const MAX_EMERGENCY_SNACKS_PER_DAY = 1;
 
 const NO_REWARD = {
   xp: 0,
@@ -67,19 +77,21 @@ export const BALANCE_PROFILE_V1 = {
   },
   rescue: {
     powerNap: {
-      enabled: false,
-      energyGain: 0,
-      hungerChange: 0,
-      happinessGain: 0,
-      maxUsesPerDay: 0,
-      cooldownMinutes: null,
+      enabled: true,
+      durationMinutes: POWER_NAP_DURATION_MINUTES,
+      energyGain: POWER_NAP_ENERGY_GAIN,
+      hungerChange: -POWER_NAP_HUNGER_COST,
+      happinessGain: POWER_NAP_HAPPINESS_GAIN,
+      maxUsesPerDay: MAX_POWER_NAPS_PER_DAY,
+      cooldownMinutes: POWER_NAP_COOLDOWN_MINUTES,
     },
     emergencySnack: {
-      enabled: false,
-      energyGain: 0,
-      hungerChange: 0,
-      happinessGain: 0,
-      maxUsesPerDay: 0,
+      enabled: true,
+      durationMinutes: null,
+      energyGain: EMERGENCY_SNACK_ENERGY_GAIN,
+      hungerChange: EMERGENCY_SNACK_HUNGER_GAIN,
+      happinessGain: EMERGENCY_SNACK_HAPPINESS_GAIN,
+      maxUsesPerDay: MAX_EMERGENCY_SNACKS_PER_DAY,
       cooldownMinutes: null,
     },
   },

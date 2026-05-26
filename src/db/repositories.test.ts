@@ -2,7 +2,11 @@ import "fake-indexeddb/auto";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { INSUFFICIENT_COINS_ERROR, type AppSettings } from "../domain";
+import {
+  INSUFFICIENT_COINS_ERROR,
+  POWER_NAP_COOLDOWN_ACTIVE_ERROR,
+  type AppSettings,
+} from "../domain";
 import { makePet, makeReward, makeSession } from "../test/factories";
 import { PetPomodoroDatabase } from "./database";
 import {
@@ -10,7 +14,11 @@ import {
   startStoredPetSleep,
   wakeStoredPetFromSleep,
 } from "./petsRepository";
-import { applyStoredStreakFreeze } from "./dailyFocusRepository";
+import {
+  applyStoredEmergencySnack,
+  applyStoredPowerNap,
+  applyStoredStreakFreeze,
+} from "./dailyFocusRepository";
 import { claimStoredSessionReward } from "./rewardsRepository";
 import { loadOrCreateSettings, updateSettings } from "./settingsRepository";
 import { buyFoodForStoredPet } from "./shopRepository";
@@ -266,6 +274,64 @@ describe("Dexie repositories", () => {
         database,
       ),
     ).rejects.toThrow();
+  });
+
+  it("persists power nap care and prevents another nap during cooldown", async () => {
+    const database = makeDatabase("power-nap");
+    await database.pets.add(
+      makePet({ coins: 0, energy: 10, happiness: 40, hunger: 12 }),
+    );
+
+    const first = await applyStoredPowerNap(
+      { petId: "pet-1", now: "2026-05-22T12:31:00.000Z" },
+      database,
+    );
+
+    expect(first.pet).toMatchObject({
+      coins: 0,
+      energy: 28,
+      happiness: 41,
+      hunger: 9,
+      xp: 0,
+      streak: 0,
+    });
+    await expect(database.dailyFocus.get(["pet-1", "2026-05-22"])).resolves.toMatchObject({
+      powerNapsUsed: 1,
+      lastPowerNapAt: "2026-05-22T12:31:00.000Z",
+    });
+
+    await expect(
+      applyStoredPowerNap(
+        { petId: "pet-1", now: "2026-05-22T13:00:00.000Z" },
+        database,
+      ),
+    ).rejects.toThrow(POWER_NAP_COOLDOWN_ACTIVE_ERROR);
+    await expect(database.pets.get("pet-1")).resolves.toMatchObject({
+      energy: 28,
+      hunger: 9,
+    });
+  });
+
+  it("persists one emergency snack for a no-coins hungry pet", async () => {
+    const database = makeDatabase("emergency-snack");
+    await database.pets.add(makePet({ coins: 0, energy: 0, hunger: 0 }));
+
+    const result = await applyStoredEmergencySnack(
+      { petId: "pet-1", now },
+      database,
+    );
+
+    expect(result.pet).toMatchObject({
+      coins: 0,
+      energy: 0,
+      hunger: 12,
+      xp: 0,
+      streak: 0,
+      honestyHearts: 0,
+    });
+    await expect(database.dailyFocus.get(["pet-1", "2026-05-22"])).resolves.toMatchObject({
+      emergencySnacksUsed: 1,
+    });
   });
 
   it("persists pet sleep start and wake actions", async () => {

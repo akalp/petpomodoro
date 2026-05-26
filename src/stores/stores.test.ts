@@ -4,6 +4,8 @@ import {
   applyFocusSessionImpact,
   applyIdlePetDecay,
   applyStreakFreeze,
+  applyEmergencySnack,
+  applyPowerNap,
   buyFoodForPet,
   claimSessionReward,
   createDailyFocusState,
@@ -501,6 +503,38 @@ describe("store workflows", () => {
     });
   });
 
+  it("uses rescue actions through the pet store without granting rewards", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet({ coins: 0, energy: 0, hunger: 0 }),
+    });
+    const petStore = createPetStore({
+      ...repo.petDependencies,
+      now: () => now,
+    });
+
+    await petStore.getState().initializePet(now);
+    const snack = await petStore.getState().useEmergencySnack(now);
+    const nap = await petStore
+      .getState()
+      .usePowerNap("2026-05-22T12:31:00.000Z");
+
+    expect(snack.pet.hunger).toBe(12);
+    expect(nap.pet).toMatchObject({
+      coins: 0,
+      energy: 18,
+      hunger: 9,
+      xp: 0,
+      streak: 0,
+      honestyHearts: 0,
+    });
+    expect(petStore.getState().lastEmergencySnackSummary?.hungerGained).toBe(12);
+    expect(petStore.getState().lastPowerNapSummary).toMatchObject({
+      energyGained: 18,
+      hungerChanged: -3,
+    });
+    expect(repo.rewardLedger.size).toBe(0);
+  });
+
   it("surfaces food purchase errors while the pet is sleeping", async () => {
     const repo = createInMemoryRepositories({
       pet: makePet({
@@ -755,6 +789,36 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
         dailyFocus.get(dailyFocusKey) ??
         createDailyFocusState({ petId, dateKey });
       const result = applyStreakFreeze(pet, dailyFocusState, freezeNow);
+
+      pet = result.pet;
+      dailyFocus.set(dailyFocusKey, result.dailyFocusState);
+      return result;
+    },
+    applyStoredPowerNap: async ({ petId, now: rescueNow }) => {
+      if (!pet || pet.id !== petId) {
+        throw new Error("Pet not found.");
+      }
+
+      const dailyFocusKey = `${petId}:2026-05-22`;
+      const dailyFocusState =
+        dailyFocus.get(dailyFocusKey) ??
+        createDailyFocusState({ petId, dateKey: "2026-05-22" });
+      const result = applyPowerNap(pet, dailyFocusState, rescueNow);
+
+      pet = result.pet;
+      dailyFocus.set(dailyFocusKey, result.dailyFocusState);
+      return result;
+    },
+    applyStoredEmergencySnack: async ({ petId, now: rescueNow }) => {
+      if (!pet || pet.id !== petId) {
+        throw new Error("Pet not found.");
+      }
+
+      const dailyFocusKey = `${petId}:2026-05-22`;
+      const dailyFocusState =
+        dailyFocus.get(dailyFocusKey) ??
+        createDailyFocusState({ petId, dateKey: "2026-05-22" });
+      const result = applyEmergencySnack(pet, dailyFocusState, rescueNow);
 
       pet = result.pet;
       dailyFocus.set(dailyFocusKey, result.dailyFocusState);

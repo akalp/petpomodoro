@@ -1,11 +1,15 @@
 import {
   FOOD_NOT_FOUND_ERROR,
   INSUFFICIENT_COINS_ERROR,
+  EMERGENCY_SNACK_DAILY_LIMIT_ERROR,
+  EMERGENCY_SNACK_NOT_NEEDED_ERROR,
   PET_ALREADY_SLEEPING_ERROR,
   PET_FOCUS_NEEDS_CARE_ERROR,
   PET_NOT_SLEEPING_ERROR,
   PET_SLEEPING_CANNOT_EAT_ERROR,
   PET_SLEEPING_CANNOT_FOCUS_ERROR,
+  POWER_NAP_COOLDOWN_ACTIVE_ERROR,
+  POWER_NAP_DAILY_LIMIT_ERROR,
   type SupportedLanguage,
 } from "../domain";
 
@@ -31,6 +35,12 @@ const englishMessages = {
     "Your pet is resting. Wake them before starting focus.",
   errorPetFocusNeedsCare:
     "Your pet needs a little more care before starting focus.",
+  errorPowerNapLimit: "Two power naps are plenty for today. A longer rest is still here.",
+  errorPowerNapCooldown: "Your pet can take another power nap a little later.",
+  errorEmergencySnackLimit:
+    "Your pet already had today's little rescue snack.",
+  errorEmergencySnackNotNeeded:
+    "That little rescue snack is saved for a hungrier moment.",
   continue: "Continue",
   close: "Close",
   store: "Store",
@@ -85,6 +95,23 @@ const englishMessages = {
   sleepResultTitle: "{pet} had a good rest.",
   sleepResultSupport:
     "Energy {energy}, hunger {hunger}, happiness {happiness}.",
+  rescueTitle: "Gentle pick-me-up",
+  rescueSupport: "A little care can help {pet} get ready again.",
+  rescueUnavailableDuringFocus:
+    "Little care breaks wait until this focus session is finished.",
+  powerNapTitle: "Power nap",
+  powerNapSupport:
+    "A {minutes}-minute cozy nap restores energy and uses a little hunger.",
+  takePowerNap: "Take power nap",
+  powerNapResultTitle: "{pet} feels refreshed after a power nap.",
+  powerNapResultSupport:
+    "Energy {energy}, hunger {hunger}, happiness {happiness}.",
+  emergencySnackTitle: "Emergency snack",
+  emergencySnackSupport:
+    "A small free bite is here while {pet} is hungry and coins are short.",
+  offerEmergencySnack: "Offer snack",
+  emergencySnackResultTitle: "{pet} enjoyed a little rescue snack.",
+  emergencySnackResultSupport: "Hunger {hunger}.",
   focusUnavailableDuringSleep:
     "{pet} is resting. Wake them before starting focus.",
   focusUnavailableCareBoth:
@@ -249,6 +276,14 @@ const turkishMessages: Record<MessageKey, string> = {
     "Dostun dinleniyor. Odağa başlamadan önce uyandır.",
   errorPetFocusNeedsCare:
     "Dostunun odağa başlamadan önce biraz bakıma ihtiyacı var.",
+  errorPowerNapLimit:
+    "Bugün iki kısa uyku yeterli. Daha uzun bir dinlenme hala burada.",
+  errorPowerNapCooldown:
+    "Dostun biraz sonra yeniden kısa bir uyku uyuyabilir.",
+  errorEmergencySnackLimit:
+    "Dostun bugünün küçük destek atıştırmalığını zaten yedi.",
+  errorEmergencySnackNotNeeded:
+    "Bu küçük destek atıştırmalığı daha aç bir ana saklanıyor.",
   continue: "Devam et",
   close: "Kapat",
   store: "Dükkan",
@@ -303,6 +338,23 @@ const turkishMessages: Record<MessageKey, string> = {
   sleepResultTitle: "{pet} güzelce dinlendi.",
   sleepResultSupport:
     "Enerji {energy}, tokluk {hunger}, mutluluk {happiness}.",
+  rescueTitle: "Nazik destek",
+  rescueSupport: "Biraz bakım {pet} için yeniden hazırlanmaya yardım eder.",
+  rescueUnavailableDuringFocus:
+    "Küçük bakım molaları bu odak oturumu bitene kadar bekler.",
+  powerNapTitle: "Kısa uyku",
+  powerNapSupport:
+    "{minutes} dakikalık sıcacık bir uyku enerji toplar ve biraz tokluk kullanır.",
+  takePowerNap: "Kısa uyku yap",
+  powerNapResultTitle: "{pet} kısa uykudan sonra canlandı.",
+  powerNapResultSupport:
+    "Enerji {energy}, tokluk {hunger}, mutluluk {happiness}.",
+  emergencySnackTitle: "Destek atıştırmalığı",
+  emergencySnackSupport:
+    "{pet} aç ve jetonlar azken küçük ücretsiz bir lokma burada.",
+  offerEmergencySnack: "Atıştırmalık ver",
+  emergencySnackResultTitle: "{pet} küçük destek atıştırmalığını keyifle yedi.",
+  emergencySnackResultSupport: "Tokluk {hunger}.",
   focusUnavailableDuringSleep:
     "{pet} dinleniyor. Odağa başlamadan önce uyandır.",
   focusUnavailableCareBoth:
@@ -498,6 +550,22 @@ export function localizeErrorMessage(message: string, t: Translator): string {
 
   if (message === PET_FOCUS_NEEDS_CARE_ERROR) {
     return t("errorPetFocusNeedsCare");
+  }
+
+  if (message === POWER_NAP_DAILY_LIMIT_ERROR) {
+    return t("errorPowerNapLimit");
+  }
+
+  if (message === POWER_NAP_COOLDOWN_ACTIVE_ERROR) {
+    return t("errorPowerNapCooldown");
+  }
+
+  if (message === EMERGENCY_SNACK_DAILY_LIMIT_ERROR) {
+    return t("errorEmergencySnackLimit");
+  }
+
+  if (message === EMERGENCY_SNACK_NOT_NEEDED_ERROR) {
+    return t("errorEmergencySnackNotNeeded");
   }
 
   if (message === INSUFFICIENT_COINS_ERROR) {

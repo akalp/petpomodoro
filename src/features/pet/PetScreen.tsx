@@ -3,9 +3,11 @@ import { useLocation } from "react-router-dom";
 
 import { PetDashboard } from "../../components/pet/PetDashboard";
 import type {
+  EmergencySnackSummary,
   PetDisplayMood,
   PetSleepSummary,
   PetState,
+  PowerNapSummary,
 } from "../../domain";
 import type { Translator } from "../../i18n";
 
@@ -16,8 +18,14 @@ interface PetScreenProps {
   installHint: ReactNode;
   isFocusActive: boolean;
   isSleepDisabled: boolean;
+  lastEmergencySnackSummary: EmergencySnackSummary | null;
+  lastPowerNapSummary: PowerNapSummary | null;
   lastSleepSummary: PetSleepSummary | null;
+  onClearEmergencySnackSummary: () => void;
+  onClearPowerNapSummary: () => void;
   onClearSleepSummary: () => void;
+  onEmergencySnack: () => void;
+  onPowerNap: () => void;
   onStartSleep: () => void;
   onWakeSleep: () => void;
   pet: PetState | null;
@@ -31,8 +39,14 @@ export function PetScreen({
   installHint,
   isFocusActive,
   isSleepDisabled,
+  lastEmergencySnackSummary,
+  lastPowerNapSummary,
   lastSleepSummary,
+  onClearEmergencySnackSummary,
+  onClearPowerNapSummary,
   onClearSleepSummary,
+  onEmergencySnack,
+  onPowerNap,
   onStartSleep,
   onWakeSleep,
   pet,
@@ -56,8 +70,14 @@ export function PetScreen({
         displayMood={displayMood}
         isFocusActive={isFocusActive}
         isSleepDisabled={isSleepDisabled}
+        lastEmergencySnackSummary={lastEmergencySnackSummary}
+        lastPowerNapSummary={lastPowerNapSummary}
         lastSleepSummary={lastSleepSummary}
+        onClearEmergencySnackSummary={onClearEmergencySnackSummary}
+        onClearPowerNapSummary={onClearPowerNapSummary}
         onClearSleepSummary={onClearSleepSummary}
+        onEmergencySnack={onEmergencySnack}
+        onPowerNap={onPowerNap}
         onStartSleep={onStartSleep}
         onWakeSleep={onWakeSleep}
         pet={pet}
