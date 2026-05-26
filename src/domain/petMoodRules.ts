@@ -1,5 +1,6 @@
 import {
   ACTIVE_BALANCE_PROFILE,
+  calculateMoodForStats,
   type BalanceMoodRuleConfig,
 } from "./balance";
 import type { PetMood, PetState } from "./types";
@@ -16,15 +17,13 @@ export const PET_MOOD_RULES =
   ACTIVE_BALANCE_PROFILE.mood.rules.map(createMoodRule) satisfies PetMoodRule[];
 
 export function resolvePetMood(stats: PetMoodStats): PetMood {
-  const matchingRule = [...PET_MOOD_RULES]
-    .sort((left, right) => right.priority - left.priority)
-    .find((rule) => rule.matches(stats));
+  const mood = calculateMoodForStats(stats);
 
-  if (!matchingRule) {
-    throw new Error("Pet mood rules must include a default rule.");
+  if (mood === "working" || mood === "sleeping") {
+    throw new Error("Care mood calculation cannot return a display-only mood.");
   }
 
-  return matchingRule.mood;
+  return mood;
 }
 
 function createMoodRule(rule: BalanceMoodRuleConfig): PetMoodRule {

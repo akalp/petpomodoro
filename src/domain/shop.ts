@@ -1,6 +1,7 @@
 import {
   ACTIVE_BALANCE_PROFILE,
   type BalanceFoodItemId,
+  calculateFoodEffects,
 } from "./balance";
 import { DomainError } from "./errors";
 import { applyPetStatAdjustments, isPetSleeping } from "./pet";
@@ -52,23 +53,23 @@ export function buyFoodForPet(
     throw new DomainError(PET_SLEEPING_CANNOT_EAT_ERROR);
   }
 
-  const item = FOOD_CATALOG.find((food) => food.id === foodId);
+  const effects = calculateFoodEffects(foodId, pet);
 
-  if (!item) {
+  if (!effects) {
     throw new DomainError(FOOD_NOT_FOUND_ERROR);
   }
 
-  if (pet.coins < item.cost) {
+  if (!effects.canAfford) {
     throw new DomainError(INSUFFICIENT_COINS_ERROR);
   }
 
   const nextPet = applyPetStatAdjustments(
     pet,
     {
-      coins: -item.cost,
-      hunger: item.hunger,
-      happiness: item.happiness,
-      energy: item.energy,
+      coins: -effects.coinsSpent,
+      hunger: effects.item.hunger,
+      happiness: effects.item.happiness,
+      energy: effects.item.energy,
     },
     now,
   );
@@ -76,23 +77,15 @@ export function buyFoodForPet(
   return {
     pet: nextPet,
     summary: {
-      item,
-      coinsSpent: item.cost,
-      previousCoins: pet.coins,
+      item: effects.item,
+      coinsSpent: effects.coinsSpent,
+      previousCoins: effects.previousCoins,
       nextCoins: nextPet.coins,
-      hungerGained: nextPet.hunger - pet.hunger,
-      happinessGained: nextPet.happiness - pet.happiness,
-      energyGained: nextPet.energy - pet.energy,
-      previousStats: {
-        hunger: pet.hunger,
-        happiness: pet.happiness,
-        energy: pet.energy,
-      },
-      nextStats: {
-        hunger: nextPet.hunger,
-        happiness: nextPet.happiness,
-        energy: nextPet.energy,
-      },
+      hungerGained: effects.hungerGained,
+      happinessGained: effects.happinessGained,
+      energyGained: effects.energyGained,
+      previousStats: effects.previousStats,
+      nextStats: effects.nextStats,
     },
   };
 }

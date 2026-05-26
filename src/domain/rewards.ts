@@ -1,4 +1,8 @@
-import { ACTIVE_BALANCE_PROFILE } from "./balance";
+import {
+  ACTIVE_BALANCE_PROFILE,
+  calculateFocusReward,
+  calculateHonestyReward,
+} from "./balance";
 import { DomainError } from "./errors";
 import { applyPetStatAdjustments } from "./pet";
 import type {
@@ -103,7 +107,10 @@ export function claimSessionReward({
     throw new DomainError("Only honestly declined sessions can claim honesty rewards.");
   }
 
-  const rewardValues = rewardValuesForSession(session.status, completedXpAwarded);
+  const rewardValues = rewardValuesForSession(
+    session,
+    completedXpAwarded,
+  );
   const nextPet = applyPetStatAdjustments(
     pet,
     {
@@ -150,35 +157,41 @@ export function claimSessionReward({
 }
 
 function rewardValuesForSession(
-  status: "completed" | "abandoned",
+  session: FocusSession,
   completedXpAwarded: number,
 ): Omit<RewardSummary, "previousLevel" | "newLevel" | "leveledUp"> {
-  if (status === "completed") {
+  if (session.status === "completed") {
     if (!Number.isFinite(completedXpAwarded) || completedXpAwarded <= 0) {
       throw new DomainError("Completed session XP must be greater than zero.");
     }
+    const reward = calculateFocusReward(session.plannedDurationMinutes);
 
     return {
       rewardType: "focus_completed",
       xpAwarded: completedXpAwarded,
-      coinsAwarded: FOCUS_SESSION_COIN_REWARD,
-      happinessAwarded: FOCUS_SESSION_HAPPINESS_REWARD,
-      hungerAwarded: FOCUS_SESSION_HUNGER_REWARD,
-      energyAwarded: FOCUS_SESSION_ENERGY_REWARD,
-      streakAwarded: ACTIVE_BALANCE_PROFILE.focus.completedReward.streak,
-      honestyHeartsAwarded:
-        ACTIVE_BALANCE_PROFILE.focus.completedReward.honestyHearts,
+      coinsAwarded: reward.coins,
+      happinessAwarded: reward.happiness,
+      hungerAwarded: reward.hunger,
+      energyAwarded: reward.energy,
+      streakAwarded: reward.streak,
+      honestyHeartsAwarded: reward.honestyHearts,
     };
   }
 
+  if (session.status !== "abandoned") {
+    throw new DomainError("Only completed or abandoned sessions can claim rewards.");
+  }
+
+  const honestyReward = calculateHonestyReward(session).reward;
+
   return {
     rewardType: "honesty",
-    xpAwarded: ACTIVE_BALANCE_PROFILE.honesty.reward.xp,
-    coinsAwarded: ACTIVE_BALANCE_PROFILE.honesty.reward.coins,
-    happinessAwarded: HONESTY_HAPPINESS_REWARD,
-    hungerAwarded: ACTIVE_BALANCE_PROFILE.honesty.reward.hunger,
-    energyAwarded: HONESTY_ENERGY_REWARD,
-    streakAwarded: ACTIVE_BALANCE_PROFILE.honesty.reward.streak,
-    honestyHeartsAwarded: HONESTY_HEART_REWARD,
+    xpAwarded: honestyReward.xp,
+    coinsAwarded: honestyReward.coins,
+    happinessAwarded: honestyReward.happiness,
+    hungerAwarded: honestyReward.hunger,
+    energyAwarded: honestyReward.energy,
+    streakAwarded: honestyReward.streak,
+    honestyHeartsAwarded: honestyReward.honestyHearts,
   };
 }

@@ -1,5 +1,13 @@
 import { DomainError } from "./errors";
-import { ACTIVE_BALANCE_PROFILE } from "./balance";
+import {
+  ACTIVE_BALANCE_PROFILE,
+  calculateFocusCareImpact,
+  calculateIdleCareImpact,
+  calculateLowCareHappinessDecay,
+  calculateMoodForStats,
+  calculateWakeUpEffects,
+  clampPetStat as clampBalancePetStat,
+} from "./balance";
 import type {
   FocusSessionStatus,
   PetDisplayMood,
@@ -118,23 +126,29 @@ export function applyIdlePetDecay(
   now: string,
   decayPerHour = DEFAULT_HUNGER_DECAY_PER_HOUR,
 ): PetState {
-  const elapsedMs = Date.parse(now) - Date.parse(pet.lastHungerUpdatedAt);
+  const impact = calculateIdleCareImpact(
+    pet,
+    pet.lastHungerUpdatedAt,
+    now,
+    ACTIVE_BALANCE_PROFILE,
+    { hungerDecayPerHour: decayPerHour },
+  );
 
-  if (elapsedMs <= 0 || decayPerHour <= 0) {
+  if (
+    impact.hungerChanged === 0 &&
+    impact.happinessChanged === 0 &&
+    impact.energyChanged === 0
+  ) {
     return pet;
   }
 
-  const elapsedHours = elapsedMs / (60 * 60 * 1000);
-  const hunger = clampHunger(pet.hunger - elapsedHours * decayPerHour);
-  const happiness = clampPetStat(
-    pet.happiness - lowCareHappinessDecay(hunger, pet.energy, elapsedHours),
-  );
+  const { hunger, happiness, energy } = impact.nextStats;
 
   return {
     ...pet,
     hunger,
     happiness,
-    mood: moodForStats({ happiness, hunger, energy: pet.energy }),
+    mood: moodForStats({ happiness, hunger, energy }),
     lastHungerUpdatedAt: now,
     updatedAt: now,
   };
@@ -195,19 +209,20 @@ export function applyFocusSessionImpact<
   const elapsedHours = elapsedMs / (60 * 60 * 1000);
   const totalFocusMinutes =
     (Date.parse(impactUntil) - Date.parse(session.startedAt)) / (60 * 1000);
-  const totalCoinsEarned = Math.max(
-    0,
-    Math.floor(totalFocusMinutes / FOCUS_COIN_MINUTES),
-  );
+  const totalCoinsEarned =
+    calculateFocusCareImpact(totalFocusMinutes).coinsEarned;
   const coinsToAward = Math.max(0, totalCoinsEarned - session.focusCoinsAwarded);
-  const hunger = clampPetStat(
-    pet.hunger - elapsedMinutes * FOCUS_HUNGER_DECAY_PER_MINUTE,
-  );
-  const energy = clampPetStat(
-    pet.energy - elapsedMinutes * FOCUS_ENERGY_DECAY_PER_MINUTE,
-  );
+  const focusImpact = calculateFocusCareImpact(elapsedMinutes);
+  const hunger = clampPetStat(pet.hunger + focusImpact.hungerChanged);
+  const energy = clampPetStat(pet.energy + focusImpact.energyChanged);
   const happiness = clampPetStat(
-    pet.happiness - lowCareHappinessDecay(hunger, energy, elapsedHours),
+    pet.happiness -
+      calculateLowCareHappinessDecay(
+        hunger,
+        energy,
+        elapsedHours,
+        ACTIVE_BALANCE_PROFILE,
+      ),
   );
   const nextPet = {
     ...pet,
@@ -252,10 +267,20 @@ export function displayMoodForSession(
   isSleeping = false,
 ): PetDisplayMood {
   if (sessionStatus === "running") {
-    return "working";
+    return calculateMoodForStats(
+      { happiness: 50, hunger: 50, energy: 50 },
+      { isWorking: true },
+    );
   }
 
-  return isSleeping ? "sleeping" : mood;
+  if (isSleeping) {
+    return calculateMoodForStats(
+      { happiness: 50, hunger: 50, energy: 50 },
+      { isSleeping: true },
+    );
+  }
+
+  return mood;
 }
 
 export function moodForStats({
@@ -263,7 +288,13 @@ export function moodForStats({
   hunger,
   energy,
 }: PetMoodStats): PetMood {
-  return resolvePetMood({ happiness, hunger, energy });
+  const mood = calculateMoodForStats({ happiness, hunger, energy });
+
+  if (mood === "working" || mood === "sleeping") {
+    return resolvePetMood({ happiness, hunger, energy });
+  }
+
+  return mood;
 }
 
 export function normalizePetState(pet: PetState): PetState {
@@ -393,21 +424,6 @@ function focusImpactUntil(
   return new Date(Math.max(Date.parse(session.startedAt), cappedMs)).toISOString();
 }
 
-function lowCareHappinessDecay(
-  hunger: number,
-  energy: number,
-  elapsedHours: number,
-): number {
-  const threshold = ACTIVE_BALANCE_PROFILE.care.lowCareHappinessThreshold;
-  const lowCarePressure =
-    (Math.max(0, threshold - hunger) + Math.max(0, threshold - energy)) / 100;
-
-  return Math.min(
-    elapsedHours * lowCarePressure,
-    elapsedHours * ACTIVE_BALANCE_PROFILE.care.maxLowCareHappinessDecayPerHour,
-  );
-}
-
 function requireSleepStartedAt(pet: PetState): string {
   if (!pet.sleepStartedAt) {
     throw new DomainError(PET_NOT_SLEEPING_ERROR);
@@ -421,48 +437,11 @@ function calculatePetSleepSummary(
   startedAt: string,
   endedAt: string,
 ): PetSleepSummary {
-  const elapsedMs = Math.max(0, Date.parse(endedAt) - Date.parse(startedAt));
-  const elapsedHours = elapsedMs / (60 * 60 * 1000);
-  const energy = clampPetStat(
-    pet.energy +
-      Math.min(elapsedHours * SLEEP_ENERGY_GAIN_PER_HOUR, MAX_SLEEP_ENERGY_GAIN),
-  );
-  const energyGained = energy - pet.energy;
-  const happinessGained = Math.min(
-    Math.floor(energyGained / SLEEP_HAPPINESS_ENERGY_STEP),
-    MAX_SLEEP_HAPPINESS_GAIN,
-  );
-  const happiness = clampPetStat(pet.happiness + happinessGained);
-  const hunger = clampPetStat(
-    pet.hunger - elapsedHours * ACTIVE_BALANCE_PROFILE.sleep.hungerDecayPerHour,
-  );
-
-  return {
-    startedAt,
-    endedAt,
-    elapsedMinutes: elapsedMs / (60 * 1000),
-    energyGained,
-    hungerChanged: hunger - pet.hunger,
-    happinessGained: happiness - pet.happiness,
-    previousStats: {
-      hunger: pet.hunger,
-      happiness: pet.happiness,
-      energy: pet.energy,
-    },
-    nextStats: {
-      hunger,
-      happiness,
-      energy,
-    },
-  };
-}
-
-function clampHunger(hunger: number): number {
-  return clampPetStat(hunger);
+  return calculateWakeUpEffects(pet, startedAt, endedAt);
 }
 
 function clampPetStat(value: number): number {
-  return Math.min(MAX_PET_STAT, Math.max(0, value));
+  return clampBalancePetStat(value);
 }
 
 function legacyCustomName(name: string): string | null {
