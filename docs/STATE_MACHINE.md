@@ -6,7 +6,7 @@ The focus-session workflow is represented in code by pure session functions and 
 
 ### `idle`
 
-No active Pomodoro session is in progress. The user can start a new focus session.
+No active Pomodoro session is in progress. The user can start a new focus session only when the awake pet meets the hunger and energy requirements calculated for the selected duration.
 
 ### `running`
 
@@ -61,6 +61,7 @@ Input:
 Rules:
 
 - Only allowed from `idle`.
+- Before the state-machine `start` event, the store rejects starting while the pet is sleeping or below the configured hunger or energy requirements for the selected duration.
 - Create a new session id.
 - Set `startedAt = now`.
 - Set `expectedEndAt = now + plannedDurationMinutes`.
@@ -137,7 +138,7 @@ Rules:
 
 ## Reward Application
 
-The MVP rewards are deterministic multi-stat updates: honestly completed focus sessions grant completion rewards, and an eligible declined confirmation grants a smaller honesty-heart reward without completion XP, coins, or streak progress. Elapsed focus time decreases hunger and energy for all session outcomes; base focus coins remain for completed sessions and early cancellations, but are removed when the final answer is "Not this time."
+The MVP rewards are deterministic multi-stat updates: honestly completed focus sessions grant duration-based completion rewards, and an eligible declined confirmation grants a smaller honesty-heart reward without completion XP, coins, or streak progress. Elapsed focus time decreases hunger and energy for all session outcomes; base focus coins remain for completed sessions and early cancellations, but are removed when the final answer is "Not this time."
 
 Reward logic should:
 
@@ -145,6 +146,8 @@ Reward logic should:
 - Return updated pet data, updated session data, and a reward ledger row.
 - Avoid side effects inside the pure domain function.
 - Let the database layer persist all changes in one transaction.
+
+Completed sessions also contribute their planned minutes to local-day `dailyFocus` state. Reaching 25 completed minutes awards one streak increment for that local day; additional completed sessions on the same day do not award another streak increment.
 
 ## Feeding Shop
 
@@ -166,6 +169,16 @@ Rules:
 - Food purchases cannot be made while the pet is sleeping.
 - Waking the pet computes elapsed local time, restores energy, applies hunger change, may adjust happiness, clears `sleepStartedAt`, and keeps the Pomodoro session state unchanged.
 - Rest must not claim to verify focus work, complete a focus session, or grant a Pomodoro reward.
+
+## Daily Goal, Freeze, And Rescue Actions
+
+These pet-care actions do not add Pomodoro session transitions:
+
+- Daily focus progress counts only honestly completed focus minutes toward the local day's 25-minute goal.
+- An eligible streak freeze is an explicit pet-care action for a missed previous day. It spends three Honesty Hearts, is limited to one freeze for that missed day with a seven-day cooldown, and grants no minutes, XP, coins, or streak increment.
+- Power Nap grants limited energy recovery with a small hunger cost and happiness gain, subject to daily and cooldown limits.
+- Emergency Snack is a limited free hunger recovery option for a hungry pet that cannot afford the cheapest food.
+- Rescue actions grant no XP, coins, streak progress, or Honesty Hearts and are unavailable during an active focus session or while incompatible with rest.
 
 ## Duplicate Reward Prevention
 

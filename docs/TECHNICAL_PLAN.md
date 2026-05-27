@@ -7,7 +7,7 @@ PetPomodoro uses a local-first frontend architecture:
 - React renders the UI and handles interaction events.
 - React Router uses hash-based routes for primary navigation.
 - Zustand stores coordinate app state, hydration, and async workflows.
-- Domain functions in `src/domain` implement session transitions, pet care stats, XP, level logic, hunger and app-open decay, rest/sleep care, feeding purchases, and reward idempotency checks.
+- Domain functions in `src/domain` implement session transitions, versioned balance calculations, pet care stats, XP, level logic, hunger and app-open decay, rest/sleep care, rescue actions, daily focus/streak rules, feeding purchases, achievement evaluation, and reward idempotency checks.
 - Dexie repositories in `src/db` isolate IndexedDB reads, writes, transactions, and schema versioning.
 - PWA configuration handles app shell caching, install metadata, and offline fallback.
 
@@ -33,6 +33,7 @@ src/
     settings/
     ui/
   db/
+    dailyFocusRepository.ts
     database.ts
     petsRepository.ts
     sessionsRepository.ts
@@ -40,10 +41,15 @@ src/
     settingsRepository.ts
     shopRepository.ts
   domain/
+    balance/
+    achievements.ts
+    dailyFocus.ts
+    dateKeys.ts
     focusSessionMachine.ts
     petMoodRules.ts
     pet.ts
     rewards.ts
+    rescue.ts
     sessions.ts
     settings.ts
     shop.ts
@@ -78,7 +84,7 @@ Current TypeScript model shapes:
 ```ts
 type PetMood = "calm" | "happy" | "hungry" | "exhausted" | "tired" | "sad";
 type PetDisplayMood = PetMood | "working" | "sleeping";
-type PetSpeciesId = "momo";
+type PetSpeciesId = "momo" | "moowi";
 
 interface Pet {
   id: string;
@@ -94,6 +100,7 @@ interface Pet {
   energy: number;
   streak: number;
   honestyHearts: number;
+  lastFreezeUsedAt: string | null;
   sleepStartedAt: string | null;
   lastHungerUpdatedAt: string;
   lastAppOpenedAt: string;
@@ -147,6 +154,19 @@ interface AppSettings {
   updatedAt: string;
 }
 
+interface DailyFocusState {
+  petId: string;
+  dateKey: string;
+  completedFocusMinutes: number;
+  dailyGoalAwarded: boolean;
+  honestyHeartsAwarded: number;
+  streakFreezesUsed: number;
+  lastStreakFreezeAt: string | null;
+  powerNapsUsed: number;
+  emergencySnacksUsed: number;
+  lastPowerNapAt: string | null;
+}
+
 type ShopItemCategory = "food";
 type FoodItemId =
   | "berry-bowl"
@@ -179,10 +199,11 @@ Initial schema:
 - `sessions`: primary key `id`; indexes `status`, `startedAt`, `expectedEndAt`, `rewardClaimedAt`.
 - `rewardLedger`: primary key `id`; unique index `sessionId`; indexes `petId`, `createdAt`.
 - `settings`: singleton primary key `id`; index `updatedAt`.
+- `dailyFocus`: compound primary key `[petId+dateKey]`; indexes `petId`, `dateKey`, `dailyGoalAwarded`.
 
 The unique `rewardLedger.sessionId` index is required. It is the persistence-level guard that prevents one Pomodoro session from rewarding the pet more than once, for completion or honest declined confirmation.
 
-Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`. Version 6 backfills `customName`, preserving user-supplied names while allowing an unnamed pet to display its selected species name. Version 7 backfills `motivationalMessages = []` on existing settings. Version 8 adds `dailyFocus`, including `honestyHeartsAwarded` for local-day caps. Version 9 adds streak-freeze metadata.
+Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`. Version 6 backfills `customName`, preserving user-supplied names while allowing an unnamed pet to display its selected species name. Version 7 backfills `motivationalMessages = []` on existing settings. Version 8 adds `dailyFocus`, reconstructs completed-minute and honesty-cap state from reward history, and recalculates the visible daily-goal streak. Version 9 adds persisted streak-freeze metadata. Rescue-use fields are normalized onto `dailyFocus` records as they are loaded or written.
 
 The feeding shop v1 uses a bundled static food catalog and does not need a new IndexedDB table. Buying food runs in a Dexie transaction that reads the current pet, applies the pure purchase function, and writes the updated pet. Failed purchases, such as insufficient coins or an unknown food id, must leave the stored pet unchanged.
 
@@ -193,9 +214,10 @@ Reward application should happen in a Dexie transaction that:
 1. Reads the session.
 2. Checks that the session is completed or was honestly declined from confirmation.
 3. Checks that no reward ledger row exists for `sessionId`.
-4. Updates the pet XP and level.
-5. Marks the session reward as claimed.
-6. Inserts the reward ledger row.
+4. Loads or creates the local-date `dailyFocus` row and computes an eligible daily-goal streak or honesty-cap update.
+5. Updates the pet XP, level, stats, and any awarded streak.
+6. Marks the session reward as claimed.
+7. Inserts the reward ledger row and writes the updated `dailyFocus` row.
 
 If any step fails, the transaction should not partially apply the reward.
 
@@ -215,6 +237,7 @@ Use small stores or slices with clear responsibilities:
   - pet updates after rewards
   - immediate food purchases and the latest purchase summary
   - pet rest start, wake, preview, and latest rest summary
+  - daily focus overview, streak freeze, Power Nap, Emergency Snack, and transient action summaries
 - Session state:
   - active session
   - session history summary
@@ -231,6 +254,8 @@ Use small stores or slices with clear responsibilities:
   - one-time migration of legacy localStorage preferences into IndexedDB
 
 Store actions may be async, but all transition decisions should be delegated to pure domain functions.
+
+Active gameplay tuning lives in `src/domain/balance/v1Profile.ts` behind `ACTIVE_BALANCE_PROFILE`. Calculators consume that profile for focus rewards and requirements, care decay, sleep, rescue, honesty, mood, shop effects, streak freeze limits, and achievement thresholds; components must not duplicate these values.
 
 Primary route and active-tab state should be derived from React Router and `src/app/routeRegistry.ts`. Do not add a Zustand navigation store for tabs.
 
@@ -285,8 +310,12 @@ Domain tests:
 - An honestly declined confirmation of at least 15 minutes can receive one idempotent honesty reward while the two-heart local-day cap allows it.
 - Completed sessions cannot receive duplicate rewards.
 - XP and level calculations are deterministic.
+- Balance calculators lock duration-scaled rewards, focus-start requirements, care pressure, sleep recovery, rescue limits, shop values, and mood thresholds.
+- Daily completed minutes award streak progress once at the 25-minute local-day goal, and an eligible freeze spends hearts without awarding focus progress.
+- Achievement rules evaluate configured thresholds and care events without persisting unlock UI state.
 - Pet mood rules preserve priority thresholds.
 - Pet rest start and wake rules update energy, hunger, happiness, and sleeping state deterministically.
+- Power Nap and Emergency Snack enforce their local-day and cooldown/need rules.
 - Feeding is rejected while the pet is sleeping.
 - Starting focus is rejected while the pet is sleeping.
 
@@ -297,6 +326,7 @@ Database tests:
 - Repositories create and update sessions.
 - Reward ledger enforces one reward per session.
 - Reward transaction is atomic.
+- `dailyFocus` migrations, daily-goal claims, streak freeze writes, and rescue counters preserve local transactional consistency and applicable one-time guards.
 - Schema migration and settings persistence preserve existing local data.
 - Pet migration backfills `sleepStartedAt`, `speciesId`, and optional custom-name state.
 
@@ -307,9 +337,11 @@ Store tests:
 - Confirm completion updates session, pet, and reward ledger.
 - Cancelling a running session applies elapsed focus care impact and base focus coins, but no completion reward or reward-ledger row.
 - Declining confirmation applies no XP, coins, or streak progress, and applies an eligible honesty reward only within the duration and daily-heart limits.
+- Daily goal progress, streak freeze spending, and rescue actions update persisted daily state and pet state together.
 - Hydration migrates and restores settings.
 - Pet sleep state persists through hydration.
 - Buying food and starting focus surface sleeping-state errors.
+- Starting focus surfaces duration-scaled low-hunger and low-energy requirements.
 
 UI and routing tests:
 

@@ -4,6 +4,10 @@ This document is the canonical long-term architecture direction for evolving Pet
 
 The long-term architecture must stay within the original product promise: a local-first, offline-first focus companion for iOS Home Screen usage, with no backend, auth, account system, or cloud sync.
 
+## Current implementation status
+
+The routed shell, CSS-art presentation registries, local Momo/Moowi selection, priority-based care moods, and focus-session reducer described in the earlier phases are implemented. The balance and pet-care extension is documented separately in `METRICS_ARCHITECTURE_EVOLUTION.md`: it includes centralized v1 configuration, daily focus and streak-freeze persistence, Power Nap and Emergency Snack actions, revised care/mood rules, and achievement-rule scaffolding.
+
 ## Non-negotiable product constraints
 
 These constraints come from the existing project direction and must stay true throughout the refactor:
@@ -245,7 +249,7 @@ const PET_MOOD_RULES = [
 
 ### 9. Separate domain state from visual/display state
 
-Current code stores `pet.mood` and also derives `working` mood through session state. This is acceptable for the MVP but should evolve carefully.
+Current code stores `pet.mood` and derives `working` and `sleeping` display overrides from activity state. This separation should remain explicit as care and activity features evolve.
 
 Recommended mental model:
 
@@ -264,17 +268,22 @@ Current code assumes a single local pet:
 - `getCurrentPet()`
 - `loadOrCreateDefaultPet()`
 
-Future-ready changes:
+Implemented foundation:
 
-- Add `speciesId` to `PetState`.
+- `speciesId` on `PetState` with locally selectable Momo and Moowi presentation.
+- A pet species registry shared by settings and the CSS-art renderer.
+
+Future multi-pet changes:
+
 - Later add `activePetId` to `AppSettings`.
 - Later add `petId` to `FocusSession`, so focus rewards apply to the pet that started the session even if the active pet changes afterward.
 - Keep `RewardLedger.petId` as the historical reward target.
-- Add a pet species registry.
 
 Avoid implementing multi-pet UX until the app shell and presentation architecture are stable. The intended direction is a local-only `activePetId` / `petId` model, not accounts or cloud-backed pet profiles.
 
-## Current architecture pain points
+## Historical architecture pain points
+
+The items in this section motivated the initial evolution work. Route-backed feature screens, extracted pet/food presentation, the priority mood resolver, and the focus transition reducer have since addressed the corresponding points; `App.tsx` composition remains an area for incremental simplification.
 
 ### `src/App.tsx`
 
@@ -295,9 +304,9 @@ Currently handles too many concerns:
 
 Target: turn `App.tsx` into a composition root that wires providers/shell/overlays, while screens and hooks own their concerns.
 
-### `src/components/pet/PetAvatar.tsx`
+### `src/components/pet/PetAvatar.tsx` (addressed)
 
-Currently combines:
+Previously combined:
 
 - mood face mapping,
 - mood label mapping,
@@ -312,9 +321,9 @@ Target split:
 - `PetAvatar.tsx`
 - CSS art file.
 
-### `src/components/pet/PetShop.tsx`
+### `src/components/pet/PetShop.tsx` (addressed)
 
-Currently includes:
+Previously included:
 
 - shop screen/card UI,
 - food copy map,
@@ -331,15 +340,15 @@ Target split:
 - `foodPresentation.ts`
 - CSS art file.
 
-### `src/domain/pet.ts`
+### `src/domain/pet.ts` (addressed)
 
-Current `moodForStats` is an ordered `if` chain. It works, but a priority-rule resolver will scale better when more moods are added.
+`moodForStats` now resolves from configurable priority rules in `src/domain/petMoodRules.ts` and the active balance profile.
 
-### `src/domain/sessions.ts`
+### `src/domain/sessions.ts` (addressed)
 
-Current functions are clear and well-tested, but a transition table/reducer would make allowed session transitions easier to inspect and extend.
+The public session functions now delegate to an inspectable transition reducer/table.
 
-Do this later, after UI navigation/presentation refactors are stable.
+This now delegates to `src/domain/focusSessionMachine.ts`.
 
 ## Target folder shape
 
@@ -389,12 +398,21 @@ src/
       FoodPurchaseOverlay.tsx
 
   domain/
+    balance/
+      activeProfile.ts
+      calculations.ts
+      types.ts
+      v1Profile.ts
+    achievements.ts
+    dailyFocus.ts
+    dateKeys.ts
     pet.ts
     petMoodRules.ts
     sessions.ts
-    focusSessionMachine.ts later
+    focusSessionMachine.ts
     shop.ts
     rewards.ts
+    rescue.ts
 
   routes/
     routePaths.ts
@@ -402,7 +420,7 @@ src/
 
 You do not need to create all of these at once. Prefer small, testable commits.
 
-## Proposed implementation phases
+## Application architecture phases
 
 ### Phase 0 — Baseline safety check
 
@@ -435,7 +453,7 @@ Acceptance criteria:
 - No runtime code changes.
 - Existing tests/build remain green.
 
-### Phase 2 — Add hash router and route registry
+### Phase 2 — Add hash router and route registry (completed)
 
 Goal: introduce route-backed app navigation without changing the full layout yet.
 
@@ -475,7 +493,7 @@ Acceptance criteria:
 - Existing Zustand stores remain focused on domain/application state.
 - No visual behavior change required yet.
 
-### Phase 3 — Add responsive route-backed navigation UI
+### Phase 3 — Add responsive route-backed navigation UI (completed)
 
 Goal: add mobile bottom tab bar and desktop/tablet side navigation.
 
@@ -497,7 +515,7 @@ Acceptance criteria:
 - Links navigate hash routes instead of calling a store action.
 - Respects keyboard focus and `aria-current="page"`.
 
-### Phase 4 — Split screens from `App.tsx`
+### Phase 4 — Split screens from `App.tsx` (completed)
 
 Goal: stop `App.tsx` from owning all screen composition.
 
@@ -522,7 +540,7 @@ Acceptance criteria:
 - Existing reward modal still works.
 - Existing tests pass or are updated to match the new screen structure.
 
-### Phase 5 — Replace shop drawer with Shop tab
+### Phase 5 — Replace shop drawer with Shop tab (completed)
 
 Goal: remove shop as a primary drawer and make it a native app section.
 
@@ -535,7 +553,7 @@ Acceptance criteria:
 - If focus session is active, decide explicitly whether shop is blocked or allowed. Recommended: allow navigation but disable buying during focus if product wants that constraint.
 - Existing food purchase feedback still works in the Shop screen.
 
-### Phase 6 — Decide Settings UX
+### Phase 6 — Decide Settings UX (completed: header sheet)
 
 Goal: keep settings out of primary tabs but make it native-feeling.
 
@@ -552,7 +570,7 @@ Acceptance criteria:
 - Notification/shortcut/language/duration/pet name settings still work.
 - Drawer can remain for settings temporarily if needed; do not block the navigation refactor on this.
 
-### Phase 7 — Extract pet presentation registries
+### Phase 7 — Extract pet presentation registries (completed)
 
 Goal: remove mood copy/motion logic from `PetAvatar.tsx`.
 
@@ -572,7 +590,7 @@ Acceptance criteria:
 - `PetStats.tsx` reuses the same mood copy map.
 - TypeScript fails if a new display mood lacks copy or motion config.
 
-### Phase 8 — Add CSS-art pet renderer
+### Phase 8 — Add CSS-art pet renderer (completed)
 
 Goal: replace text/emoticon face with CSS-rendered pet parts.
 
@@ -592,7 +610,7 @@ Acceptance criteria:
 - Framer Motion still controls the overall pet container motion.
 - Tests do not need to inspect visual internals beyond accessible labels/test IDs.
 
-### Phase 9 — Extract food presentation and CSS-art visuals
+### Phase 9 — Extract food presentation and CSS-art visuals (completed)
 
 Goal: remove `FoodVisual` `if` chain from `PetShop.tsx`.
 
@@ -612,7 +630,7 @@ Acceptance criteria:
 - Food/snack visuals are CSS-only.
 - Existing `PetShop` tests pass or are updated.
 
-### Phase 10 — Replace pet mood `if` chain with priority rules
+### Phase 10 — Replace pet mood `if` chain with priority rules (completed and subsequently rebalanced)
 
 Goal: make mood expansion easier without changing behavior.
 
@@ -624,16 +642,11 @@ src/domain/petMoodRules.ts
 
 Acceptance criteria:
 
-- Current behavior is preserved:
-  - hunger <= 25 => hungry
-  - else energy <= 15 => tired
-  - else happiness <= 25 => sad
-  - else happiness >= 60 => happy
-  - else calm
-- Tests verify existing thresholds.
+- The original behavior was preserved during extraction; the active thresholds and the later `exhausted` addition are now defined in `METRICS_ARCHITECTURE_EVOLUTION.md`.
+- Tests verify active thresholds.
 - Adding a new mood should require adding a rule and updating exhaustive registries.
 
-### Phase 11 — Prepare multi-pet data model minimally
+### Phase 11 — Prepare pet species model (completed with local species selection)
 
 Goal: add the least invasive future-proofing.
 
@@ -643,16 +656,16 @@ Recommended first step:
 - Add normalization fallback for old stored pets.
 - Add a pet species registry.
 
-Do not implement multi-pet selection yet.
+Do not interpret local species selection as multiple pets; there remains one local pet.
 
 Acceptance criteria:
 
 - Existing local data normalizes without crashing.
 - New pets get `speciesId: "momo"`.
 - Pet renderer receives `speciesId` and `displayMood`.
-- No multi-pet UI yet.
+- Settings may change the one local pet's species; no multi-pet UI exists.
 
-### Phase 12 — Refactor focus session to transition reducer/table
+### Phase 12 — Refactor focus session to transition reducer/table (completed)
 
 Goal: make session state rules more explicitly state-machine-like.
 

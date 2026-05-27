@@ -6,7 +6,7 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 
 ## Included
 
-- One local pet with name, species id, level, XP, mood, coins, streak, honesty hearts, and care stats.
+- One local pet with selectable Momo or Moowi presentation, name, level, XP, mood, coins, streak, honesty hearts, and care stats.
 - CSS-art pet presentation with care, working, and sleeping display moods.
 - Focus durations for 5, 15, 25, and 50 minutes, plus custom whole-minute durations from 1 to 180 minutes.
 - Local session states: `idle`, `running`, `awaiting_confirmation`, `completed`, and `abandoned`.
@@ -15,9 +15,12 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
   - "Yes, we did it"
   - "Not this time"
 - Multi-stat completion rewards with idempotent reward protection.
+- Versioned v1 balance profile with duration-scaled focus rewards and care-aware focus start requirements.
 - Duration-based focus care impact and base focus coins for elapsed work time.
 - Neutral abandoned-session handling: early cancellation grants no completion reward, while honestly declining after at least 15 planned minutes may grant `+1` Honesty Heart and `+2` happiness, capped at two hearts per local day and never granting XP, coins, or streak progress.
 - Local pet rest/sleep behavior that can restore energy and blocks focus or feeding until the pet wakes.
+- A 25-minute local daily focus goal with at most one streak award per day, plus an explicit Honesty Heart-funded streak freeze for an eligible missed day.
+- Power Nap and Emergency Snack rescue care actions with local daily/cooldown eligibility limits.
 - Hash-routed Pet, Focus, Shop, and Journal screens with mobile bottom tabs and desktop side navigation.
 - Header Settings sheet kept outside primary navigation.
 - Local snack shop with CSS-art food visuals and disabled states for focus, sleep, and insufficient coins.
@@ -28,6 +31,7 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 - Optional iOS Shortcut launch for starting a native timer with the selected duration.
 - Optional local notification reminders while the PWA is allowed to keep running.
 - Care stats, hunger and happiness decay, streak tracking, and honesty hearts.
+- Configured achievement rule evaluation for future local presentation, without an achievement screen or persisted unlocks.
 - Bundled English and Türkçe interface copy with local language persistence.
 
 ## Not Included
@@ -40,6 +44,7 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 - Native timer verification or monitoring.
 - Multi-pet selection, pet accounts, or cross-device pet profiles.
 - Mini-games or a Games tab.
+- Achievement gallery, achievement unlock persistence, or achievement rewards.
 
 ## Trust-Based Completion
 

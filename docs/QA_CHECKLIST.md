@@ -37,6 +37,7 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] The pet has a name, species id, level, mood, XP, coins, honesty hearts, and care stats.
 - [ ] Reloading the app preserves the same pet from IndexedDB.
 - [ ] Updating the pet name in Settings persists after reload.
+- [ ] Selecting Momo or Moowi in Settings updates the one local pet and persists after reload without creating another pet.
 - [ ] Empty-state copy remains cozy and shame-free.
 
 ## Starting Pomodoro Durations
@@ -52,6 +53,8 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] The latest valid Focus duration is restored as the selected duration after reopen.
 - [ ] Settings does not render a second duration editor.
 - [ ] Starting a session creates exactly one running session.
+- [ ] A selected duration cannot start when the awake pet lacks its required hunger or energy.
+- [ ] Low-care start blocks show a helpful next step: Shop/Emergency Snack for hunger and Power Nap/Rest time for energy.
 
 ## Countdown Behavior
 
@@ -145,6 +148,16 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Reloading preserves persisted stats.
 - [ ] Stats do not go outside expected bounds.
 
+## Daily Goal And Streak Freeze
+
+- [ ] Completed focus minutes display toward the local day's 25-minute goal.
+- [ ] One 25-minute completed session, or multiple completed sessions totaling 25 minutes, advances streak once for that local day.
+- [ ] Further completions on the same local day do not grant another streak increment.
+- [ ] A missed previous day offers a freeze only when the pet has at least three Honesty Hearts and the cooldown permits it.
+- [ ] Using a freeze spends exactly three Honesty Hearts and persists across reload.
+- [ ] A freeze does not award focus minutes, XP, coins, or an additional streak increment.
+- [ ] A second freeze for the same missed day or within the seven-day cooldown is blocked.
+
 ## Level Up
 
 - [ ] Prepare a pet near the next level threshold.
@@ -171,6 +184,14 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Confirm focus cannot start while the pet is sleeping.
 - [ ] Confirm food cannot be purchased while the pet is sleeping.
 - [ ] Confirm rest cannot complete or reward a Pomodoro session.
+
+## Rescue Actions
+
+- [ ] Power Nap applies `+18` energy, `-3` hunger, and `+1` happiness, without XP, coins, streak progress, or Honesty Hearts.
+- [ ] Power Nap is blocked after two uses in the same local day and during its 120-minute cooldown.
+- [ ] Emergency Snack appears for a sufficiently hungry pet who cannot afford the cheapest shop food and applies `+12` hunger only.
+- [ ] Emergency Snack is blocked after one use in the same local day or when the pet does not need it.
+- [ ] Rescue actions are unavailable while a focus flow is active and remain locally persisted after reload.
 
 ## Reset Local Data
 

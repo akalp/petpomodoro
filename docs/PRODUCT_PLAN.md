@@ -22,7 +22,7 @@ The first version should be optimized for one-handed mobile use and iOS Home Scr
 
 1. The user opens PetPomodoro.
 2. The user lands on the Pet tab and sees their pet, current progress, care stats, and rest state.
-3. The user moves to the Focus tab and starts a preset or custom whole-minute focus session from 1 to 180 minutes, defaulting to 25 minutes.
+3. The user moves to the Focus tab and starts a preset or custom whole-minute focus session from 1 to 180 minutes, defaulting to 25 minutes, once the pet has enough hunger and energy for that duration.
 4. The app records `startedAt` and `expectedEndAt` locally.
 5. The user may leave the app and use the native iOS timer, a Shortcut, or another reminder method.
 6. When the user returns after the expected end time, PetPomodoro asks:
@@ -37,13 +37,16 @@ The first version should be optimized for one-handed mobile use and iOS Home Scr
 
 Ending a running session before it reaches confirmation abandons it without a completion reward. Elapsed focus care impact and base focus coins still apply because the pet spent that time working with the user. Choosing "Not this time" grants no XP, coins, or streak progress.
 
+Completed focus minutes accumulate toward a 25-minute local daily goal. Reaching that goal advances the visible streak once for that local day. If the previous day was missed, the user may explicitly spend three Honesty Hearts on one eligible streak freeze, subject to a seven-day cooldown; a freeze preserves the ritual without awarding focus progress.
+
 ## MVP Features
 
 - Single local pet with name, level, XP, mood, coins, care stats, streak, honesty hearts, and timestamps.
-- Single default pet species id for the local pet, with future-ready species presentation metadata but no multi-pet UI.
+- One local pet with selectable Momo or Moowi presentation; this is not a multi-pet system.
 - Working display mood and focused face while an active session is running, without changing the saved care mood.
 - Sleeping display mood while the pet is resting, with focus and feeding blocked until wake.
 - Pomodoro session creation with preset durations and custom whole-minute durations from 1 to 180 minutes.
+- Duration-scaled hunger and energy start requirements with guidance toward food, rest, Power Nap, or Emergency Snack when care is too low.
 - Session states: idle, running, awaiting confirmation, completed, abandoned.
 - Local time-based transition from running to awaiting confirmation.
 - Honesty confirmation with two choices:
@@ -52,8 +55,11 @@ Ending a running session before it reaches confirmation abandons it without a co
 - Multi-stat reward application for completed sessions and an eligibility-limited honesty reward for declined confirmation.
 - Honesty Hearts support achievements and streak freeze only; they are not XP, coins, shop currency, or mini-game currency.
 - Duration-based focus care impact and base focus coins for elapsed focus time.
+- A local 25-minute daily focus goal that awards at most one streak increment per local day.
+- Explicit streak freeze support that spends three Honesty Hearts for an eligible missed day with a seven-day cooldown and no XP, coins, or focus-minute award.
 - A local feeding shop with five foods, each with a different coin cost and care-stat impact.
 - A local pet rest flow that restores energy over elapsed local time and may affect hunger and happiness.
+- Limited local rescue actions: a Power Nap for energy recovery and an Emergency Snack for a hungry pet without enough coins for food.
 - Idempotent reward protection per session.
 - Hunger decay based on locally stored timestamps.
 - Local session history for recent completed and abandoned sessions.
@@ -113,9 +119,9 @@ The abandoned path should be neutral and supportive. A user who chooses "Not thi
 ## Possible Future Features
 
 - Multiple pets.
-- Pet customization.
+- Expanded pet looks and accessories.
 - Themes and habitats.
-- More forgiving or richer streak rules.
+- Richer streak milestones and achievement presentation.
 - Break timers.
 - Focus intention notes.
 - Richer reminder and iOS Shortcut templates.

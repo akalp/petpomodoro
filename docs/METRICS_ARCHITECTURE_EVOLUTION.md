@@ -1,8 +1,12 @@
 # PetPomodoro Metrics Architecture Evolution Roadmap
 
-This document defines the intended evolution of PetPomodoro's care, reward, economy, sleep, rescue, honesty, streak, and achievement metrics.
+This document records the implemented v1 evolution of PetPomodoro's care, reward, economy, sleep, rescue, honesty, streak, and achievement metrics, and remains the reference for later balance changes.
 
 It is intentionally separate from `docs/ARCHITECTURE_EVOLUTION.md`, which focuses on app shell, navigation, UI architecture, CSS art, and long-term presentation structure. This document focuses on the domain balance model and the technical architecture needed to make that balance easy to configure, test, and evolve.
+
+## Implementation status
+
+The `v1-cozy-balanced` profile is active in `src/domain/balance/v1Profile.ts`. The balance series implements centralized configuration and calculators, duration-scaled focus rewards and start requirements, persisted local-day progress and streak freeze, rescue actions, revised sleep and care pressure, the five-item shop, combined-care moods, achievement rule scaffolding, UI guidance, and regression tests. The baseline inventory below is retained as the pre-evolution reference only.
 
 The target product feel is:
 
@@ -156,7 +160,7 @@ Display mood overrides are not persisted:
 - Honesty Hearts must not become a mini-game currency, market currency, XP source, or coin source.
 - Achievement UI, mini-games, cosmetics, and advanced sleep quality are out of scope for the first balance implementation unless explicitly requested later.
 
-## Target balance principles
+## Active balance principles
 
 ### 1. Micro-focus is valid, but 25 minutes is the standard
 
@@ -260,11 +264,11 @@ The implementation should avoid magic numbers spread across `pet.ts`, `rewards.t
 
 Balance constants should live in a central typed profile. Domain calculations should read from that profile. Tests should be able to import the profile and assert both exact values and behavior tables.
 
-## Proposed configurable balance architecture
+## Implemented configurable balance architecture
 
 ### Recommended folder structure
 
-Start small, but move toward this shape:
+The implementation starts with shared typed configuration and calculators:
 
 ```txt
 src/domain/balance/
@@ -272,20 +276,14 @@ src/domain/balance/
   v1Profile.ts
   activeProfile.ts
   calculations.ts
-  rewardCalculations.ts
-  careCalculations.ts
-  startRequirements.ts
-  sleepCalculations.ts
-  rescueCalculations.ts
-  streakCalculations.ts
-  honestyCalculations.ts
-  moodCalculations.ts
-  shopCatalog.ts
-  achievementRules.ts
   index.ts
+src/domain/
+  achievements.ts
+  dailyFocus.ts
+  rescue.ts
 ```
 
-This can be implemented incrementally. Do not create files that are empty placeholders. Each file should have a clear purpose and tests.
+Additional balance files should only be split out if a subsystem grows beyond the shared calculator module.
 
 ### Balance profile type
 
@@ -383,7 +381,7 @@ The following values should come from the active balance profile:
 
 Each balance subsystem should expose pure functions first. Stores can call these functions and then persist results.
 
-Recommended examples:
+Implemented calculator surface and adjacent pure domain operations include:
 
 ```ts
 calculateFocusReward(minutes, profile);
@@ -392,12 +390,13 @@ calculateFocusStartRequirements(minutes, profile);
 canStartFocus(pet, minutes, profile);
 calculateIdleCareImpact(pet, from, to, profile);
 calculateWakeUpEffects(pet, sleepStartedAt, wakeAt, profile);
-calculatePowerNapEffects(pet, now, dailyState, profile);
-calculateEmergencySnackEffects(pet, now, dailyState, profile);
 calculateHonestyReward(session, dailyState, profile);
-calculateDailyFocusProgress(existingDailyState, session, profile);
-calculateStreakTransition(streakState, dailyState, now, profile);
 calculateMoodForStats(stats, activityState, profile);
+calculateFoodEffects(foodId, pet, profile);
+applyCompletedFocusMinutesToDailyState(dailyState, minutes);
+applyStreakFreeze(pet, dailyState, now);
+applyPowerNap(pet, dailyState, now);
+applyEmergencySnack(pet, dailyState, now);
 ```
 
 Pure functions make it easier to test the balance with exact tables before wiring UI.
@@ -416,17 +415,19 @@ Tests should use explicit dates and local date keys. Avoid relying on the machin
 
 ### Daily state model
 
-V1 needs daily counters. They can live in a new repository/table or be embedded in pet state. A dedicated daily state model is cleaner.
+V1 persists daily counters in the `dailyFocus` table through `DailyFocusState`.
 
-Recommended model:
+Implemented model:
 
 ```ts
-export interface PetDailyState {
+export interface DailyFocusState {
   petId: string;
   dateKey: string;
   completedFocusMinutes: number;
   dailyGoalAwarded: boolean;
   honestyHeartsAwarded: number;
+  streakFreezesUsed: number;
+  lastStreakFreezeAt: string | null;
   powerNapsUsed: number;
   emergencySnacksUsed: number;
   lastPowerNapAt: string | null;
@@ -435,32 +436,32 @@ export interface PetDailyState {
 
 A later version can add more counters without bloating `PetState`.
 
-If the implementation prefers embedding for speed, keep it wrapped behind selectors so it can be moved later.
-
 ### Streak state model
 
-Existing `PetState.streak` can remain as the visible streak count. However, daily habit streaks need metadata.
-
-Recommended minimal additions:
+`PetState.streak` remains the visible streak count. The implemented freeze metadata is split between the pet and local-day record:
 
 ```ts
-export interface StreakMetadata {
-  lastCompletedDateKey: string | null;
-  lastEvaluatedDateKey: string | null;
+interface PetState {
   lastFreezeUsedAt: string | null;
+}
+
+interface DailyFocusState {
+  streakFreezesUsed: number;
+  lastStreakFreezeAt: string | null;
 }
 ```
 
-This can be embedded into `PetState` or a companion record. Keep migration safe for old pets.
+Version 9 backfills these fields for old local data. Completed minutes and `dailyGoalAwarded` on `DailyFocusState` supply the per-day goal history.
 
 ### Achievements model
 
-V1 should not implement achievement UI. It can still add domain scaffolding if useful.
+V1 implements achievement rule scaffolding without achievement UI.
 
-Recommended v1 scope:
+Implemented v1 scope:
 
 - Define achievement rule IDs and thresholds.
-- Track unlocked achievement IDs locally only if it is low-risk.
+- Evaluate satisfied and newly satisfied rule IDs from a provided local progress snapshot.
+- Defer persisted unlock IDs until a presentation surface needs them.
 - No badge gallery or cosmetic unlock UI yet.
 
 Achievement categories:
@@ -473,7 +474,7 @@ Achievement categories:
 
 Achievements should avoid large economy rewards in v1.
 
-## Proposed v1 balance profile
+## Active v1 balance profile
 
 The following numbers are the starting profile. They are intentionally simple and should be adjusted through config after playtesting.
 
@@ -722,9 +723,9 @@ careAchievements = [
 
 Achievement rewards should be cosmetic/badge-oriented later. Avoid large coin or XP rewards in v1.
 
-## Implementation phases
+## Completed implementation phases
 
-### Phase 0 — Baseline inventory and safety
+### Phase 0 — Baseline inventory and safety (completed)
 
 Goal: verify the current app and document the existing metric behavior before changing rules.
 
@@ -741,7 +742,7 @@ Acceptance criteria:
 - Existing tests pass.
 - The team can see the current values and the target values side by side.
 
-### Phase 1 — Add centralized balance profile without changing behavior
+### Phase 1 — Add centralized balance profile without changing behavior (completed)
 
 Goal: introduce typed balance configuration while preserving existing behavior.
 
@@ -759,7 +760,7 @@ Acceptance criteria:
 - Existing constants are no longer scattered where practical.
 - New profile values are typed and easy to edit.
 
-### Phase 2 — Extract pure metric calculators
+### Phase 2 — Extract pure metric calculators (completed)
 
 Goal: make reward, care, sleep, rescue, honesty, streak, mood, and shop calculations testable before changing product behavior.
 
@@ -776,7 +777,7 @@ Acceptance criteria:
 - Pure tests cover 5, 15, 25, and 50-minute focus examples.
 - Pure tests cover sleep, honesty, mood, and shop calculations.
 
-### Phase 3 — Activate v1 focus reward and start requirement rules
+### Phase 3 — Activate v1 focus reward and start requirement rules (completed)
 
 Goal: make focus rewards duration-based and prevent focus from starting when the pet is too hungry or tired.
 
@@ -795,7 +796,7 @@ Acceptance criteria:
 - Low energy or hunger blocks focus start.
 - The app suggests Power Nap or Emergency Snack where appropriate once those actions exist, or provides copy placeholders until Phase 6.
 
-### Phase 4 — Implement daily focus habit streaks
+### Phase 4 — Implement daily focus habit streaks (completed)
 
 Goal: replace session-count streak behavior with daily focus-minute streak behavior.
 
@@ -815,7 +816,7 @@ Acceptance criteria:
 - The same day cannot increase streak more than once.
 - Session completion remains idempotent.
 
-### Phase 5 — Add streak freeze/grace using Honesty Hearts
+### Phase 5 — Add streak freeze/grace using Honesty Hearts (completed)
 
 Goal: keep streaks cozy by allowing rare recovery without making streak meaningless.
 
@@ -834,7 +835,7 @@ Acceptance criteria:
 - Freeze does not create focus minutes.
 - Freeze does not unlock coin or XP rewards.
 
-### Phase 6 — Add Power Nap and Emergency Snack rescue mechanics
+### Phase 6 — Add Power Nap and Emergency Snack rescue mechanics (completed)
 
 Goal: prevent low-hunger/low-energy/no-coin deadlocks.
 
@@ -853,7 +854,7 @@ Acceptance criteria:
 - Daily limits are enforced.
 - The user can recover from a no-coins low-care state.
 
-### Phase 7 — Rebalance sleep
+### Phase 7 — Rebalance sleep (completed)
 
 Goal: make sleep the primary energy recovery path.
 
@@ -871,7 +872,7 @@ Acceptance criteria:
 - Happiness gain is small and capped.
 - Sleep remains a recovery mechanic, not an economy mechanic.
 
-### Phase 8 — Add hunger-linked happiness and energy pressure
+### Phase 8 — Add hunger-linked happiness and energy pressure (completed)
 
 Goal: make care metrics meaningful without harsh passive energy decay.
 
@@ -891,7 +892,7 @@ Acceptance criteria:
 - Low hunger and low energy make happiness decline faster.
 - All values are capped safely at 0 and 100.
 
-### Phase 9 — Rework Honesty Heart rules (implemented)
+### Phase 9 — Rework Honesty Heart rules (completed)
 
 Goal: preserve honesty as a trust mechanic while preventing farming.
 
@@ -909,7 +910,7 @@ Acceptance criteria:
 - Honesty rewards never produce XP, coins, or streak.
 - Honesty Hearts can be spent only by approved mechanics such as streak freeze.
 
-### Phase 10 — Rebalance shop catalog
+### Phase 10 — Rebalance shop catalog (completed)
 
 Goal: align food costs/effects with the new 25-minute coin economy.
 
@@ -927,7 +928,7 @@ Acceptance criteria:
 - Food cannot be purchased without enough coins.
 - Food cannot be used while sleeping if that remains the product rule.
 
-### Phase 11 — Update mood resolver
+### Phase 11 — Update mood resolver (completed)
 
 Goal: make visual pet state reflect combined care state.
 
@@ -945,7 +946,7 @@ Acceptance criteria:
 - Very low happiness shows sad.
 - Mood rules are configurable and table-tested.
 
-### Phase 12 — Add achievement rule scaffolding without full UI
+### Phase 12 — Add achievement rule scaffolding without full UI (completed)
 
 Goal: prepare streak and Honesty Heart achievements while avoiding a large UI feature.
 
@@ -962,7 +963,7 @@ Acceptance criteria:
 - Honesty and streak achievements can be evaluated.
 - No mini-game or cosmetic currency is introduced.
 
-### Phase 13 — UI copy and rescue guidance polish
+### Phase 13 — UI copy and rescue guidance polish (completed)
 
 Goal: make the new rules understandable without turning the UI into a spreadsheet.
 
@@ -981,7 +982,7 @@ Acceptance criteria:
 - The tone remains kind and pet-centric.
 - No large achievement UI or mini-game UI is introduced.
 
-### Phase 14 — Balance stabilization and regression tests
+### Phase 14 — Balance stabilization and regression tests (completed)
 
 Goal: lock down the v1 balance profile with test coverage and avoid accidental regressions.
 
@@ -1000,9 +1001,9 @@ Acceptance criteria:
 - The v1 balance profile is fully configurable from central config.
 - No new external dependencies are required unless already justified elsewhere.
 
-## Recommended implementation order
+## Implemented commit sequence
 
-For safer Codex runs, do not implement all phases in one prompt. Use small checkpoints:
+The work was divided into small checkpoints in this order:
 
 1. Documentation and config layer.
 2. Pure calculators.

@@ -196,30 +196,71 @@ Primary:
 Supporting:
 
 - A little care can help {pet} get ready again.
+- Little care breaks wait until this focus session is finished.
+- Power nap
 - A {minutes}-minute cozy nap can help {pet} feel ready.
 - Power Nap is resting for now. Rest time can still help {pet}.
 - Power Nap is done for today. Rest time can still help {pet}.
 - A small free bite is ready while {pet} is hungry and coins are short.
 - Saved for a very hungry moment when coins are short.
 - Emergency Snack is done for today. The Shop can help when coins are back.
+- Emergency snack
 
 Actions:
 
 - Take power nap
 - Offer snack
+- Continue
+
+Labels and results:
+
+- Care ready
+- After focus
+- Ready
+- Cooling down
+- Done today
+- Saved
+- {minutes} min
+- Energy {value}
+- Hunger {value}
+- Free
+- 1/day
+- {pet} feels refreshed after a power nap.
+- Energy {energy}, hunger {hunger}, happiness {happiness}.
+- {pet} enjoyed a little rescue snack.
+- Hunger {hunger}.
 
 Turkish:
 
 - Nazik destek
 - Biraz bakım {pet} için yeniden hazırlanmaya yardım eder.
+- Küçük bakım molaları bu odak oturumu bitene kadar bekler.
+- Kısa uyku
 - {minutes} dakikalık sıcacık bir uyku {pet} için hazır hissettirebilir.
 - Kısa uyku şimdilik dinleniyor. Dinlenme zamanı {pet} için hâlâ yardım eder.
 - Kısa uyku bugün tamamlandı. Dinlenme zamanı {pet} için hâlâ yardım eder.
 - {pet} aç ve jetonlar azken küçük ücretsiz bir lokma hazır.
 - Jetonlar azken çok aç bir an için saklanıyor.
 - Destek atıştırmalığı bugün tamamlandı. Jetonlar geri gelince Dükkan yardım eder.
+- Destek atıştırmalığı
 - Kısa uyku yap
 - Atıştırmalık ver
+- Devam
+- Bakım hazır
+- Odaktan sonra
+- Hazır
+- Bekliyor
+- Bugün tamam
+- Saklı
+- {minutes} dk
+- Enerji {value}
+- Tokluk {value}
+- Ücretsiz
+- 1/gün
+- {pet} kısa uykudan sonra canlandı.
+- Enerji {energy}, tokluk {hunger}, mutluluk {happiness}.
+- {pet} küçük destek atıştırmalığını keyifle yedi.
+- Tokluk {hunger}.
 
 ## Daily Goal And Streak Freeze
 

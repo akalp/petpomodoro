@@ -8,14 +8,18 @@ The original MVP phases below are implemented in the current codebase and should
 
 Current implemented architecture includes:
 
+- Central `v1-cozy-balanced` profile and pure metric calculators for care, rewards, focus requirements, sleep, shop, mood, and honesty rules.
 - Hash-based React Router navigation for Pet, Focus, Shop, and Journal.
 - Mobile bottom tabs and desktop side navigation from `src/app/routeRegistry.ts`.
 - Settings as a header sheet, not a primary tab.
 - Routed Shop screen with focus/sleep disabled states.
 - CSS-art pet and food visuals with typed presentation registries.
 - Priority-based pet mood rules.
-- Minimal future-ready pet `speciesId`.
+- One local pet with locally selectable Momo or Moowi `speciesId` presentation.
 - Pet rest/sleep care flow.
+- Local daily focus progress, once-per-day streak awards, and Honesty Heart-funded streak freeze.
+- Power Nap and Emergency Snack rescue care actions with persisted local-day limits.
+- Pure achievement rule scaffolding without achievement UI or persistence.
 - Focus-session transition reducer/table in `src/domain/focusSessionMachine.ts`.
 - Local user-authored pet speech messages saved in settings.
 
@@ -110,6 +114,10 @@ Current implemented architecture includes:
 - Add hunger, happiness, and duration-based focus care decay using local timestamps.
 - Add pet rest/sleep behavior with deterministic elapsed-time care changes.
 - Block focus and feeding while the pet is sleeping.
+- Gate focus start on duration-scaled hunger and energy requirements.
+- Track a 25-minute daily focus goal and award streak progress at most once per local day.
+- Add an explicit Honesty Heart-funded streak freeze with persisted eligibility limits.
+- Add limited Power Nap and Emergency Snack rescue actions that do not award focus progress.
 - Add tests for reward idempotency through the store and database transaction.
 
 ## Phase 7: PWA Setup
@@ -144,6 +152,9 @@ Current implemented architecture includes:
 - Test starting a session.
 - Test cancelling a running session with elapsed focus care impact and no completion reward.
 - Test declined confirmation eligibility, daily heart cap, idempotency, and absence of XP, coins, or streak progress.
+- Test focus start requirements and the food/rest/rescue guidance for low-care states.
+- Test daily goal progress, once-per-day streak awards, and streak-freeze spending/limits.
+- Test Power Nap cooldown/daily limit and Emergency Snack need/daily limit.
 - Test custom durations and settings migration/reset.
 - Test reaching awaiting confirmation while the app remains open.
 - Test closing the app and reopening after `expectedEndAt`.
@@ -164,7 +175,7 @@ Current implemented architecture includes:
 
 ## Phase 10: Architecture Evolution Maintenance
 
-Use `docs/ARCHITECTURE_EVOLUTION.md` as the canonical direction for post-MVP cleanup and future features.
+Use `docs/ARCHITECTURE_EVOLUTION.md` as the canonical UI/application direction and `docs/METRICS_ARCHITECTURE_EVOLUTION.md` as the canonical active balance reference for post-MVP cleanup and future features.
 
 - Keep `App.tsx` moving toward a composition root by extracting bootstrap, notification, overlay, and feature wiring when those changes can stay small.
 - Keep route metadata centralized in `src/app/routeRegistry.ts`.

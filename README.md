@@ -73,7 +73,7 @@ Preview the production build locally:
 npm run preview
 ```
 
-Open the preview URL printed by Vite, usually `http://localhost:4173/`. Use preview mode for PWA and service-worker checks because the development server does not represent the final cached app shell.
+Open the preview URL printed by Vite, usually `http://localhost:5173/`. Use preview mode for PWA and service-worker checks because the development server does not represent the final cached app shell.
 
 Service workers require a secure origin. `http://localhost` is sufficient when
 testing in a browser on the same computer, but an iPhone opening
@@ -111,15 +111,15 @@ If IndexedDB is unavailable or blocked, the app should show a local-storage erro
 Development proceeds in small, reviewable steps. The MVP foundation is now implemented across:
 
 1. Vite, React, TypeScript, Tailwind CSS, Vitest, and ESLint setup.
-2. Pure domain models, pet care rules, shop rules, and focus-session transition reducer.
-3. Dexie repositories and IndexedDB schema migrations.
-4. Zustand stores for hydration, pet care, focus sessions, settings, rewards, and reset workflows.
+2. Pure domain models, versioned balance rules, pet care and rescue actions, shop rules, daily focus progress, and focus-session transition reducer.
+3. Dexie repositories and IndexedDB schema migrations, including local daily-focus tracking.
+4. Zustand stores for hydration, pet care, rescue actions, daily focus, focus sessions, settings, rewards, and reset workflows.
 5. Hash-router app shell with Pet, Focus, Shop, and Journal routes.
 6. Mobile bottom navigation and desktop side navigation.
 7. CSS-art pet and food presentation registries.
 8. PWA manifest, app icons, service worker precaching, install hints, Shortcut convenience, and best-effort local reminders.
 
-Future changes should continue following `docs/MVP_TASKS.md` and the architecture direction in `docs/ARCHITECTURE_EVOLUTION.md`.
+Future changes should continue following `docs/MVP_TASKS.md`, the architecture direction in `docs/ARCHITECTURE_EVOLUTION.md`, and the balance model in `docs/METRICS_ARCHITECTURE_EVOLUTION.md`.
 
 ## Initial MVP Scope
 
@@ -127,11 +127,14 @@ The MVP should include:
 
 - One local pet with name, level, XP, species id, mood, coins, streak, honesty hearts, rest state, and care stats.
 - Preset focus durations plus a custom 1 to 180 minute option, defaulting to 25 minutes.
+- Care-aware focus start requirements so a pet that needs food or energy is guided to feeding, rest, or a limited rescue action before a long session.
 - A local session lifecycle: idle, running, awaiting confirmation, completed, abandoned.
 - A trust-based completion prompt after the expected end time.
 - Multi-stat completion rewards, duration-based focus care impact, and hunger decay between visits.
 - A local feeding shop where focus coins can buy food that immediately improves hunger, energy, and happiness.
 - A local rest flow where the pet can sleep to recover energy; focus and feeding wait until the pet wakes.
+- Local Power Nap and Emergency Snack rescue actions with daily limits and a Power Nap cooldown to prevent low-care dead ends.
+- A 25-minute local daily focus goal that advances the visible streak at most once per day, plus an explicit Honesty Heart-funded streak freeze for an eligible missed day.
 - An eligibility-limited honesty reward when the user declines completion after a session of at least 15 minutes: at most two Honesty Hearts per local day, with `+2` happiness and no XP, coins, or streak progress. Ending a running session early gives no completion reward, but elapsed focus care impact and base coins still apply.
 - Idempotent rewards so the same session cannot reward the pet twice.
 - Local session history and local-only shop purchases.
