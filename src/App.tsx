@@ -16,6 +16,7 @@ import {
   calculateFocusStartEligibility,
   DEFAULT_FOCUS_DURATION_MINUTES,
   displayMoodForSession,
+  FOCUS_PRESET_DURATION_MINUTES,
   isPetSleeping,
   previewPetSleep,
 } from "./domain";
@@ -57,7 +58,7 @@ import {
 } from "./stores";
 
 let appInitialization: Promise<void> | null = null;
-const FOCUS_DURATIONS = [5, 15, 25, 50];
+const FOCUS_DURATIONS = [...FOCUS_PRESET_DURATION_MINUTES];
 const EMPTY_MOTIVATIONAL_MESSAGES: string[] = [];
 type AppSheet = "settings" | null;
 

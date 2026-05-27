@@ -1,9 +1,17 @@
 import { DomainError } from "./errors";
 import type { AppSettings } from "./types";
+import { ACTIVE_BALANCE_PROFILE } from "./balance";
 
-export const DEFAULT_FOCUS_DURATION_MINUTES = 25;
-export const MIN_FOCUS_DURATION_MINUTES = 1;
-export const MAX_FOCUS_DURATION_MINUTES = 180;
+export const DEFAULT_FOCUS_DURATION_MINUTES =
+  ACTIVE_BALANCE_PROFILE.focus.defaultDurationMinutes;
+export const MIN_FOCUS_DURATION_MINUTES =
+  ACTIVE_BALANCE_PROFILE.focus.minDurationMinutes;
+export const MAX_FOCUS_DURATION_MINUTES =
+  ACTIVE_BALANCE_PROFILE.focus.maxDurationMinutes;
+export const FOCUS_PRESET_DURATION_MINUTES =
+  ACTIVE_BALANCE_PROFILE.focus.presetDurationMinutes;
+export const CUSTOM_DURATION_ADJUSTMENT_MINUTES =
+  ACTIVE_BALANCE_PROFILE.focus.customDurationAdjustmentMinutes;
 export const MAX_MOTIVATIONAL_MESSAGES = 6;
 export const MAX_MOTIVATIONAL_MESSAGE_LENGTH = 88;
 

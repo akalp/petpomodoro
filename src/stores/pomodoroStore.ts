@@ -5,6 +5,7 @@ import {
   canPetStartFocus,
   confirmFocusSession,
   createRunningSession,
+  DEFAULT_FOCUS_DURATION_MINUTES,
   DomainError,
   isPetSleeping,
   PET_FOCUS_NEEDS_CARE_ERROR,
@@ -120,7 +121,7 @@ export function createPomodoroStore(
     },
 
     startSession: async (
-      plannedDurationMinutes = 25,
+      plannedDurationMinutes = DEFAULT_FOCUS_DURATION_MINUTES,
       now = dependencies.now(),
     ) => {
       set({ isLoading: true, error: null });

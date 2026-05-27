@@ -31,6 +31,11 @@ export interface BalanceFocusStartRequirements {
 }
 
 export interface BalanceFocusConfig {
+  defaultDurationMinutes: number;
+  minDurationMinutes: number;
+  maxDurationMinutes: number;
+  presetDurationMinutes: readonly number[];
+  customDurationAdjustmentMinutes: readonly number[];
   baseCoinIntervalMinutes: number;
   xpPerFocusMinute: number;
   completionBonusPer25Minutes: number;
@@ -69,6 +74,7 @@ export interface BalanceRescueActionConfig {
   happinessGain: number;
   maxUsesPerDay: number;
   cooldownMinutes: number | null;
+  eligibilityMaxHunger: number | null;
 }
 
 export interface BalanceRescueConfig {

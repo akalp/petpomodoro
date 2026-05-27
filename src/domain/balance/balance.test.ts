@@ -23,6 +23,13 @@ import {
   SLEEP_HAPPINESS_ENERGY_STEP,
   XP_PER_LEVEL,
 } from "../pet";
+import {
+  CUSTOM_DURATION_ADJUSTMENT_MINUTES,
+  DEFAULT_FOCUS_DURATION_MINUTES,
+  FOCUS_PRESET_DURATION_MINUTES,
+  MAX_FOCUS_DURATION_MINUTES,
+  MIN_FOCUS_DURATION_MINUTES,
+} from "../settings";
 import { PET_MOOD_RULES, resolvePetMood } from "../petMoodRules";
 import {
   claimSessionReward,
@@ -42,6 +49,7 @@ import {
   EMERGENCY_SNACK_ENERGY_GAIN,
   EMERGENCY_SNACK_HAPPINESS_GAIN,
   EMERGENCY_SNACK_HUNGER_GAIN,
+  EMERGENCY_SNACK_MAX_HUNGER,
   MAX_EMERGENCY_SNACKS_PER_DAY,
   MAX_POWER_NAPS_PER_DAY,
   POWER_NAP_COOLDOWN_MINUTES,
@@ -54,6 +62,21 @@ import { ACTIVE_BALANCE_PROFILE } from "./activeProfile";
 
 describe("active balance profile", () => {
   it("mirrors current progression, care, focus, and sleep constants", () => {
+    expect(DEFAULT_FOCUS_DURATION_MINUTES).toBe(
+      ACTIVE_BALANCE_PROFILE.focus.defaultDurationMinutes,
+    );
+    expect(MIN_FOCUS_DURATION_MINUTES).toBe(
+      ACTIVE_BALANCE_PROFILE.focus.minDurationMinutes,
+    );
+    expect(MAX_FOCUS_DURATION_MINUTES).toBe(
+      ACTIVE_BALANCE_PROFILE.focus.maxDurationMinutes,
+    );
+    expect(FOCUS_PRESET_DURATION_MINUTES).toBe(
+      ACTIVE_BALANCE_PROFILE.focus.presetDurationMinutes,
+    );
+    expect(CUSTOM_DURATION_ADJUSTMENT_MINUTES).toBe(
+      ACTIVE_BALANCE_PROFILE.focus.customDurationAdjustmentMinutes,
+    );
     expect(XP_PER_LEVEL).toBe(ACTIVE_BALANCE_PROFILE.progression.xpPerLevel);
     expect(MAX_PET_STAT).toBe(ACTIVE_BALANCE_PROFILE.progression.maxPetStat);
     expect(DEFAULT_HUNGER_DECAY_PER_HOUR).toBe(
@@ -217,11 +240,13 @@ describe("active balance profile", () => {
       hungerGain: EMERGENCY_SNACK_HUNGER_GAIN,
       happinessGain: EMERGENCY_SNACK_HAPPINESS_GAIN,
       energyGain: EMERGENCY_SNACK_ENERGY_GAIN,
+      maxHunger: EMERGENCY_SNACK_MAX_HUNGER,
       maxUses: MAX_EMERGENCY_SNACKS_PER_DAY,
     }).toEqual({
       hungerGain: 12,
       happinessGain: 0,
       energyGain: 0,
+      maxHunger: 25,
       maxUses: 1,
     });
   });

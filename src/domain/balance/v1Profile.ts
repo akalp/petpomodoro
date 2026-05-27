@@ -1,6 +1,11 @@
 import type { BalanceProfile } from "./types";
 
 export const DAILY_FOCUS_GOAL_MINUTES = 25;
+export const DEFAULT_FOCUS_DURATION_MINUTES = DAILY_FOCUS_GOAL_MINUTES;
+export const MIN_FOCUS_DURATION_MINUTES = 1;
+export const MAX_FOCUS_DURATION_MINUTES = 180;
+export const FOCUS_PRESET_DURATION_MINUTES = [5, 15, 25, 50] as const;
+export const CUSTOM_DURATION_ADJUSTMENT_MINUTES = [-5, -1, 1, 5] as const;
 export const XP_PER_FOCUS_MINUTE = 1;
 export const FOCUS_BASE_COIN_INTERVAL_MINUTES = 5;
 export const FOCUS_COMPLETION_BONUS_PER_25_MINUTES = 2;
@@ -30,6 +35,7 @@ export const EMERGENCY_SNACK_HUNGER_GAIN = 12;
 export const EMERGENCY_SNACK_HAPPINESS_GAIN = 0;
 export const EMERGENCY_SNACK_ENERGY_GAIN = 0;
 export const MAX_EMERGENCY_SNACKS_PER_DAY = 1;
+export const EMERGENCY_SNACK_MAX_HUNGER = 25;
 export const HONESTY_HAPPINESS_REWARD = 2;
 export const HONESTY_HEART_REWARD = 1;
 export const MIN_HONESTY_SESSION_MINUTES = 15;
@@ -68,6 +74,11 @@ export const BALANCE_PROFILE_V1 = {
     maxPetStat: 100,
   },
   focus: {
+    defaultDurationMinutes: DEFAULT_FOCUS_DURATION_MINUTES,
+    minDurationMinutes: MIN_FOCUS_DURATION_MINUTES,
+    maxDurationMinutes: MAX_FOCUS_DURATION_MINUTES,
+    presetDurationMinutes: FOCUS_PRESET_DURATION_MINUTES,
+    customDurationAdjustmentMinutes: CUSTOM_DURATION_ADJUSTMENT_MINUTES,
     baseCoinIntervalMinutes: FOCUS_BASE_COIN_INTERVAL_MINUTES,
     xpPerFocusMinute: XP_PER_FOCUS_MINUTE,
     completionBonusPer25Minutes: FOCUS_COMPLETION_BONUS_PER_25_MINUTES,
@@ -115,6 +126,7 @@ export const BALANCE_PROFILE_V1 = {
       happinessGain: POWER_NAP_HAPPINESS_GAIN,
       maxUsesPerDay: MAX_POWER_NAPS_PER_DAY,
       cooldownMinutes: POWER_NAP_COOLDOWN_MINUTES,
+      eligibilityMaxHunger: null,
     },
     emergencySnack: {
       enabled: true,
@@ -124,6 +136,7 @@ export const BALANCE_PROFILE_V1 = {
       happinessGain: EMERGENCY_SNACK_HAPPINESS_GAIN,
       maxUsesPerDay: MAX_EMERGENCY_SNACKS_PER_DAY,
       cooldownMinutes: null,
+      eligibilityMaxHunger: EMERGENCY_SNACK_MAX_HUNGER,
     },
   },
   streak: {

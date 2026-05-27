@@ -6,6 +6,7 @@ import {
   INSUFFICIENT_COINS_ERROR,
   POWER_NAP_COOLDOWN_ACTIVE_ERROR,
   type AppSettings,
+  type DailyFocusState,
 } from "../domain";
 import { makePet, makeReward, makeSession } from "../test/factories";
 import { PetPomodoroDatabase } from "./database";
@@ -18,6 +19,7 @@ import {
   applyStoredEmergencySnack,
   applyStoredPowerNap,
   applyStoredStreakFreeze,
+  getStoredDailyFocusState,
 } from "./dailyFocusRepository";
 import { claimStoredSessionReward } from "./rewardsRepository";
 import { loadOrCreateSettings, updateSettings } from "./settingsRepository";
@@ -423,6 +425,33 @@ describe("Dexie repositories", () => {
     });
     await expect(database.dailyFocus.get(["pet-1", "2026-05-22"])).resolves.toMatchObject({
       emergencySnacksUsed: 1,
+    });
+  });
+
+  it("normalizes daily focus rows saved before rescue counters existed", async () => {
+    const database = makeDatabase("daily-focus-normalization");
+    await database.dailyFocus.add({
+      petId: "pet-1",
+      dateKey: "2026-05-22",
+      completedFocusMinutes: 10,
+      dailyGoalAwarded: false,
+      honestyHeartsAwarded: 1,
+    } as DailyFocusState);
+
+    const normalized = await getStoredDailyFocusState(
+      { petId: "pet-1", dateKey: "2026-05-22" },
+      database,
+    );
+
+    expect(normalized).toMatchObject({
+      completedFocusMinutes: 10,
+      dailyGoalAwarded: false,
+      honestyHeartsAwarded: 1,
+      streakFreezesUsed: 0,
+      lastStreakFreezeAt: null,
+      powerNapsUsed: 0,
+      emergencySnacksUsed: 0,
+      lastPowerNapAt: null,
     });
   });
 

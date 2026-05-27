@@ -25,7 +25,8 @@ export const EMERGENCY_SNACK_ENERGY_GAIN = emergencySnackConfig.energyGain;
 export const MAX_EMERGENCY_SNACKS_PER_DAY = emergencySnackConfig.maxUsesPerDay;
 
 // A free snack is reserved for a clearly hungry pet without a coin-funded option.
-export const EMERGENCY_SNACK_MAX_HUNGER = 25;
+export const EMERGENCY_SNACK_MAX_HUNGER =
+  emergencySnackConfig.eligibilityMaxHunger;
 export const POWER_NAP_DAILY_LIMIT_ERROR = "power_nap_daily_limit_reached";
 export const POWER_NAP_COOLDOWN_ACTIVE_ERROR = "power_nap_cooldown_active";
 export const EMERGENCY_SNACK_DAILY_LIMIT_ERROR =

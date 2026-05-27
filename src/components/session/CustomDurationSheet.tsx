@@ -1,3 +1,4 @@
+import { CUSTOM_DURATION_ADJUSTMENT_MINUTES } from "../../domain";
 import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
 import { Sheet } from "../ui/Sheet";
@@ -13,8 +14,6 @@ interface CustomDurationSheetProps {
   onClose: () => void;
   t: Translator;
 }
-
-const ADJUSTMENTS = [-5, -1, 1, 5];
 
 export function CustomDurationSheet({
   disabled = false,
@@ -75,7 +74,7 @@ export function CustomDurationSheet({
           className="grid grid-cols-4 gap-2"
           role="group"
         >
-          {ADJUSTMENTS.map((adjustment) => (
+          {CUSTOM_DURATION_ADJUSTMENT_MINUTES.map((adjustment) => (
             <button
               aria-label={
                 adjustment === -1
