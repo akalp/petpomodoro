@@ -29,7 +29,7 @@ This section records runtime behavior before the configurable balance work began
 | `coins` | Local food shop currency. | Initial pet starts at `0`; focus impact adds base coins for full 5-minute focus blocks; completed reward adds `10`; food purchases subtract item cost; clamped at minimum `0`. |
 | `happiness` | Care stat and mood input. | Initial pet starts at `50`; completed reward adds `8`; honesty reward adds `3`; food adds item happiness; idle app-open decay subtracts up to `6`; low-care pressure during hunger/focus impact may subtract more; sleep can add happiness based on energy recovered. Clamped `0..100`. |
 | `hunger` | Care stat and mood input. Higher means better fed. | Initial pet starts at `100`; idle hunger decay subtracts `2` per hour; focus impact subtracts `0.2` per minute; sleep subtracts `2` per hour with a floor of `15`; food adds item hunger; completed and honesty rewards add `0`. Clamped `0..100`. |
-| `energy` | Care stat and mood input. Higher means more rested. | Initial pet starts at `80`; focus impact subtracts `0.28` per minute; sleep adds `18` per hour capped at `54` gained per wake; food adds item energy; completed and honesty rewards add `0`. Clamped `0..100`. |
+| `energy` | Care stat and mood input. Higher means more rested. | Initial pet starts at `80`; focus impact subtracts `0.28` per minute; sleep adds `20` per hour up to the `100` stat cap; food adds item energy; completed and honesty rewards add `0`. Clamped `0..100`. |
 | `streak` | Current simple completion count. | Initial pet starts at `0`; completed focus reward adds `1`; honesty, focus impact, sleep, feeding, and idle decay do not change it. |
 | `honestyHearts` | Trust marker for honest declined confirmation. | Initial pet starts at `0`; honesty reward adds `1`; completed focus, sleep, feeding, and decay do not change it. |
 | `mood` | Persisted care mood derived from happiness, hunger, and energy. | Recomputed by care/reward/feed/decay/wake actions. Start sleep does not change persisted mood. Working and sleeping are display-only overrides. |
@@ -91,7 +91,7 @@ Current examples from tests:
 - Starting sleep sets `sleepStartedAt = now` and does not grant rewards or change Pomodoro state.
 - Sleeping blocks focus start and food purchases.
 - Waking sleep:
-  - restores `18` energy per hour, capped at `54` energy gained for the wake action;
+  - restores `20` energy per hour, up to the `100` stat cap;
   - subtracts `2` hunger per hour, with a floor of `15` after waking;
   - adds `floor(energyGained / 15)` happiness, capped at `4`;
   - clears `sleepStartedAt`;
@@ -142,7 +142,7 @@ Display mood overrides are not persisted:
 - Completion XP/coin/happiness rewards are fixed and do not use `plannedDurationMinutes`; a 1-minute completed session can currently claim the same completion reward as a 180-minute session after confirmation.
 - `streak` currently increments once per completed rewarded session, not once per daily focus goal.
 - Honesty Hearts have no minimum duration or daily cap.
-- Sleep energy recovery is capped at `+54`, so long sleep cannot necessarily restore energy to `100`.
+- Sleep energy recovery now reaches the `100` stat cap when enough rest time has elapsed.
 - There is no persisted daily state for focus minutes, honesty caps, rescue actions, or streak freezes.
 - There are no focus start requirements based on hunger or energy yet, except the sleep block.
 - `claimStoredSessionReward` trusts an optional caller-provided session after checking only the id matches the stored session; current store usage passes domain-transitioned sessions, but future refactors should keep this boundary tight.
