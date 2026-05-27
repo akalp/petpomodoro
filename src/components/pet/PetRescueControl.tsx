@@ -15,6 +15,7 @@ import {
   type EmergencySnackSummary,
   type PetState,
   type PowerNapSummary,
+  type RescueEligibility,
 } from "../../domain";
 import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
@@ -66,6 +67,12 @@ export function PetRescueControl({
   const emergencySnackDisabled =
     sharedDisabled || !emergencySnackEligibility.canApply;
   const emergencySnackNeeded = isEmergencySnackNeeded(pet);
+  const panelStatus = rescuePanelStatus(
+    t,
+    isFocusActive,
+    powerNapEligibility,
+    emergencySnackEligibility,
+  );
 
   return (
     <div className="space-y-4 rounded-lg border border-rose-100 bg-rose-50/55 p-4 text-left text-slate-950">
@@ -78,10 +85,15 @@ export function PetRescueControl({
               : t("rescueSupport", { pet: pet.name })}
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-[0.7rem] font-semibold uppercase tracking-wide text-teal-700 ring-1 ring-teal-100">
-          {isFocusActive
-            ? t("rescueAfterFocus")
-            : t("rescueCareReady")}
+        <span
+          className={[
+            "shrink-0 rounded-full px-2.5 py-1 text-[0.7rem] font-semibold uppercase tracking-wide ring-1",
+            panelStatus.tone === "ready"
+              ? "bg-white text-teal-700 ring-teal-100"
+              : "bg-slate-50 text-slate-600 ring-slate-100",
+          ].join(" ")}
+        >
+          {panelStatus.label}
         </span>
       </div>
 
@@ -257,6 +269,39 @@ function formatSigned(value: number): string {
   const rounded = Math.round(value * 10) / 10;
   const formatted = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
   return value > 0 ? `+${formatted}` : formatted;
+}
+
+function rescuePanelStatus(
+  t: Translator,
+  isFocusActive: boolean,
+  powerNapEligibility: RescueEligibility,
+  emergencySnackEligibility: RescueEligibility,
+): { label: string; tone: "ready" | "muted" } {
+  if (isFocusActive) {
+    return { label: t("rescueAfterFocus"), tone: "muted" };
+  }
+
+  if (powerNapEligibility.canApply || emergencySnackEligibility.canApply) {
+    return { label: t("rescueCareReady"), tone: "ready" };
+  }
+
+  if (
+    powerNapEligibility.reasons.includes(POWER_NAP_COOLDOWN_ACTIVE_ERROR) &&
+    !powerNapEligibility.reasons.includes(POWER_NAP_DAILY_LIMIT_ERROR)
+  ) {
+    return { label: t("rescueCoolingDown"), tone: "muted" };
+  }
+
+  if (
+    powerNapEligibility.reasons.includes(POWER_NAP_DAILY_LIMIT_ERROR) &&
+    emergencySnackEligibility.reasons.includes(
+      EMERGENCY_SNACK_DAILY_LIMIT_ERROR,
+    )
+  ) {
+    return { label: t("rescueDoneToday"), tone: "muted" };
+  }
+
+  return { label: t("rescueSaved"), tone: "muted" };
 }
 
 function powerNapSupport(

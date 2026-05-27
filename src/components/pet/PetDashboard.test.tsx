@@ -188,7 +188,7 @@ describe("PetDashboard", () => {
       <PetDashboard
         dailyFocusToday={makeDailyFocusState({
           emergencySnacksUsed: 1,
-          lastPowerNapAt: "2026-05-27T11:30:00.000Z",
+          lastPowerNapAt: new Date().toISOString(),
           powerNapsUsed: 2,
         })}
         displayMood="hungry"
@@ -213,5 +213,39 @@ describe("PetDashboard", () => {
 
     expect(html).toContain("Power Nap is done for today.");
     expect(html).toContain("Emergency Snack is done for today.");
+    expect(html).not.toContain("Care ready");
+    expect(html).not.toContain("Cooling down");
+  });
+
+  it("does not show care ready when power nap is cooling down and snack is saved", () => {
+    const html = renderToStaticMarkup(
+      <PetDashboard
+        dailyFocusToday={makeDailyFocusState({
+          lastPowerNapAt: new Date().toISOString(),
+          powerNapsUsed: 1,
+        })}
+        displayMood="calm"
+        isFocusActive={false}
+        isSleepDisabled={false}
+        lastEmergencySnackSummary={null}
+        lastPowerNapSummary={null}
+        lastSleepSummary={null}
+        onClearEmergencySnackSummary={() => undefined}
+        onClearPowerNapSummary={() => undefined}
+        onClearSleepSummary={() => undefined}
+        onEmergencySnack={() => undefined}
+        onPowerNap={() => undefined}
+        onStartSleep={() => undefined}
+        onWakeSleep={() => undefined}
+        pet={makePet({ coins: 0, hunger: 50 })}
+        petMessage="A soft reset is here."
+        sleepPreview={null}
+        t={createTranslator("tr")}
+      />,
+    );
+
+    expect(html).toContain("Bekliyor");
+    expect(html).toContain("Saklı");
+    expect(html).not.toContain("Bakım hazır");
   });
 });
