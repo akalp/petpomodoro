@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 
 import { PetDashboard } from "../../components/pet/PetDashboard";
 import type {
+  DailyFocusState,
   EmergencySnackSummary,
   PetDisplayMood,
   PetSleepSummary,
@@ -15,6 +16,7 @@ import { PetMoodShowcase } from "./PetMoodShowcase";
 
 interface PetScreenProps {
   displayMood: PetDisplayMood | null;
+  dailyFocusToday: DailyFocusState | null;
   installHint: ReactNode;
   isFocusActive: boolean;
   isSleepDisabled: boolean;
@@ -36,6 +38,7 @@ interface PetScreenProps {
 
 export function PetScreen({
   displayMood,
+  dailyFocusToday,
   installHint,
   isFocusActive,
   isSleepDisabled,
@@ -68,6 +71,7 @@ export function PetScreen({
       {installHint}
       <PetDashboard
         displayMood={displayMood}
+        dailyFocusToday={dailyFocusToday}
         isFocusActive={isFocusActive}
         isSleepDisabled={isSleepDisabled}
         lastEmergencySnackSummary={lastEmergencySnackSummary}

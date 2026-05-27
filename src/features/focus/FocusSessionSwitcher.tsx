@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { AwaitingConfirmationScreen } from "../../components/session/AwaitingConfirmationScreen";
 import { PomodoroStartPanel } from "../../components/session/PomodoroStartPanel";
 import { RunningSessionScreen } from "../../components/session/RunningSessionScreen";
@@ -17,6 +19,7 @@ interface FocusSessionSwitcherProps {
   onStart: (duration: number) => void;
   selectedDuration: number;
   startDisabled: boolean;
+  startNotice?: ReactNode;
   t: Translator;
 }
 
@@ -33,6 +36,7 @@ export function FocusSessionSwitcher({
   onStart,
   selectedDuration,
   startDisabled,
+  startNotice = null,
   t,
 }: FocusSessionSwitcherProps) {
   if (activeSession?.status === "running") {
@@ -67,6 +71,7 @@ export function FocusSessionSwitcher({
       onDurationChange={onDurationChange}
       onStart={onStart}
       selectedDuration={selectedDuration}
+      startNotice={startNotice}
       t={t}
     />
   );

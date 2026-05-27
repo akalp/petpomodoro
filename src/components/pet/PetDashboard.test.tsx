@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { createTranslator } from "../../i18n";
-import { makePet } from "../../test/factories";
+import { makeDailyFocusState, makePet } from "../../test/factories";
 
 import { PetDashboard } from "./PetDashboard";
 
@@ -30,6 +30,7 @@ describe("PetDashboard", () => {
     const pet = makePet();
     const html = renderToStaticMarkup(
       <PetDashboard
+        dailyFocusToday={makeDailyFocusState()}
         displayMood="calm"
         isFocusActive={false}
         isSleepDisabled={false}
@@ -61,6 +62,7 @@ describe("PetDashboard", () => {
     });
     const html = renderToStaticMarkup(
       <PetDashboard
+        dailyFocusToday={makeDailyFocusState()}
         displayMood="sleeping"
         isFocusActive={false}
         isSleepDisabled={false}
@@ -96,6 +98,7 @@ describe("PetDashboard", () => {
     const pet = makePet();
     const html = renderToStaticMarkup(
       <PetDashboard
+        dailyFocusToday={makeDailyFocusState()}
         displayMood="working"
         isFocusActive={true}
         isSleepDisabled={false}
@@ -124,6 +127,7 @@ describe("PetDashboard", () => {
     const pet = makePet();
     const html = renderToStaticMarkup(
       <PetDashboard
+        dailyFocusToday={makeDailyFocusState()}
         displayMood="calm"
         isFocusActive={false}
         isSleepDisabled={false}
@@ -152,6 +156,7 @@ describe("PetDashboard", () => {
   it("offers rescue actions when a no-coins pet needs care", () => {
     const html = renderToStaticMarkup(
       <PetDashboard
+        dailyFocusToday={makeDailyFocusState()}
         displayMood="hungry"
         isFocusActive={false}
         isSleepDisabled={false}
@@ -176,5 +181,37 @@ describe("PetDashboard", () => {
     expect(html).toContain("Take power nap");
     expect(html).toContain("Emergency snack");
     expect(html).toContain("Offer snack");
+  });
+
+  it("explains rescue cooldowns and daily limits", () => {
+    const html = renderToStaticMarkup(
+      <PetDashboard
+        dailyFocusToday={makeDailyFocusState({
+          emergencySnacksUsed: 1,
+          lastPowerNapAt: "2026-05-27T11:30:00.000Z",
+          powerNapsUsed: 2,
+        })}
+        displayMood="hungry"
+        isFocusActive={false}
+        isSleepDisabled={false}
+        lastEmergencySnackSummary={null}
+        lastPowerNapSummary={null}
+        lastSleepSummary={null}
+        onClearEmergencySnackSummary={() => undefined}
+        onClearPowerNapSummary={() => undefined}
+        onClearSleepSummary={() => undefined}
+        onEmergencySnack={() => undefined}
+        onPowerNap={() => undefined}
+        onStartSleep={() => undefined}
+        onWakeSleep={() => undefined}
+        pet={makePet({ coins: 0, hunger: 5, energy: 2 })}
+        petMessage="A soft reset is here."
+        sleepPreview={null}
+        t={createTranslator("en")}
+      />,
+    );
+
+    expect(html).toContain("Power Nap is done for today.");
+    expect(html).toContain("Emergency Snack is done for today.");
   });
 });

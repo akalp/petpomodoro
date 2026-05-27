@@ -10,7 +10,10 @@ export interface UiStoreDependencies {
     StoreApi<
       Pick<
         PetStoreState,
-        "initializePet" | "updateAppOpenDecay" | "updateDecayOnOpen"
+        | "initializePet"
+        | "loadDailyFocusOverview"
+        | "updateAppOpenDecay"
+        | "updateDecayOnOpen"
       >
     >
   >;
@@ -59,6 +62,7 @@ export function createUiStore(
         if (!activeSession) {
           await dependencies.petStore.getState().updateDecayOnOpen(now);
         }
+        await dependencies.petStore.getState().loadDailyFocusOverview(now);
         set({ hasHydrated: true, isInitializing: false });
       } catch (error) {
         set({ error: errorMessage(error), isInitializing: false });

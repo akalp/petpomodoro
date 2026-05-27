@@ -25,6 +25,22 @@ export interface ApplyStoredRescueInput {
   now: string;
 }
 
+export interface GetStoredDailyFocusStateInput {
+  petId: string;
+  dateKey: string;
+}
+
+export async function getStoredDailyFocusState(
+  { petId, dateKey }: GetStoredDailyFocusStateInput,
+  database: PetPomodoroDatabase = defaultDb,
+) {
+  const storedDailyFocusState = await database.dailyFocus.get([petId, dateKey]);
+
+  return normalizeDailyFocusState(
+    storedDailyFocusState ?? createDailyFocusState({ petId, dateKey }),
+  );
+}
+
 export async function applyStoredStreakFreeze(
   { petId, dateKey, now }: ApplyStoredStreakFreezeInput,
   database: PetPomodoroDatabase = defaultDb,

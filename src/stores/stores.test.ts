@@ -877,6 +877,13 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
       dailyFocus.set(dailyFocusKey, result.dailyFocusState);
       return result;
     },
+    getStoredDailyFocusState: async ({ petId, dateKey }) => {
+      const dailyFocusKey = `${petId}:${dateKey}`;
+      return (
+        dailyFocus.get(dailyFocusKey) ??
+        createDailyFocusState({ petId, dateKey })
+      );
+    },
     buyFoodForStoredPet: async ({ petId, foodId, now: foodNow }) => {
       if (!pet || pet.id !== petId) {
         throw new Error("Pet not found.");

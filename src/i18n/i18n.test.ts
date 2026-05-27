@@ -12,6 +12,7 @@ import {
   PET_SLEEPING_CANNOT_FOCUS_ERROR,
   POWER_NAP_COOLDOWN_ACTIVE_ERROR,
   POWER_NAP_DAILY_LIMIT_ERROR,
+  STREAK_FREEZE_INSUFFICIENT_HEARTS_ERROR,
 } from "../domain";
 import {
   createTranslator,
@@ -46,6 +47,8 @@ describe("offline translations", () => {
     expect(t("petNameSupport")).toContain("kendi adını");
     expect(t("powerNapTitle")).toBe("Kısa uyku");
     expect(t("emergencySnackTitle")).toBe("Destek atıştırmalığı");
+    expect(t("dailyFocusTitle")).toBe("Günlük odak hedefi");
+    expect(t("streakFreezeAvailableTitle")).toBe("Seri dondurma hazır");
   });
 
   it("localizes known persisted store error messages", () => {
@@ -87,5 +90,8 @@ describe("offline translations", () => {
     expect(localizeErrorMessage(EMERGENCY_SNACK_NOT_NEEDED_ERROR, t)).toContain(
       "daha aç",
     );
+    expect(
+      localizeErrorMessage(STREAK_FREEZE_INSUFFICIENT_HEARTS_ERROR, t),
+    ).toContain("Dürüstlük Kalbi");
   });
 });

@@ -49,6 +49,13 @@ Primary button:
 
 - Start focus
 
+Blocked care states:
+
+- {pet} is too sleepy for this focus. Try a Power Nap or Rest time first.
+- {pet} needs a bite before this focus. Try the Shop or Emergency Snack.
+- {pet} needs food and rest before this focus. Try a snack, then a nap.
+- Needs energy {requiredEnergy} and hunger {requiredHunger}.
+
 Secondary options:
 
 - Maybe later
@@ -179,6 +186,69 @@ Turkish:
 - Mutluluk
 - {pet} güzelce dinlendi.
 - Enerji {energy}, tokluk {hunger}, mutluluk {happiness}.
+
+## Rescue Actions
+
+Primary:
+
+- Gentle pick-me-up
+
+Supporting:
+
+- A little care can help {pet} get ready again.
+- A {minutes}-minute cozy nap can help {pet} feel ready.
+- Power Nap is resting for now. Rest time can still help {pet}.
+- Power Nap is done for today. Rest time can still help {pet}.
+- A small free bite is ready while {pet} is hungry and coins are short.
+- Saved for a very hungry moment when coins are short.
+- Emergency Snack is done for today. The Shop can help when coins are back.
+
+Actions:
+
+- Take power nap
+- Offer snack
+
+Turkish:
+
+- Nazik destek
+- Biraz bakım {pet} için yeniden hazırlanmaya yardım eder.
+- {minutes} dakikalık sıcacık bir uyku {pet} için hazır hissettirebilir.
+- Kısa uyku şimdilik dinleniyor. Dinlenme zamanı {pet} için hâlâ yardım eder.
+- Kısa uyku bugün tamamlandı. Dinlenme zamanı {pet} için hâlâ yardım eder.
+- {pet} aç ve jetonlar azken küçük ücretsiz bir lokma hazır.
+- Jetonlar azken çok aç bir an için saklanıyor.
+- Destek atıştırmalığı bugün tamamlandı. Jetonlar geri gelince Dükkan yardım eder.
+- Kısa uyku yap
+- Atıştırmalık ver
+
+## Daily Goal And Streak Freeze
+
+Daily focus:
+
+- Daily focus goal
+- {minutes} of {goal} minutes with your pet today.
+- Daily goal complete. {pet}'s streak is tucked in for today.
+- Today
+
+Streak freeze:
+
+- Streak freeze ready
+- Use {cost} Honesty Hearts to keep {pet}'s streak warm for yesterday.
+- Streak freeze needs Honesty Hearts
+- It costs {cost}. Honest check-ins can bring hearts back.
+- Use freeze
+
+Turkish:
+
+- Günlük odak hedefi
+- Bugün dostunla {goal} dakikanın {minutes} dakikası.
+- Günlük hedef tamam. {pet} için seri bugün sarıp sarmalandı.
+- Bugün
+- Seri dondurma hazır
+- {pet} için dünkü seriyi sıcak tutmak üzere {cost} Dürüstlük Kalbi kullan.
+- Seri dondurma Dürüstlük Kalbi istiyor
+- {cost} kalp gerekir. Dürüst check-in'ler kalpleri geri getirebilir.
+- Dondur
 
 ## Session Ready For Confirmation
 

@@ -1,4 +1,5 @@
 import type {
+  DailyFocusState,
   EmergencySnackSummary,
   PetDisplayMood,
   PetSleepSummary,
@@ -15,6 +16,7 @@ import { PetSleepControl } from "./PetSleepControl";
 import { PetStats } from "./PetStats";
 
 interface PetDashboardProps {
+  dailyFocusToday: DailyFocusState | null;
   displayMood: PetDisplayMood | null;
   isFocusActive: boolean;
   isSleepDisabled: boolean;
@@ -35,6 +37,7 @@ interface PetDashboardProps {
 }
 
 export function PetDashboard({
+  dailyFocusToday,
   displayMood,
   isFocusActive,
   isSleepDisabled,
@@ -85,6 +88,7 @@ export function PetDashboard({
       />
       <PetStats displayMood={displayMood ?? pet.mood} pet={pet} t={t} />
       <PetRescueControl
+        dailyFocusToday={dailyFocusToday}
         disabled={isSleepDisabled}
         isFocusActive={isFocusActive}
         lastEmergencySnackSummary={lastEmergencySnackSummary}

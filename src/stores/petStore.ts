@@ -8,6 +8,7 @@ import {
   changePetSpecies,
   isPetSleeping,
   type ClaimFocusRewardResult,
+  type DailyFocusState,
   type FoodItemId,
   type FoodPurchaseResult,
   type FocusSession,
@@ -19,6 +20,7 @@ import {
   type PowerNapResult,
   type RewardSummary,
   type StreakFreezeResult,
+  toLocalDateKey,
 } from "../domain";
 import {
   applyStoredSessionImpact,
@@ -28,6 +30,7 @@ import {
   buyFoodForStoredPet,
   claimStoredSessionReward,
   getCurrentPet,
+  getStoredDailyFocusState,
   loadOrCreateDefaultPet,
   startStoredPetSleep,
   updatePet,
@@ -45,6 +48,7 @@ export interface PetStoreDependencies {
   applyStoredStreakFreeze: typeof applyStoredStreakFreeze;
   applyStoredPowerNap: typeof applyStoredPowerNap;
   applyStoredEmergencySnack: typeof applyStoredEmergencySnack;
+  getStoredDailyFocusState: typeof getStoredDailyFocusState;
   buyFoodForStoredPet: typeof buyFoodForStoredPet;
   startStoredPetSleep: typeof startStoredPetSleep;
   wakeStoredPetFromSleep: typeof wakeStoredPetFromSleep;
@@ -58,6 +62,8 @@ export interface PetStoreState {
   lastSleepSummary: PetSleepSummary | null;
   lastPowerNapSummary: PowerNapResult["summary"] | null;
   lastEmergencySnackSummary: EmergencySnackResult["summary"] | null;
+  dailyFocusToday: DailyFocusState | null;
+  previousDailyFocusState: DailyFocusState | null;
   isLoading: boolean;
   error: string | null;
   initializePet: (now?: string) => Promise<PetState>;
@@ -79,6 +85,12 @@ export interface PetStoreState {
     dateKey: string,
     now?: string,
   ) => Promise<StreakFreezeResult>;
+  loadDailyFocusOverview: (
+    now?: string,
+  ) => Promise<{
+    dailyFocusToday: DailyFocusState | null;
+    previousDailyFocusState: DailyFocusState | null;
+  }>;
   usePowerNap: (now?: string) => Promise<PowerNapResult>;
   useEmergencySnack: (now?: string) => Promise<EmergencySnackResult>;
   buyFood: (
@@ -108,6 +120,7 @@ const defaultDependencies: PetStoreDependencies = {
   applyStoredStreakFreeze,
   applyStoredPowerNap,
   applyStoredEmergencySnack,
+  getStoredDailyFocusState,
   buyFoodForStoredPet,
   startStoredPetSleep,
   wakeStoredPetFromSleep,
@@ -124,6 +137,8 @@ export function createPetStore(
     lastSleepSummary: null,
     lastPowerNapSummary: null,
     lastEmergencySnackSummary: null,
+    dailyFocusToday: null,
+    previousDailyFocusState: null,
     isLoading: false,
     error: null,
 
@@ -181,6 +196,9 @@ export function createPetStore(
           lastRewardSummary: result.summary,
           isLoading: false,
         });
+        if (result.dailyFocusState) {
+          setDailyFocusStateForDate(set, result.dailyFocusState, now);
+        }
         return result;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
@@ -204,6 +222,9 @@ export function createPetStore(
           lastRewardSummary: result.summary,
           isLoading: false,
         });
+        if (result.dailyFocusState) {
+          setDailyFocusStateForDate(set, result.dailyFocusState, now);
+        }
         return result;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
@@ -250,6 +271,7 @@ export function createPetStore(
           now,
         });
         set({ pet: result.pet, isLoading: false });
+        setDailyFocusStateForDate(set, result.dailyFocusState, now);
         return result;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
@@ -271,6 +293,7 @@ export function createPetStore(
           lastPowerNapSummary: result.summary,
           isLoading: false,
         });
+        setDailyFocusStateForDate(set, result.dailyFocusState, now);
         return result;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
@@ -292,6 +315,7 @@ export function createPetStore(
           lastEmergencySnackSummary: result.summary,
           isLoading: false,
         });
+        setDailyFocusStateForDate(set, result.dailyFocusState, now);
         return result;
       } catch (error) {
         set({ error: errorMessage(error), isLoading: false });
@@ -396,6 +420,31 @@ export function createPetStore(
     clearLastEmergencySnackSummary: () =>
       set({ lastEmergencySnackSummary: null }),
 
+    loadDailyFocusOverview: async (now = dependencies.now()) => {
+      const pet = get().pet ?? (await get().initializePet(now));
+      const todayKey = toLocalDateKey(new Date(now));
+      const previousKey = previousLocalDateKey(now);
+
+      try {
+        const [dailyFocusToday, previousDailyFocusState] = await Promise.all([
+          dependencies.getStoredDailyFocusState({
+            petId: pet.id,
+            dateKey: todayKey,
+          }),
+          dependencies.getStoredDailyFocusState({
+            petId: pet.id,
+            dateKey: previousKey,
+          }),
+        ]);
+
+        set({ dailyFocusToday, previousDailyFocusState });
+        return { dailyFocusToday, previousDailyFocusState };
+      } catch (error) {
+        set({ error: errorMessage(error) });
+        throw error;
+      }
+    },
+
     updateAppOpenDecay: async (now = dependencies.now()) => {
       const pet = get().pet ?? (await get().loadCurrentPet());
 
@@ -438,6 +487,30 @@ export function createPetStore(
 
     clearError: () => set({ error: null }),
   }));
+}
+
+function setDailyFocusStateForDate(
+  set: (partial: Partial<PetStoreState>) => void,
+  dailyFocusState: DailyFocusState,
+  now: string,
+) {
+  const todayKey = toLocalDateKey(new Date(now));
+  const previousKey = previousLocalDateKey(now);
+
+  if (dailyFocusState.dateKey === todayKey) {
+    set({ dailyFocusToday: dailyFocusState });
+    return;
+  }
+
+  if (dailyFocusState.dateKey === previousKey) {
+    set({ previousDailyFocusState: dailyFocusState });
+  }
+}
+
+function previousLocalDateKey(now: string): string {
+  const previousDate = new Date(now);
+  previousDate.setDate(previousDate.getDate() - 1);
+  return toLocalDateKey(previousDate);
 }
 
 export const usePetStore = createPetStore();

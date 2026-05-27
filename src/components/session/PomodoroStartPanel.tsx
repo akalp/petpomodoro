@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import {
   MAX_FOCUS_DURATION_MINUTES,
@@ -16,6 +16,7 @@ interface PomodoroStartPanelProps {
   onDurationChange: (duration: number) => void;
   onStart: (duration: number) => void;
   selectedDuration: number;
+  startNotice?: ReactNode;
   t: Translator;
 }
 
@@ -25,6 +26,7 @@ export function PomodoroStartPanel({
   onDurationChange,
   onStart,
   selectedDuration,
+  startNotice = null,
   t,
 }: PomodoroStartPanelProps) {
   const [isCustomSheetOpen, setIsCustomSheetOpen] = useState(false);
@@ -69,9 +71,9 @@ export function PomodoroStartPanel({
 
   return (
     <>
-      <Card className="space-y-4 max-[359px]:p-4">
+      <Card className="space-y-5 border-rose-100 bg-white max-[359px]:p-4">
         <div>
-          <h2 className="text-2xl font-semibold text-slate-950">
+          <h2 className="text-3xl font-semibold text-slate-950 max-[359px]:text-2xl">
             {t("startTitle")}
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -133,8 +135,9 @@ export function PomodoroStartPanel({
             </span>
           </button>
         </div>
+        {startNotice}
         <Button
-          className="w-full"
+          className="min-h-14 w-full text-lg shadow-md shadow-rose-100"
           disabled={disabled}
           onClick={() => onStart(selectedDuration)}
         >

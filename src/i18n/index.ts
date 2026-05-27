@@ -10,6 +10,10 @@ import {
   PET_SLEEPING_CANNOT_FOCUS_ERROR,
   POWER_NAP_COOLDOWN_ACTIVE_ERROR,
   POWER_NAP_DAILY_LIMIT_ERROR,
+  STREAK_FREEZE_COOLDOWN_ACTIVE_ERROR,
+  STREAK_FREEZE_DAILY_LIMIT_ERROR,
+  STREAK_FREEZE_DAY_NOT_MISSED_ERROR,
+  STREAK_FREEZE_INSUFFICIENT_HEARTS_ERROR,
   type SupportedLanguage,
 } from "../domain";
 
@@ -41,6 +45,14 @@ const englishMessages = {
     "Your pet already had today's little rescue snack.",
   errorEmergencySnackNotNeeded:
     "That little rescue snack is saved for a hungrier moment.",
+  errorStreakFreezeNotMissed:
+    "Your pet does not need a streak freeze right now.",
+  errorStreakFreezeHearts:
+    "Streak freeze needs more Honesty Hearts. Honest check-ins can bring them back.",
+  errorStreakFreezeCooldown:
+    "Streak freeze is resting for now. Try again another day.",
+  errorStreakFreezeLimit:
+    "That missed day already has a streak freeze tucked in.",
   continue: "Continue",
   close: "Close",
   store: "Store",
@@ -99,29 +111,61 @@ const englishMessages = {
   rescueSupport: "A little care can help {pet} get ready again.",
   rescueUnavailableDuringFocus:
     "Little care breaks wait until this focus session is finished.",
+  rescueCareReady: "Care ready",
+  rescueAfterFocus: "After focus",
+  rescueReady: "Ready",
+  rescueCoolingDown: "Cooling down",
+  rescueDoneToday: "Done today",
+  rescueSaved: "Saved",
   powerNapTitle: "Power nap",
   powerNapSupport:
-    "A {minutes}-minute cozy nap restores energy and uses a little hunger.",
+    "A {minutes}-minute cozy nap can help {pet} feel ready.",
+  powerNapUnavailableSupport:
+    "Power Nap is resting for now. Rest time can still help {pet}.",
+  powerNapLimitSupport:
+    "Power Nap is done for today. Rest time can still help {pet}.",
   takePowerNap: "Take power nap",
   powerNapResultTitle: "{pet} feels refreshed after a power nap.",
   powerNapResultSupport:
     "Energy {energy}, hunger {hunger}, happiness {happiness}.",
   emergencySnackTitle: "Emergency snack",
   emergencySnackSupport:
-    "A small free bite is here while {pet} is hungry and coins are short.",
+    "A small free bite is ready while {pet} is hungry and coins are short.",
+  emergencySnackSavedSupport:
+    "Saved for a very hungry moment when coins are short.",
+  emergencySnackLimitSupport:
+    "Emergency Snack is done for today. The Shop can help when coins are back.",
   offerEmergencySnack: "Offer snack",
+  powerNapDurationChip: "{minutes} min",
+  energyChangeChip: "Energy {value}",
+  hungerChangeChip: "Hunger {value}",
+  emergencySnackFreeChip: "Free",
+  emergencySnackDailyChip: "1/day",
   emergencySnackResultTitle: "{pet} enjoyed a little rescue snack.",
   emergencySnackResultSupport: "Hunger {hunger}.",
   focusUnavailableDuringSleep:
     "{pet} is resting. Wake them before starting focus.",
   focusUnavailableCareBoth:
-    "{pet} needs a little food and rest before this focus.",
+    "{pet} needs food and rest before this focus. Try a snack, then a nap.",
   focusUnavailableCareEnergy:
-    "{pet} needs a little rest before this focus.",
+    "{pet} is too sleepy for this focus. Try a Power Nap or Rest time first.",
   focusUnavailableCareHunger:
-    "{pet} needs a small snack before this focus.",
+    "{pet} needs a bite before this focus. Try the Shop or Emergency Snack.",
   focusRequirementSummary:
     "Needs energy {requiredEnergy} and hunger {requiredHunger}.",
+  dailyFocusTitle: "Daily focus goal",
+  dailyFocusProgress:
+    "{minutes} of {goal} minutes with your pet today.",
+  dailyFocusComplete:
+    "Daily goal complete. {pet}'s streak is tucked in for today.",
+  dailyFocusProgressLabel: "Today",
+  streakFreezeAvailableTitle: "Streak freeze ready",
+  streakFreezeAvailableSupport:
+    "Use {cost} Honesty Hearts to keep {pet}'s streak warm for yesterday.",
+  streakFreezeNotEnoughTitle: "Streak freeze needs Honesty Hearts",
+  streakFreezeNotEnoughSupport:
+    "It costs {cost}. Honest check-ins can bring hearts back.",
+  useStreakFreeze: "Use freeze",
   shopUnavailableDuringSleep:
     "Snacks wait until {pet} wakes up.",
   totalXp: "Total XP",
@@ -287,6 +331,14 @@ const turkishMessages: Record<MessageKey, string> = {
     "Dostun bugünün küçük destek atıştırmalığını zaten yedi.",
   errorEmergencySnackNotNeeded:
     "Bu küçük destek atıştırmalığı daha aç bir ana saklanıyor.",
+  errorStreakFreezeNotMissed:
+    "Dostunun şu anda seri dondurmaya ihtiyacı yok.",
+  errorStreakFreezeHearts:
+    "Seri dondurma için daha fazla Dürüstlük Kalbi gerekiyor. Dürüst check-in'ler onları geri getirebilir.",
+  errorStreakFreezeCooldown:
+    "Seri dondurma şimdilik dinleniyor. Başka bir gün yeniden dene.",
+  errorStreakFreezeLimit:
+    "Bu kaçan gün için seri dondurma zaten yerinde.",
   continue: "Devam et",
   close: "Kapat",
   store: "Dükkan",
@@ -345,29 +397,61 @@ const turkishMessages: Record<MessageKey, string> = {
   rescueSupport: "Biraz bakım {pet} için yeniden hazırlanmaya yardım eder.",
   rescueUnavailableDuringFocus:
     "Küçük bakım molaları bu odak oturumu bitene kadar bekler.",
+  rescueCareReady: "Bakım hazır",
+  rescueAfterFocus: "Odaktan sonra",
+  rescueReady: "Hazır",
+  rescueCoolingDown: "Bekliyor",
+  rescueDoneToday: "Bugün tamam",
+  rescueSaved: "Saklı",
   powerNapTitle: "Kısa uyku",
   powerNapSupport:
-    "{minutes} dakikalık sıcacık bir uyku enerji toplar ve biraz tokluk kullanır.",
+    "{minutes} dakikalık sıcacık bir uyku {pet} için hazır hissettirebilir.",
+  powerNapUnavailableSupport:
+    "Kısa uyku şimdilik dinleniyor. Dinlenme zamanı {pet} için hâlâ yardım eder.",
+  powerNapLimitSupport:
+    "Kısa uyku bugün tamamlandı. Dinlenme zamanı {pet} için hâlâ yardım eder.",
   takePowerNap: "Kısa uyku yap",
   powerNapResultTitle: "{pet} kısa uykudan sonra canlandı.",
   powerNapResultSupport:
     "Enerji {energy}, tokluk {hunger}, mutluluk {happiness}.",
   emergencySnackTitle: "Destek atıştırmalığı",
   emergencySnackSupport:
-    "{pet} aç ve jetonlar azken küçük ücretsiz bir lokma burada.",
+    "{pet} aç ve jetonlar azken küçük ücretsiz bir lokma hazır.",
+  emergencySnackSavedSupport:
+    "Jetonlar azken çok aç bir an için saklanıyor.",
+  emergencySnackLimitSupport:
+    "Destek atıştırmalığı bugün tamamlandı. Jetonlar geri gelince Dükkan yardım eder.",
   offerEmergencySnack: "Atıştırmalık ver",
+  powerNapDurationChip: "{minutes} dk",
+  energyChangeChip: "Enerji {value}",
+  hungerChangeChip: "Tokluk {value}",
+  emergencySnackFreeChip: "Ücretsiz",
+  emergencySnackDailyChip: "1/gün",
   emergencySnackResultTitle: "{pet} küçük destek atıştırmalığını keyifle yedi.",
   emergencySnackResultSupport: "Tokluk {hunger}.",
   focusUnavailableDuringSleep:
     "{pet} dinleniyor. Odağa başlamadan önce uyandır.",
   focusUnavailableCareBoth:
-    "{pet} bu odak için biraz yemek ve dinlenmeye ihtiyaç duyuyor.",
+    "{pet} bu odak için yemek ve dinlenmeye ihtiyaç duyuyor. Önce atıştırmalık, sonra kısa uyku dene.",
   focusUnavailableCareEnergy:
-    "{pet} bu odak için biraz dinlenmeye ihtiyaç duyuyor.",
+    "{pet} bu odak için çok uykulu. Önce Kısa uyku ya da Dinlenme zamanı dene.",
   focusUnavailableCareHunger:
-    "{pet} bu odak için küçük bir atıştırmalığa ihtiyaç duyuyor.",
+    "{pet} bu odaktan önce bir lokmaya ihtiyaç duyuyor. Dükkan ya da Destek atıştırmalığı dene.",
   focusRequirementSummary:
     "Gerekli enerji {requiredEnergy}, tokluk {requiredHunger}.",
+  dailyFocusTitle: "Günlük odak hedefi",
+  dailyFocusProgress:
+    "Bugün dostunla {goal} dakikanın {minutes} dakikası.",
+  dailyFocusComplete:
+    "Günlük hedef tamam. {pet} için seri bugün sarıp sarmalandı.",
+  dailyFocusProgressLabel: "Bugün",
+  streakFreezeAvailableTitle: "Seri dondurma hazır",
+  streakFreezeAvailableSupport:
+    "{pet} için dünkü seriyi sıcak tutmak üzere {cost} Dürüstlük Kalbi kullan.",
+  streakFreezeNotEnoughTitle: "Seri dondurma Dürüstlük Kalbi istiyor",
+  streakFreezeNotEnoughSupport:
+    "{cost} kalp gerekir. Dürüst check-in'ler kalpleri geri getirebilir.",
+  useStreakFreeze: "Dondur",
   shopUnavailableDuringSleep:
     "Atıştırmalıklar {pet} uyanana kadar bekler.",
   totalXp: "Toplam XP",
@@ -572,6 +656,22 @@ export function localizeErrorMessage(message: string, t: Translator): string {
 
   if (message === EMERGENCY_SNACK_NOT_NEEDED_ERROR) {
     return t("errorEmergencySnackNotNeeded");
+  }
+
+  if (message === STREAK_FREEZE_DAY_NOT_MISSED_ERROR) {
+    return t("errorStreakFreezeNotMissed");
+  }
+
+  if (message === STREAK_FREEZE_INSUFFICIENT_HEARTS_ERROR) {
+    return t("errorStreakFreezeHearts");
+  }
+
+  if (message === STREAK_FREEZE_COOLDOWN_ACTIVE_ERROR) {
+    return t("errorStreakFreezeCooldown");
+  }
+
+  if (message === STREAK_FREEZE_DAILY_LIMIT_ERROR) {
+    return t("errorStreakFreezeLimit");
   }
 
   if (message === INSUFFICIENT_COINS_ERROR) {

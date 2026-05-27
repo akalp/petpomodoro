@@ -40,6 +40,10 @@ import {
   buildStartNativeTimerShortcutUrl,
   shouldRunStartNativeTimerShortcut,
 } from "./pwa/shortcuts";
+import {
+  FocusBalanceStatus,
+  FocusStartNotice,
+} from "./features/focus/FocusBalanceStatus";
 import { FocusScreen } from "./features/focus/FocusScreen";
 import { FocusSessionSwitcher } from "./features/focus/FocusSessionSwitcher";
 import { JournalScreen } from "./features/journal/JournalScreen";
@@ -89,6 +93,10 @@ export function App() {
   const lastEmergencySnackSummary = usePetStore(
     (state) => state.lastEmergencySnackSummary,
   );
+  const dailyFocusToday = usePetStore((state) => state.dailyFocusToday);
+  const previousDailyFocusState = usePetStore(
+    (state) => state.previousDailyFocusState,
+  );
   const isPetLoading = usePetStore((state) => state.isLoading);
   const clearLastRewardSummary = usePetStore(
     (state) => state.clearLastRewardSummary,
@@ -109,6 +117,10 @@ export function App() {
   const applyPowerNapAction = usePetStore((state) => state.usePowerNap);
   const applyEmergencySnackAction = usePetStore(
     (state) => state.useEmergencySnack,
+  );
+  const applyStreakFreezeAction = usePetStore((state) => state.useStreakFreeze);
+  const loadDailyFocusOverview = usePetStore(
+    (state) => state.loadDailyFocusOverview,
   );
   const startSleep = usePetStore((state) => state.startSleep);
   const wakeSleep = usePetStore((state) => state.wakeSleep);
@@ -414,13 +426,13 @@ export function App() {
 
   const handleCompleted = () => {
     void confirmCompleted()
-      .then(() => loadRecentSessions())
+      .then(() => Promise.all([loadRecentSessions(), loadDailyFocusOverview()]))
       .catch(() => undefined);
   };
 
   const handleAbandoned = () => {
     void confirmAbandoned()
-      .then(() => loadRecentSessions())
+      .then(() => Promise.all([loadRecentSessions(), loadDailyFocusOverview()]))
       .catch(() => undefined);
   };
 
@@ -455,7 +467,9 @@ export function App() {
       return;
     }
 
-    void applyPowerNapAction().catch(() => undefined);
+    void applyPowerNapAction()
+      .then(() => loadDailyFocusOverview())
+      .catch(() => undefined);
   };
 
   const handleEmergencySnack = () => {
@@ -463,7 +477,15 @@ export function App() {
       return;
     }
 
-    void applyEmergencySnackAction().catch(() => undefined);
+    void applyEmergencySnackAction()
+      .then(() => loadDailyFocusOverview())
+      .catch(() => undefined);
+  };
+
+  const handleStreakFreeze = (dateKey: string) => {
+    void applyStreakFreezeAction(dateKey)
+      .then(() => loadDailyFocusOverview())
+      .catch(() => undefined);
   };
 
   const handleWakeSleep = () => {
@@ -498,6 +520,8 @@ export function App() {
           lastSleepSummary: null,
           lastPowerNapSummary: null,
           lastEmergencySnackSummary: null,
+          dailyFocusToday: null,
+          previousDailyFocusState: null,
           pet: null,
         });
         usePomodoroStore.setState({
@@ -525,29 +549,6 @@ export function App() {
 
   const focusPanel = (
     <>
-      {petIsSleeping && pet ? (
-        <Card className="border-indigo-100 bg-indigo-50 text-sm font-medium leading-6 text-indigo-950">
-          {t("focusUnavailableDuringSleep", { pet: pet.name })}
-        </Card>
-      ) : null}
-      {focusNeedsCare && pet && focusStartEligibility ? (
-        <Card className="border-amber-100 bg-amber-50 text-sm font-medium leading-6 text-amber-950">
-          <p>
-            {focusStartCareMessage(
-              t,
-              pet.name,
-              focusStartEligibility.hasEnoughEnergy,
-              focusStartEligibility.hasEnoughHunger,
-            )}
-          </p>
-          <p className="mt-1 text-xs leading-5 text-amber-800">
-            {t("focusRequirementSummary", {
-              requiredEnergy: focusStartEligibility.requiredEnergy,
-              requiredHunger: focusStartEligibility.requiredHunger,
-            })}
-          </p>
-        </Card>
-      ) : null}
       <FocusSessionSwitcher
         activeSession={activeSession}
         countdownLabel={
@@ -565,6 +566,23 @@ export function App() {
         onStart={handleStart}
         selectedDuration={selectedDuration}
         startDisabled={isBusy || !hasHydrated || petIsSleeping || focusNeedsCare}
+        startNotice={
+          <FocusStartNotice
+            focusStartEligibility={focusStartEligibility}
+            isPetSleeping={petIsSleeping}
+            pet={pet}
+            t={t}
+          />
+        }
+        t={t}
+      />
+      <FocusBalanceStatus
+        dailyFocusToday={dailyFocusToday}
+        disabled={isBusy || !hasHydrated}
+        now={new Date(currentTime).toISOString()}
+        onStreakFreeze={handleStreakFreeze}
+        pet={pet}
+        previousDailyFocusState={previousDailyFocusState}
         t={t}
       />
     </>
@@ -572,6 +590,7 @@ export function App() {
   const petScreen = (
     <PetScreen
       displayMood={displayMood}
+      dailyFocusToday={dailyFocusToday}
       installHint={<InstallHint t={t} />}
       isFocusActive={isFocusActive}
       isSleepDisabled={isBusy || !hasHydrated}
@@ -679,23 +698,6 @@ export function App() {
       </Sheet>
     </AppShell>
   );
-}
-
-function focusStartCareMessage(
-  t: Translator,
-  petName: string,
-  hasEnoughEnergy: boolean,
-  hasEnoughHunger: boolean,
-): string {
-  if (!hasEnoughEnergy && !hasEnoughHunger) {
-    return t("focusUnavailableCareBoth", { pet: petName });
-  }
-
-  if (!hasEnoughEnergy) {
-    return t("focusUnavailableCareEnergy", { pet: petName });
-  }
-
-  return t("focusUnavailableCareHunger", { pet: petName });
 }
 
 function runStartNativeTimerShortcut(
