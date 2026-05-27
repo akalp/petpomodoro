@@ -189,7 +189,7 @@ Use this checklist before the first MVP deployment and again after every release
 
 - [ ] Power Nap applies `+18` energy, `-3` hunger, and `+1` happiness, without XP, coins, streak progress, or Honesty Hearts.
 - [ ] Power Nap is blocked after two uses in the same local day and during its 120-minute cooldown.
-- [ ] Emergency Snack appears for a sufficiently hungry pet who cannot afford the cheapest shop food and applies `+12` hunger only.
+- [ ] Emergency Snack appears for a sufficiently hungry pet who cannot afford the cheapest shop food and applies `+15` hunger only.
 - [ ] Emergency Snack is blocked after one use in the same local day or when the pet does not need it.
 - [ ] The rescue section says `Care ready` / `Bakım hazır` only while Power Nap or Emergency Snack can currently be used.
 - [ ] Rescue actions are unavailable while a focus flow is active and remain locally persisted after reload.

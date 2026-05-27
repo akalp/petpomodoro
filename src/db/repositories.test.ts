@@ -129,7 +129,7 @@ describe("Dexie repositories", () => {
 
     expect(first.pet.xp).toBe(25);
     expect(first.pet.coins).toBe(7);
-    expect(first.pet.hunger).toBeCloseTo(94.6);
+    expect(first.pet.hunger).toBeCloseTo(94.8);
     expect(first.pet.energy).toBe(73);
     expect(second.reward).toBeNull();
     expect(await completedDatabase.rewardLedger.count()).toBe(1);
@@ -161,7 +161,7 @@ describe("Dexie repositories", () => {
     expect(honesty.pet.xp).toBe(0);
     expect(honesty.pet.coins).toBe(0);
     expect(honesty.pet.happiness).toBe(52);
-    expect(honesty.pet.hunger).toBeCloseTo(94.6);
+    expect(honesty.pet.hunger).toBeCloseTo(94.8);
     expect(honesty.pet.energy).toBe(73);
     expect(honesty.pet.streak).toBe(0);
     expect(honesty.pet.honestyHearts).toBe(1);
@@ -473,12 +473,12 @@ describe("Dexie repositories", () => {
 
     expect(result.pet).toMatchObject({
       energy: 40,
-      hunger: 96,
+      hunger: 98,
       sleepStartedAt: null,
     });
     await expect(database.pets.get("pet-1")).resolves.toMatchObject({
       energy: 40,
-      hunger: 96,
+      hunger: 98,
       sleepStartedAt: null,
     });
   });

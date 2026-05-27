@@ -120,7 +120,7 @@ describe("store workflows", () => {
     expect(session?.status).toBe("awaiting_confirmation");
     expect(repo.pet?.xp).toBe(0);
     expect(repo.pet?.coins).toBe(5);
-    expect(repo.pet?.hunger).toBeCloseTo(94.67, 2);
+      expect(repo.pet?.hunger).toBeCloseTo(94.83, 2);
     expect(repo.pet?.energy).toBe(73);
     expect(repo.rewardLedger.size).toBe(0);
   });
@@ -159,7 +159,7 @@ describe("store workflows", () => {
     await uiStore.getState().initializeApp(now);
 
     expect(repo.pet?.coins).toBe(5);
-    expect(repo.pet?.hunger).toBeCloseTo(94.67, 2);
+      expect(repo.pet?.hunger).toBeCloseTo(94.83, 2);
   });
 
   it("keeps a running session active before its expected end time", async () => {
@@ -544,14 +544,14 @@ describe("store workflows", () => {
       coins: 9,
       energy: 40,
       honestyHearts: 2,
-      hunger: 96,
+      hunger: 98,
       sleepStartedAt: null,
       streak: 3,
       xp: 42,
     });
     expect(petStore.getState().lastSleepSummary).toMatchObject({
       energyGained: 20,
-      hungerChanged: -4,
+      hungerChanged: -2,
     });
     expect(repo.rewardLedger.size).toBe(0);
   });

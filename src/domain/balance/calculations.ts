@@ -280,10 +280,8 @@ export function calculateWakeUpEffects(
     profile.sleep.maxHappinessGain,
   );
   const happiness = clampPetStat(pet.happiness + happinessGained, profile);
-  const hunger = clampPetStat(
-    pet.hunger - elapsedHours * profile.sleep.hungerDecayPerHour,
-    profile,
-  );
+  const rawHunger = pet.hunger - elapsedHours * profile.sleep.hungerDecayPerHour;
+  const hunger = Math.max(profile.sleep.minHungerAfterSleep, clampPetStat(rawHunger, profile));
 
   return {
     startedAt: sleepStartedAt,

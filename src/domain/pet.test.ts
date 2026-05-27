@@ -142,7 +142,7 @@ describe("pet domain logic", () => {
       DEFAULT_HUNGER_DECAY_PER_HOUR,
     );
 
-    expect(updated.hunger).toBe(0);
+    expect(updated.hunger).toBe(2);
     expect(updated.happiness).toBeLessThan(50);
     expect(updated.mood).toBe("hungry");
     expect(updated.lastHungerUpdatedAt).toBe("2026-05-22T12:00:00.000Z");
@@ -340,7 +340,7 @@ describe("pet domain logic", () => {
     expect(result.pet).toMatchObject({
       energy: 40,
       happiness: 51,
-      hunger: 96,
+      hunger: 98,
       sleepStartedAt: null,
       lastHungerUpdatedAt: "2026-05-22T14:00:00.000Z",
       lastAppOpenedAt: "2026-05-22T14:00:00.000Z",
@@ -349,7 +349,7 @@ describe("pet domain logic", () => {
     expect(result.summary).toMatchObject({
       elapsedMinutes: 60,
       energyGained: 20,
-      hungerChanged: -4,
+      hungerChanged: -2,
       happinessGained: 1,
     });
   });
@@ -374,7 +374,7 @@ describe("pet domain logic", () => {
       energy: 100,
       happiness: 54,
       honestyHearts: 2,
-      hunger: 80,
+      hunger: 90,
       streak: 3,
       xp: 42,
     });
@@ -394,10 +394,10 @@ describe("pet domain logic", () => {
     );
 
     expect(result.pet.energy).toBe(100);
-    expect(result.pet.hunger).toBe(0);
+    expect(result.pet.hunger).toBe(15);
     expect(result.pet.happiness).toBe(99);
     expect(result.summary.energyGained).toBe(10);
-    expect(result.summary.hungerChanged).toBe(-2);
+    expect(result.summary.hungerChanged).toBe(13);
   });
 
   it("recalculates persisted care mood after waking", () => {
@@ -425,7 +425,7 @@ describe("pet domain logic", () => {
 
     expect(summary.nextStats).toMatchObject({
       energy: 40,
-      hunger: 96,
+      hunger: 98,
     });
     expect(pet.energy).toBe(20);
     expect(pet.hunger).toBe(100);

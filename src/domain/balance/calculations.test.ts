@@ -124,7 +124,7 @@ describe("metric calculations with the active balance profile", () => {
       energy: 80,
       expectedEnergy: 80,
       expectedHappiness: 50,
-      expectedHunger: 96,
+      expectedHunger: 98,
       happiness: 50,
       hunger: 100,
     },
@@ -133,7 +133,7 @@ describe("metric calculations with the active balance profile", () => {
       energy: 80,
       expectedEnergy: 80,
       expectedHappiness: 49,
-      expectedHunger: 31,
+      expectedHunger: 33,
       happiness: 50,
       hunger: 35,
     },
@@ -142,7 +142,7 @@ describe("metric calculations with the active balance profile", () => {
       energy: 25,
       expectedEnergy: 25,
       expectedHappiness: 49.5,
-      expectedHunger: 96,
+      expectedHunger: 98,
       happiness: 50,
       hunger: 100,
     },
@@ -151,7 +151,7 @@ describe("metric calculations with the active balance profile", () => {
       energy: 80,
       expectedEnergy: 78,
       expectedHappiness: 49,
-      expectedHunger: 16,
+      expectedHunger: 18,
       happiness: 50,
       hunger: 20,
     },
@@ -183,7 +183,7 @@ describe("metric calculations with the active balance profile", () => {
     );
 
     expect(linkedImpact.nextStats).toEqual({
-      hunger: 16,
+      hunger: 18,
       happiness: 48.5,
       energy: 23,
     });
@@ -202,9 +202,9 @@ describe("metric calculations with the active balance profile", () => {
     );
 
     expect(result.nextStats).toEqual({
-      hunger: 16,
-      happiness: 45.25,
-      energy: 78,
+      hunger: 58,
+      happiness: 50,
+      energy: 80,
     });
   });
 
@@ -213,7 +213,7 @@ describe("metric calculations with the active balance profile", () => {
       energyGained: 10,
       expectedEnergy: 30,
       expectedHappiness: 50,
-      expectedHunger: 98,
+      expectedHunger: 99,
       sleepStartedAt: "2026-05-22T13:00:00.000Z",
       wakeAt: "2026-05-22T13:30:00.000Z",
     },
@@ -221,7 +221,7 @@ describe("metric calculations with the active balance profile", () => {
       energyGained: 20,
       expectedEnergy: 40,
       expectedHappiness: 51,
-      expectedHunger: 96,
+      expectedHunger: 98,
       sleepStartedAt: "2026-05-22T13:00:00.000Z",
       wakeAt: "2026-05-22T14:00:00.000Z",
     },
@@ -229,7 +229,7 @@ describe("metric calculations with the active balance profile", () => {
       energyGained: 60,
       expectedEnergy: 80,
       expectedHappiness: 53,
-      expectedHunger: 88,
+      expectedHunger: 94,
       sleepStartedAt: "2026-05-22T13:00:00.000Z",
       wakeAt: "2026-05-22T16:00:00.000Z",
     },
@@ -237,7 +237,7 @@ describe("metric calculations with the active balance profile", () => {
       energyGained: 80,
       expectedEnergy: 100,
       expectedHappiness: 54,
-      expectedHunger: 68,
+      expectedHunger: 84,
       sleepStartedAt: "2026-05-22T13:00:00.000Z",
       wakeAt: "2026-05-22T21:00:00.000Z",
     },

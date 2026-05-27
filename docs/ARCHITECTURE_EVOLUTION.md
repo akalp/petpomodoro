@@ -240,7 +240,7 @@ const PET_MOOD_RULES = [
   { mood: "exhausted", priority: 110, matches: ({ energy }) => energy <= 8 },
   { mood: "hungry", priority: 100, matches: ({ hunger }) => hunger <= 15 },
   { mood: "sad", priority: 90, matches: ({ happiness }) => happiness <= 20 },
-  { mood: "tired", priority: 80, matches: ({ energy }) => energy <= 25 },
+  { mood: "tired", priority: 80, matches: ({ energy }) => energy <= 30 },
   {
     mood: "happy",
     priority: 40,

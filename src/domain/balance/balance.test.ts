@@ -129,7 +129,7 @@ describe("active balance profile", () => {
       maxHappinessGain: SLEEP_HAPPINESS_MAX_GAIN,
     }).toEqual({
       energyGainPerHour: 20,
-      hungerDecayPerHour: 4,
+      hungerDecayPerHour: 2,
       happinessEnergyStep: 20,
       maxHappinessGain: 8,
     });

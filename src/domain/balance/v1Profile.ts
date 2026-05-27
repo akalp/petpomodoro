@@ -13,7 +13,8 @@ export const FOCUS_HAPPINESS_PER_5_MINUTES = 1;
 export const FOCUS_HAPPINESS_MAX = 10;
 export const FOCUS_HUNGER_DECAY_PER_MINUTE = 0.2;
 export const FOCUS_ENERGY_DECAY_PER_MINUTE = 0.28;
-export const HUNGER_DECAY_PER_HOUR = 4;
+export const HUNGER_DECAY_PER_HOUR = 2;
+export const MIN_POST_SLEEP_HUNGER = 15;
 export const BASE_HAPPINESS_DECAY_PER_HOUR = 0.25;
 export const LOW_HUNGER_HAPPINESS_THRESHOLD = 35;
 export const LOW_HUNGER_HAPPINESS_DECAY_PER_HOUR = 1;
@@ -43,7 +44,7 @@ export const MAX_HONESTY_HEARTS_PER_DAY = 2;
 export const EXHAUSTED_ENERGY_THRESHOLD = 8;
 export const HUNGRY_HUNGER_THRESHOLD = 15;
 export const SAD_HAPPINESS_THRESHOLD = 20;
-export const TIRED_ENERGY_THRESHOLD = 25;
+export const TIRED_ENERGY_THRESHOLD = 30;
 export const HAPPY_HAPPINESS_THRESHOLD = 70;
 export const HAPPY_HUNGER_THRESHOLD = 40;
 export const HAPPY_ENERGY_THRESHOLD = 40;
@@ -113,7 +114,8 @@ export const BALANCE_PROFILE_V1 = {
   },
   sleep: {
     energyGainPerHour: 20,
-    hungerDecayPerHour: 4,
+    hungerDecayPerHour: 2,
+    minHungerAfterSleep: MIN_POST_SLEEP_HUNGER,
     happinessEnergyStep: 20,
     maxHappinessGain: 8,
   },

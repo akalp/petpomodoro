@@ -28,7 +28,7 @@ This section records runtime behavior before the configurable balance work began
 | `level` | Display/progression level. | Initial pet starts at `1`; recalculated as `floor(max(0, xp) / 100) + 1` whenever `applyPetStatAdjustments` changes XP. |
 | `coins` | Local food shop currency. | Initial pet starts at `0`; focus impact adds base coins for full 5-minute focus blocks; completed reward adds `10`; food purchases subtract item cost; clamped at minimum `0`. |
 | `happiness` | Care stat and mood input. | Initial pet starts at `50`; completed reward adds `8`; honesty reward adds `3`; food adds item happiness; idle app-open decay subtracts up to `6`; low-care pressure during hunger/focus impact may subtract more; sleep can add happiness based on energy recovered. Clamped `0..100`. |
-| `hunger` | Care stat and mood input. Higher means better fed. | Initial pet starts at `100`; idle hunger decay subtracts `4` per hour; focus impact subtracts `0.2` per minute; sleep subtracts `4` per hour; food adds item hunger; completed and honesty rewards add `0`. Clamped `0..100`. |
+| `hunger` | Care stat and mood input. Higher means better fed. | Initial pet starts at `100`; idle hunger decay subtracts `2` per hour; focus impact subtracts `0.2` per minute; sleep subtracts `2` per hour with a floor of `15`; food adds item hunger; completed and honesty rewards add `0`. Clamped `0..100`. |
 | `energy` | Care stat and mood input. Higher means more rested. | Initial pet starts at `80`; focus impact subtracts `0.28` per minute; sleep adds `18` per hour capped at `54` gained per wake; food adds item energy; completed and honesty rewards add `0`. Clamped `0..100`. |
 | `streak` | Current simple completion count. | Initial pet starts at `0`; completed focus reward adds `1`; honesty, focus impact, sleep, feeding, and idle decay do not change it. |
 | `honestyHearts` | Trust marker for honest declined confirmation. | Initial pet starts at `0`; honesty reward adds `1`; completed focus, sleep, feeding, and decay do not change it. |
@@ -84,7 +84,7 @@ Current examples from tests:
 
 ### Current idle care and sleep rules
 
-- Idle hunger decay subtracts `4` hunger per hour since `lastHungerUpdatedAt`.
+- Idle hunger decay subtracts `2` hunger per hour since `lastHungerUpdatedAt`.
 - App-open happiness decay subtracts `0.25` happiness per hour since `lastAppOpenedAt`, capped at `6` per app-open update.
 - Low-care happiness pressure subtracts extra happiness when hunger or energy are below `50`.
 - There is no generic passive energy decay.
@@ -92,7 +92,7 @@ Current examples from tests:
 - Sleeping blocks focus start and food purchases.
 - Waking sleep:
   - restores `18` energy per hour, capped at `54` energy gained for the wake action;
-  - subtracts `4` hunger per hour;
+  - subtracts `2` hunger per hour, with a floor of `15` after waking;
   - adds `floor(energyGained / 15)` happiness, capped at `4`;
   - clears `sleepStartedAt`;
   - sets `lastAppOpenedAt = now`;
@@ -547,7 +547,7 @@ Expected examples:
 ### Care decay
 
 ```ts
-HUNGER_DECAY_PER_HOUR = 4;
+HUNGER_DECAY_PER_HOUR = 2;
 BASE_HAPPINESS_DECAY_PER_HOUR = 0.25;
 LOW_HUNGER_HAPPINESS_THRESHOLD = 35;
 LOW_HUNGER_HAPPINESS_DECAY_PER_HOUR = 1;
@@ -567,7 +567,8 @@ There is no generic passive energy decay. Energy decays over time only when hung
 
 ```ts
 SLEEP_ENERGY_GAIN_PER_HOUR = 20;
-SLEEP_HUNGER_DECAY_PER_HOUR = 4;
+SLEEP_HUNGER_DECAY_PER_HOUR = 2;
+SLEEP_MIN_HUNGER_AFTER_SLEEP = 15;
 SLEEP_HAPPINESS_ENERGY_STEP = 20;
 SLEEP_HAPPINESS_MAX_GAIN = 8;
 ```
@@ -575,7 +576,7 @@ SLEEP_HAPPINESS_MAX_GAIN = 8;
 Rules:
 
 - Energy can recover up to 100.
-- Hunger decreases while sleeping.
+- Hunger decreases while sleeping, but never below `15` after waking.
 - Happiness increases slightly based on energy recovered.
 - Sleep gives no XP, coins, streak, or Honesty Hearts.
 
@@ -598,7 +599,7 @@ POWER_NAP_HAPPINESS_GAIN = 1;
 MAX_POWER_NAPS_PER_DAY = 2;
 POWER_NAP_COOLDOWN_MINUTES = 120;
 
-EMERGENCY_SNACK_HUNGER_GAIN = 12;
+EMERGENCY_SNACK_HUNGER_GAIN = 15;
 EMERGENCY_SNACK_HAPPINESS_GAIN = 0;
 EMERGENCY_SNACK_ENERGY_GAIN = 0;
 MAX_EMERGENCY_SNACKS_PER_DAY = 1;
@@ -659,7 +660,7 @@ Rules:
 EXHAUSTED_ENERGY_THRESHOLD = 8;
 HUNGRY_HUNGER_THRESHOLD = 15;
 SAD_HAPPINESS_THRESHOLD = 20;
-TIRED_ENERGY_THRESHOLD = 25;
+TIRED_ENERGY_THRESHOLD = 30;
 HAPPY_HAPPINESS_THRESHOLD = 70;
 HAPPY_HUNGER_THRESHOLD = 40;
 HAPPY_ENERGY_THRESHOLD = 40;
