@@ -11,6 +11,7 @@ interface FocusSessionSwitcherProps {
   countdownLabel: string | null;
   disabled: boolean;
   durations: number[];
+  durationsDisabled: boolean;
   language: SupportedLanguage;
   onAbandoned: () => void;
   onCompleted: () => void;
@@ -28,6 +29,7 @@ export function FocusSessionSwitcher({
   countdownLabel,
   disabled,
   durations,
+  durationsDisabled,
   language,
   onAbandoned,
   onCompleted,
@@ -68,6 +70,7 @@ export function FocusSessionSwitcher({
     <PomodoroStartPanel
       disabled={startDisabled}
       durations={durations}
+      durationsDisabled={durationsDisabled}
       onDurationChange={onDurationChange}
       onStart={onStart}
       selectedDuration={selectedDuration}

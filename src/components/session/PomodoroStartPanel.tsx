@@ -13,6 +13,7 @@ import { Card } from "../ui/Card";
 interface PomodoroStartPanelProps {
   disabled?: boolean;
   durations: number[];
+  durationsDisabled?: boolean;
   onDurationChange: (duration: number) => void;
   onStart: (duration: number) => void;
   selectedDuration: number;
@@ -23,6 +24,7 @@ interface PomodoroStartPanelProps {
 export function PomodoroStartPanel({
   disabled = false,
   durations,
+  durationsDisabled = false,
   onDurationChange,
   onStart,
   selectedDuration,
@@ -102,7 +104,7 @@ export function PomodoroStartPanel({
                       ? "border-rose-600 bg-rose-600 text-white"
                       : "border-rose-200 bg-white text-rose-800",
                   ].join(" ")}
-                  disabled={disabled}
+                  disabled={durationsDisabled}
                   key={duration}
                   onClick={() => onDurationChange(duration)}
                   type="button"
@@ -121,7 +123,7 @@ export function PomodoroStartPanel({
                 ? "border-rose-600 bg-rose-600 text-white"
                 : "border-rose-200 bg-white text-rose-800",
             ].join(" ")}
-            disabled={disabled}
+            disabled={durationsDisabled}
             onClick={openCustomSheet}
             type="button"
           >

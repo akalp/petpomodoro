@@ -258,6 +258,7 @@ export function App() {
         }
         disabled={isBusy}
         durations={FOCUS_DURATIONS}
+        durationsDisabled={isBusy || !hasHydrated || petIsSleeping}
         language={language}
         onAbandoned={handleAbandoned}
         onCompleted={handleCompleted}
