@@ -94,7 +94,7 @@ export interface PetStoreState {
   usePowerNap: (now?: string) => Promise<PowerNapResult>;
   useEmergencySnack: (now?: string) => Promise<EmergencySnackResult>;
   buyFood: (
-    foodId: FoodItemId | string,
+    foodId: FoodItemId,
     now?: string,
   ) => Promise<FoodPurchaseResult>;
   startSleep: (now?: string) => Promise<PetState>;
@@ -126,6 +126,14 @@ const defaultDependencies: PetStoreDependencies = {
   wakeStoredPetFromSleep,
   now: () => new Date().toISOString(),
 };
+
+async function getOrCreatePet(
+  get: () => PetStoreState,
+  _dependencies: PetStoreDependencies,
+  now: string,
+): Promise<PetState> {
+  return get().pet ?? (await get().initializePet(now));
+}
 
 export function createPetStore(
   dependencies: PetStoreDependencies = defaultDependencies,
@@ -182,7 +190,7 @@ export function createPetStore(
     },
 
     applyHonestyReward: async (sessionId, now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       set({ isLoading: true, error: null });
 
       try {
@@ -207,7 +215,7 @@ export function createPetStore(
     },
 
     applySessionReward: async (session, now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       set({ isLoading: true, error: null });
 
       try {
@@ -233,7 +241,7 @@ export function createPetStore(
     },
 
     applyFocusImpact: async (session, now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       set({ isLoading: true, error: null });
 
       try {
@@ -261,7 +269,7 @@ export function createPetStore(
     },
 
     useStreakFreeze: async (dateKey, now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       set({ isLoading: true, error: null });
 
       try {
@@ -280,7 +288,7 @@ export function createPetStore(
     },
 
     usePowerNap: async (now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       set({ isLoading: true, error: null });
 
       try {
@@ -302,7 +310,7 @@ export function createPetStore(
     },
 
     useEmergencySnack: async (now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       set({ isLoading: true, error: null });
 
       try {
@@ -324,7 +332,7 @@ export function createPetStore(
     },
 
     buyFood: async (foodId, now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       set({ isLoading: true, error: null });
 
       try {
@@ -346,7 +354,7 @@ export function createPetStore(
     },
 
     startSleep: async (now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       set({ isLoading: true, error: null });
 
       try {
@@ -367,7 +375,7 @@ export function createPetStore(
     },
 
     wakeSleep: async (now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       set({ isLoading: true, error: null });
 
       try {
@@ -388,7 +396,7 @@ export function createPetStore(
     },
 
     renamePet: async (name, now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       const nextPet = changePetName(pet, name, now);
 
       if (nextPet === pet) {
@@ -399,7 +407,7 @@ export function createPetStore(
     },
 
     changeSpecies: async (speciesId, now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       const nextPet = changePetSpecies(pet, speciesId, now);
 
       if (nextPet === pet) {
@@ -421,7 +429,7 @@ export function createPetStore(
       set({ lastEmergencySnackSummary: null }),
 
     loadDailyFocusOverview: async (now = dependencies.now()) => {
-      const pet = get().pet ?? (await get().initializePet(now));
+      const pet = await getOrCreatePet(get, dependencies, now);
       const todayKey = toLocalDateKey(new Date(now));
       const previousKey = previousLocalDateKey(now);
 

@@ -9,7 +9,7 @@ import { RepositoryError } from "./errors";
 
 export interface BuyFoodInput {
   petId: string;
-  foodId: FoodItemId | string;
+  foodId: FoodItemId;
   now: string;
 }
 

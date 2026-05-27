@@ -425,7 +425,7 @@ describe("metric calculations with the active balance profile", () => {
       hungerGained: 30,
       nextCoins: 12,
     },
-  ])(
+  ] as const)(
     "calculates current food effects for $foodId",
     ({ cost, energyGained, foodId, happinessGained, hungerGained, nextCoins }) => {
       const result = calculateFoodEffects(

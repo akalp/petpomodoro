@@ -5,6 +5,7 @@ import {
 } from "../../domain";
 import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
+import { formatSigned } from "../ui/format";
 
 interface PetSleepControlProps {
   disabled: boolean;
@@ -151,13 +152,4 @@ function formatSleepDuration(elapsedMinutes: number): string {
   }
 
   return `${hours}h ${minutes.toString().padStart(2, "0")}m`;
-}
-
-function formatSigned(value: number): string {
-  return value > 0 ? `+${formatStat(value)}` : formatStat(value);
-}
-
-function formatStat(value: number): string {
-  const rounded = Math.round(value * 10) / 10;
-  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }

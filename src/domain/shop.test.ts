@@ -8,6 +8,7 @@ import {
   FOOD_NOT_FOUND_ERROR,
   INSUFFICIENT_COINS_ERROR,
   PET_SLEEPING_CANNOT_EAT_ERROR,
+  type FoodItemId,
 } from "./shop";
 
 const now = "2026-05-22T13:00:00.000Z";
@@ -117,9 +118,13 @@ describe("feeding shop domain logic", () => {
   });
 
   it("rejects unknown food ids", () => {
-    expect(() => buyFoodForPet(makePet({ coins: 28 }), "star-cake", now)).toThrow(
-      FOOD_NOT_FOUND_ERROR,
-    );
+    expect(() =>
+      buyFoodForPet(
+        makePet({ coins: 28 }),
+        "star-cake" as FoodItemId,
+        now,
+      ),
+    ).toThrow(FOOD_NOT_FOUND_ERROR);
   });
 
   it("rejects purchases while the pet is sleeping", () => {

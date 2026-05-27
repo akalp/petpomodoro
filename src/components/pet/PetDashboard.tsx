@@ -23,6 +23,7 @@ interface PetDashboardProps {
   lastEmergencySnackSummary: EmergencySnackSummary | null;
   lastPowerNapSummary: PowerNapSummary | null;
   lastSleepSummary: PetSleepSummary | null;
+  now: string;
   onClearEmergencySnackSummary: () => void;
   onClearPowerNapSummary: () => void;
   onClearSleepSummary: () => void;
@@ -44,6 +45,7 @@ export function PetDashboard({
   lastEmergencySnackSummary,
   lastPowerNapSummary,
   lastSleepSummary,
+  now,
   onClearEmergencySnackSummary,
   onClearPowerNapSummary,
   onClearSleepSummary,
@@ -93,6 +95,7 @@ export function PetDashboard({
         isFocusActive={isFocusActive}
         lastEmergencySnackSummary={lastEmergencySnackSummary}
         lastPowerNapSummary={lastPowerNapSummary}
+        now={now}
         onClearEmergencySnackSummary={onClearEmergencySnackSummary}
         onClearPowerNapSummary={onClearPowerNapSummary}
         onEmergencySnack={onEmergencySnack}

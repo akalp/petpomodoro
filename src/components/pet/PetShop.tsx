@@ -8,6 +8,7 @@ import {
 import { FoodVisual } from "../../features/shop/FoodVisual";
 import { FOOD_PRESENTATION } from "../../features/shop/foodPresentation";
 import type { Translator } from "../../i18n";
+import { formatSigned } from "../ui/format";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 
@@ -65,9 +66,7 @@ export function PetShop({
       ) : null}
 
       {lastFoodPurchase ? (
-        <div
-          className="ui-feedback-enter rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-950"
-        >
+        <div className="ui-feedback-enter rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-950">
           <p className="font-semibold">
             {t("foodBought", {
               food: t(FOOD_PRESENTATION[lastFoodPurchase.item.id].nameKey),
@@ -173,13 +172,21 @@ function FoodButton({
         </div>
       </div>
       <dl className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-semibold">
-        <StatBoost disabled={disabled} label={t("hunger")} value={food.hunger} />
+        <StatBoost
+          disabled={disabled}
+          label={t("hunger")}
+          value={food.hunger}
+        />
         <StatBoost
           disabled={disabled}
           label={t("happiness")}
           value={food.happiness}
         />
-        <StatBoost disabled={disabled} label={t("energy")} value={food.energy} />
+        <StatBoost
+          disabled={disabled}
+          label={t("energy")}
+          value={food.energy}
+        />
       </dl>
       <div className="mt-auto flex min-w-0 flex-wrap items-center justify-between gap-2 pt-4 text-sm font-semibold">
         <span className="shrink-0 rounded-full bg-amber-100 px-3 py-1 text-amber-900">
@@ -254,13 +261,4 @@ function StatBoost({
       <dd className="mt-1 text-sm">{formatSigned(value)}</dd>
     </div>
   );
-}
-
-function formatSigned(value: number): string {
-  return value > 0 ? `+${formatStat(value)}` : formatStat(value);
-}
-
-function formatStat(value: number): string {
-  const rounded = Math.round(value * 10) / 10;
-  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }

@@ -23,6 +23,7 @@ interface PetScreenProps {
   lastEmergencySnackSummary: EmergencySnackSummary | null;
   lastPowerNapSummary: PowerNapSummary | null;
   lastSleepSummary: PetSleepSummary | null;
+  now: string;
   onClearEmergencySnackSummary: () => void;
   onClearPowerNapSummary: () => void;
   onClearSleepSummary: () => void;
@@ -45,6 +46,7 @@ export function PetScreen({
   lastEmergencySnackSummary,
   lastPowerNapSummary,
   lastSleepSummary,
+  now,
   onClearEmergencySnackSummary,
   onClearPowerNapSummary,
   onClearSleepSummary,
@@ -77,6 +79,7 @@ export function PetScreen({
         lastEmergencySnackSummary={lastEmergencySnackSummary}
         lastPowerNapSummary={lastPowerNapSummary}
         lastSleepSummary={lastSleepSummary}
+        now={now}
         onClearEmergencySnackSummary={onClearEmergencySnackSummary}
         onClearPowerNapSummary={onClearPowerNapSummary}
         onClearSleepSummary={onClearSleepSummary}

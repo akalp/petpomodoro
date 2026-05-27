@@ -19,6 +19,7 @@ import {
 } from "../../domain";
 import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
+import { formatSigned } from "../ui/format";
 
 interface PetRescueControlProps {
   dailyFocusToday: DailyFocusState | null;
@@ -26,6 +27,7 @@ interface PetRescueControlProps {
   isFocusActive: boolean;
   lastEmergencySnackSummary: EmergencySnackSummary | null;
   lastPowerNapSummary: PowerNapSummary | null;
+  now: string;
   onClearEmergencySnackSummary: () => void;
   onClearPowerNapSummary: () => void;
   onEmergencySnack: () => void;
@@ -40,6 +42,7 @@ export function PetRescueControl({
   isFocusActive,
   lastEmergencySnackSummary,
   lastPowerNapSummary,
+  now,
   onClearEmergencySnackSummary,
   onClearPowerNapSummary,
   onEmergencySnack,
@@ -50,13 +53,13 @@ export function PetRescueControl({
   const sleeping = isPetSleeping(pet);
   const fallbackDailyFocusState = createDailyFocusState({
     petId: pet.id,
-    dateKey: new Date().toISOString().slice(0, 10),
+    dateKey: now.slice(0, 10),
   });
   const dailyFocusState = dailyFocusToday ?? fallbackDailyFocusState;
   const powerNapEligibility = checkPowerNapEligibility(
     pet,
     dailyFocusState,
-    new Date().toISOString(),
+    now,
   );
   const emergencySnackEligibility = checkEmergencySnackEligibility(
     pet,
@@ -265,11 +268,7 @@ function RescueResult({
   );
 }
 
-function formatSigned(value: number): string {
-  const rounded = Math.round(value * 10) / 10;
-  const formatted = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
-  return value > 0 ? `+${formatted}` : formatted;
-}
+
 
 function rescuePanelStatus(
   t: Translator,

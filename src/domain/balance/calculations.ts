@@ -381,7 +381,7 @@ export function calculateMoodForStats(
 }
 
 export function calculateFoodEffects(
-  itemId: BalanceFoodItemId | string,
+  itemId: BalanceFoodItemId,
   pet: Pick<PetState, "coins" | "hunger" | "happiness" | "energy">,
   profile: BalanceProfile = ACTIVE_BALANCE_PROFILE,
 ): FoodEffectsCalculation | null {

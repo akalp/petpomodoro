@@ -6,6 +6,8 @@ import { makeDailyFocusState, makePet } from "../../test/factories";
 
 import { PetDashboard } from "./PetDashboard";
 
+const NOW = "2026-05-22T13:00:00.000Z";
+
 describe("PetDashboard", () => {
   const sleepSummary = {
     startedAt: "2026-05-22T13:00:00.000Z",
@@ -37,6 +39,7 @@ describe("PetDashboard", () => {
         lastEmergencySnackSummary={null}
         lastPowerNapSummary={null}
         lastSleepSummary={null}
+        now={NOW}
         onClearEmergencySnackSummary={() => undefined}
         onClearPowerNapSummary={() => undefined}
         onClearSleepSummary={() => undefined}
@@ -69,6 +72,7 @@ describe("PetDashboard", () => {
         lastEmergencySnackSummary={null}
         lastPowerNapSummary={null}
         lastSleepSummary={null}
+        now={NOW}
         onClearEmergencySnackSummary={() => undefined}
         onClearPowerNapSummary={() => undefined}
         onClearSleepSummary={() => undefined}
@@ -105,6 +109,7 @@ describe("PetDashboard", () => {
         lastEmergencySnackSummary={null}
         lastPowerNapSummary={null}
         lastSleepSummary={null}
+        now={NOW}
         onClearEmergencySnackSummary={() => undefined}
         onClearPowerNapSummary={() => undefined}
         onClearSleepSummary={() => undefined}
@@ -134,6 +139,7 @@ describe("PetDashboard", () => {
         lastEmergencySnackSummary={null}
         lastPowerNapSummary={null}
         lastSleepSummary={sleepSummary}
+        now={NOW}
         onClearEmergencySnackSummary={() => undefined}
         onClearPowerNapSummary={() => undefined}
         onClearSleepSummary={() => undefined}
@@ -163,6 +169,7 @@ describe("PetDashboard", () => {
         lastEmergencySnackSummary={null}
         lastPowerNapSummary={null}
         lastSleepSummary={null}
+        now={NOW}
         onClearEmergencySnackSummary={() => undefined}
         onClearPowerNapSummary={() => undefined}
         onClearSleepSummary={() => undefined}
@@ -197,6 +204,7 @@ describe("PetDashboard", () => {
         lastEmergencySnackSummary={null}
         lastPowerNapSummary={null}
         lastSleepSummary={null}
+        now={NOW}
         onClearEmergencySnackSummary={() => undefined}
         onClearPowerNapSummary={() => undefined}
         onClearSleepSummary={() => undefined}
@@ -230,6 +238,7 @@ describe("PetDashboard", () => {
         lastEmergencySnackSummary={null}
         lastPowerNapSummary={null}
         lastSleepSummary={null}
+        now={NOW}
         onClearEmergencySnackSummary={() => undefined}
         onClearPowerNapSummary={() => undefined}
         onClearSleepSummary={() => undefined}

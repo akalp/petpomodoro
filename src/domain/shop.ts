@@ -46,7 +46,7 @@ export const FOOD_CATALOG =
 
 export function buyFoodForPet(
   pet: PetState,
-  foodId: FoodItemId | string,
+  foodId: FoodItemId,
   now: string,
 ): FoodPurchaseResult {
   if (isPetSleeping(pet)) {
