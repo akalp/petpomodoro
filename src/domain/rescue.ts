@@ -33,6 +33,8 @@ export const EMERGENCY_SNACK_DAILY_LIMIT_ERROR =
   "emergency_snack_daily_limit_reached";
 export const EMERGENCY_SNACK_NOT_NEEDED_ERROR = "emergency_snack_not_needed";
 
+const CHEAPEST_FOOD_COST = Math.min(...FOOD_CATALOG.map((food) => food.cost));
+
 export type RescueIneligibilityReason =
   | typeof POWER_NAP_DAILY_LIMIT_ERROR
   | typeof POWER_NAP_COOLDOWN_ACTIVE_ERROR
@@ -167,8 +169,7 @@ export function checkEmergencySnackEligibility(
 export function isEmergencySnackNeeded(
   pet: Pick<PetState, "coins" | "hunger">,
 ): boolean {
-  const cheapestFoodCost = Math.min(...FOOD_CATALOG.map((food) => food.cost));
-  return pet.hunger <= EMERGENCY_SNACK_MAX_HUNGER && pet.coins < cheapestFoodCost;
+  return pet.hunger <= EMERGENCY_SNACK_MAX_HUNGER && pet.coins < CHEAPEST_FOOD_COST;
 }
 
 export function applyEmergencySnack(

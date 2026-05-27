@@ -1,7 +1,8 @@
 import type { FocusSession } from "../../domain";
-import { languageLocale, type SupportedLanguage, type Translator } from "../../i18n";
+import { type SupportedLanguage, type Translator } from "../../i18n";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
+import { formatTime } from "../ui/dateFormat";
 import { StatRow } from "../ui/StatRow";
 
 interface RunningSessionScreenProps {
@@ -67,11 +68,4 @@ export function RunningSessionScreen({
       ) : null}
     </Card>
   );
-}
-
-function formatTime(value: string, language: SupportedLanguage): string {
-  return new Intl.DateTimeFormat(languageLocale(language), {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(value));
 }

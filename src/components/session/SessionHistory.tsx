@@ -1,6 +1,7 @@
 import type { FocusSession } from "../../domain";
-import { languageLocale, type SupportedLanguage, type Translator } from "../../i18n";
+import { type SupportedLanguage, type Translator } from "../../i18n";
 import { Card } from "../ui/Card";
+import { formatDate } from "../ui/dateFormat";
 
 interface SessionHistoryProps {
   isLoading?: boolean;
@@ -122,13 +123,4 @@ function statusSupportLabel(status: FocusSession["status"], t: Translator): stri
   }
 
   return t("runningHistorySupport");
-}
-
-function formatDate(value: string, language: SupportedLanguage): string {
-  return new Intl.DateTimeFormat(languageLocale(language), {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(value));
 }
