@@ -62,7 +62,6 @@ src/
     index.ts
   pwa/
     installHints.ts
-    notifications.ts
     shortcuts.ts
   routes/
     routePaths.ts
@@ -148,7 +147,6 @@ interface AppSettings {
   id: "local-settings";
   preferredDurationMinutes: number;
   hasInstalledShortcut: boolean;
-  hasEnabledFocusNotifications: boolean;
   language: "en" | "tr";
   motivationalMessages: string[];
   updatedAt: string;
@@ -203,7 +201,7 @@ Initial schema:
 
 The unique `rewardLedger.sessionId` index is required. It is the persistence-level guard that prevents one Pomodoro session from rewarding the pet more than once, for completion or honest declined confirmation.
 
-Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`. Version 6 backfills `customName`, preserving user-supplied names while allowing an unnamed pet to display its selected species name. Version 7 backfills `motivationalMessages = []` on existing settings. Version 8 adds `dailyFocus`, reconstructs completed-minute and honesty-cap state from reward history, and recalculates the visible daily-goal streak. Version 9 adds persisted streak-freeze metadata. Rescue-use fields are normalized onto `dailyFocus` records as they are loaded or written.
+Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`. Version 6 backfills `customName`, preserving user-supplied names while allowing an unnamed pet to display its selected species name. Version 7 backfills `motivationalMessages = []` on existing settings. Version 8 adds `dailyFocus`, reconstructs completed-minute and honesty-cap state from reward history, and recalculates the visible daily-goal streak. Version 9 adds persisted streak-freeze metadata. Version 10 removes the retired focus-notification setting. Rescue-use fields are normalized onto `dailyFocus` records as they are loaded or written.
 
 The feeding shop v1 uses a bundled static food catalog and does not need a new IndexedDB table. Buying food runs in a Dexie transaction that reads the current pet, applies the pure purchase function, and writes the updated pet. Failed purchases, such as insufficient coins or an unknown food id, must leave the stored pet unchanged.
 
@@ -248,7 +246,7 @@ Use small stores or slices with clear responsibilities:
   - rehydrate running sessions after app launch
 - Settings state:
   - preferred duration, including custom whole-minute values from 1 to 180
-  - optional Shortcut and local-reminder preferences
+  - optional Shortcut preference
   - bundled English or Türkçe interface language preference
   - local user-authored pet speech messages
   - one-time migration of legacy localStorage preferences into IndexedDB
@@ -280,6 +278,7 @@ The app should meet these installable PWA requirements:
 - Offline fallback that can load the app shell after first load, including hash routes.
 - No network dependency for core user flows after initial installation.
 - Icons sized for iOS Home Screen and general PWA installability.
+- No scheduled local-notification feature; focus completion is handled when the user returns to the app.
 
 The app should be tested both in a desktop browser and as an installed iOS Home Screen PWA.
 

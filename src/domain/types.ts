@@ -60,7 +60,6 @@ export interface AppSettings {
   id: "local-settings";
   preferredDurationMinutes: number;
   hasInstalledShortcut: boolean;
-  hasEnabledFocusNotifications: boolean;
   language: SupportedLanguage;
   motivationalMessages: string[];
   updatedAt: string;

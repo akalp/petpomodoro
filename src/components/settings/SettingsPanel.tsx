@@ -10,18 +10,13 @@ import {
 import { PetSpeciesSelector } from "../../features/pet/PetSpeciesSelector";
 import { PET_SPECIES_REGISTRY } from "../../features/pet/petSpeciesRegistry";
 import type { Translator } from "../../i18n";
-import type { LocalNotificationPermission } from "../../pwa/notifications";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 
 interface SettingsPanelProps {
   disabled?: boolean;
   framed?: boolean;
-  hasEnabledFocusNotifications: boolean;
   hasInstalledShortcut: boolean;
-  notificationNotice: "unavailable" | "off" | null;
-  notificationPermission: LocalNotificationPermission;
-  onFocusNotificationsChange: (hasEnabledFocusNotifications: boolean) => void;
   onLanguageChange: (language: SupportedLanguage) => void;
   onMotivationalMessagesSave: (messages: string[]) => void;
   onPetNameSave: (name: string) => void;
@@ -39,11 +34,7 @@ interface SettingsPanelProps {
 export function SettingsPanel({
   disabled = false,
   framed = true,
-  hasEnabledFocusNotifications,
   hasInstalledShortcut,
-  notificationNotice,
-  notificationPermission,
-  onFocusNotificationsChange,
   onLanguageChange,
   onMotivationalMessagesSave,
   onPetNameSave,
@@ -239,58 +230,26 @@ export function SettingsPanel({
       </section>
 
       {supportsIosFeatures ? (
-        <>
-          <div className="rounded-lg border border-teal-100 bg-teal-50 p-4">
-            <p className="text-sm font-semibold text-slate-900">
-              {t("shortcutTitle")}
-            </p>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              {t("shortcutSettingsSupport")}
-            </p>
-            <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
-              <input
-                checked={hasInstalledShortcut}
-                className="h-5 w-5 accent-teal-600"
-                disabled={disabled}
-                onChange={(event) =>
-                  onShortcutInstalledChange(event.target.checked)
-                }
-                type="checkbox"
-              />
-              {t("installedShortcut")}
-            </label>
-          </div>
-
-          <div className="rounded-lg border border-sky-100 bg-sky-50 p-4">
-            <p className="text-sm font-semibold text-slate-900">{t("remindersTitle")}</p>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              {t("remindersSupport")}
-            </p>
-            <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
-              <input
-                checked={hasEnabledFocusNotifications}
-                className="h-5 w-5 accent-sky-600"
-                disabled={disabled}
-                onChange={(event) =>
-                  onFocusNotificationsChange(event.target.checked)
-                }
-                type="checkbox"
-              />
-              {t("notifyAtEnd")}
-            </label>
-            {notificationNotice ? (
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                {notificationNotice === "unavailable"
-                  ? t("notificationsUnavailable")
-                  : t("notificationsOff")}
-              </p>
-            ) : hasEnabledFocusNotifications && notificationPermission === "granted" ? (
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                {t("remindersOn")}
-              </p>
-            ) : null}
-          </div>
-        </>
+        <div className="rounded-lg border border-teal-100 bg-teal-50 p-4">
+          <p className="text-sm font-semibold text-slate-900">
+            {t("shortcutTitle")}
+          </p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {t("shortcutSettingsSupport")}
+          </p>
+          <label className="mt-3 flex min-h-12 items-center gap-3 text-sm font-medium text-slate-700">
+            <input
+              checked={hasInstalledShortcut}
+              className="h-5 w-5 accent-teal-600"
+              disabled={disabled}
+              onChange={(event) =>
+                onShortcutInstalledChange(event.target.checked)
+              }
+              type="checkbox"
+            />
+            {t("installedShortcut")}
+          </label>
+        </div>
       ) : null}
 
       <div className="rounded-lg border border-rose-100 bg-rose-50 p-4">

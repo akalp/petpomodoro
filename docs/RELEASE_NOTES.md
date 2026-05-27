@@ -25,11 +25,10 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 - Header Settings sheet kept outside primary navigation.
 - Local snack shop with CSS-art food visuals and disabled states for focus, sleep, and insufficient coins.
 - Recent session history.
-- IndexedDB-backed settings for pet name, preferred focus duration, Shortcut preference, reminders, and resetting local data.
+- IndexedDB-backed settings for pet name, preferred focus duration, Shortcut preference, and resetting local data.
 - PWA manifest, app icons, service worker precaching, and offline app-shell support after first load.
 - iOS Safari install hint and Home Screen metadata.
 - Optional iOS Shortcut launch for starting a native timer with the selected duration.
-- Optional local notification reminders while the PWA is allowed to keep running.
 - Care stats, hunger and happiness decay, streak tracking, and honesty hearts.
 - Configured achievement rule evaluation for future local presentation, without an achievement screen or persisted unlocks.
 - Bundled English and Türkçe interface copy with local language persistence.
@@ -73,7 +72,7 @@ Use the preview build for browser and PWA checks. Use a real iPhone Safari sessi
 - Installed PWA storage can be cleared by the user, browser, or operating system.
 - Offline launch works after the app shell has loaded and the service worker has installed.
 - Shortcut launch can start a native timer as a convenience, but the user must return to PetPomodoro manually for honesty confirmation.
-- Local notification reminders are best-effort and are not Web Push or a closed-app delivery guarantee.
+- The offline PWA does not schedule built-in focus-end notifications; users return manually or use an optional native-timer Shortcut.
 - This MVP has no export or backup flow for local data.
 - The database upgrades in place so existing pets, sessions, rewards, and migrated settings remain on the device.
 - The app uses hash routes for static hosting and offline PWA resilience.

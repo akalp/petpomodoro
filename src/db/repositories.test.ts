@@ -49,7 +49,6 @@ describe("Dexie repositories", () => {
       {
         preferredDurationMinutes: 90,
         hasInstalledShortcut: true,
-        hasEnabledFocusNotifications: true,
       },
       database,
     );
@@ -58,7 +57,6 @@ describe("Dexie repositories", () => {
       id: "local-settings",
       preferredDurationMinutes: 90,
       hasInstalledShortcut: true,
-      hasEnabledFocusNotifications: true,
       language: "en",
       motivationalMessages: [],
     });
@@ -84,7 +82,6 @@ describe("Dexie repositories", () => {
       id: "local-settings",
       preferredDurationMinutes: 25,
       hasInstalledShortcut: false,
-      hasEnabledFocusNotifications: false,
       updatedAt: now,
     };
     await database.settings.add(legacySettings as AppSettings);

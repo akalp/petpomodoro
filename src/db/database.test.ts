@@ -217,7 +217,7 @@ describe("PetPomodoroDatabase", () => {
     await database.delete();
   });
 
-  it("backfills motivational messages for existing settings", async () => {
+  it("backfills motivational messages and removes retired notification settings", async () => {
     const name = "petpomodoro-settings-message-upgrade-test";
     const legacy = new Dexie(name);
     legacy.version(6).stores({
@@ -240,9 +240,12 @@ describe("PetPomodoroDatabase", () => {
     const database = new PetPomodoroDatabase(name);
     await database.open();
 
-    await expect(database.settings.get("local-settings")).resolves.toMatchObject({
+    const settings = await database.settings.get("local-settings");
+
+    expect(settings).toMatchObject({
       motivationalMessages: [],
     });
+    expect(settings).not.toHaveProperty("hasEnabledFocusNotifications");
 
     await database.delete();
   });

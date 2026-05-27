@@ -280,13 +280,6 @@ const englishMessages = {
   shortcutSettingsSupport:
     "This only remembers whether this device should hide the Shortcut install hint.",
   installedShortcut: "I installed shortcut already.",
-  remindersTitle: "Local reminders",
-  remindersSupport:
-    "PetPomodoro can send a local reminder if this app is still allowed to run when focus time ends.",
-  notifyAtEnd: "Notify me when focus time is done.",
-  remindersOn: "Local reminders are on for this device.",
-  notificationsUnavailable: "Notifications are not available on this device.",
-  notificationsOff: "Notifications are off for this device.",
   resetTitle: "Reset local data",
   resetSupport:
     "This clears the pet, sessions, rewards, and preferences saved on this device.",
@@ -294,8 +287,6 @@ const englishMessages = {
   resetDevice: "Reset this device",
   resetConfirmation:
     "Reset the pet, sessions, and rewards saved on this device?",
-  notificationTitle: "Your pet is waiting.",
-  notificationBody: "Come back to PetPomodoro when you're ready to check in.",
 } as const;
 
 export type MessageKey = keyof typeof englishMessages;
@@ -567,13 +558,6 @@ const turkishMessages: Record<MessageKey, string> = {
   shortcutSettingsSupport:
     "Bu ayar yalnızca bu cihazda kestirme yükleme ipucunun gizlenip gizlenmeyeceğini hatırlar.",
   installedShortcut: "Kestirmeyi zaten yükledim.",
-  remindersTitle: "Yerel hatırlatıcılar",
-  remindersSupport:
-    "Odak süresi bittiğinde bu uygulamanın çalışmasına hâlâ izin veriliyorsa PetPomodoro yerel bir hatırlatıcı gönderebilir.",
-  notifyAtEnd: "Odak süresi bitince bana bildir.",
-  remindersOn: "Bu cihazda yerel hatırlatıcılar açık.",
-  notificationsUnavailable: "Bu cihazda bildirimler kullanılamıyor.",
-  notificationsOff: "Bu cihazda bildirimler kapalı.",
   resetTitle: "Yerel verileri sıfırla",
   resetSupport:
     "Bu cihazda kayıtlı dostunu, oturumlarını, ödüllerini ve tercihlerini temizler.",
@@ -581,8 +565,6 @@ const turkishMessages: Record<MessageKey, string> = {
   resetDevice: "Bu cihazı sıfırla",
   resetConfirmation:
     "Bu cihazda kayıtlı dost, oturum ve ödüller sıfırlansın mı?",
-  notificationTitle: "Dostun seni bekliyor.",
-  notificationBody: "Kontrol etmek için hazır olduğunda PetPomodoro'ya dön.",
 };
 
 const messages: Record<SupportedLanguage, Record<MessageKey, string>> = {

@@ -294,8 +294,6 @@ The items in this section motivated the initial evolution work. Route-backed fea
 Currently handles too many concerns:
 
 - hydration/bootstrap,
-- notification permission,
-- notification scheduling,
 - duration draft state,
 - shortcut integration,
 - pet dashboard,
@@ -369,7 +367,6 @@ src/
     DesktopSideNav.tsx
     OverlayHost.tsx
     useAppBootstrap.ts
-    useFocusNotifications.ts
 
   features/
     focus/
@@ -569,7 +566,7 @@ Acceptance criteria:
 - Settings remains accessible.
 - Settings is not shown in the primary bottom tab bar.
 - Reset confirmation remains explicit and safe.
-- Notification/shortcut/language/duration/pet name settings still work.
+- Shortcut/language/duration/pet name settings still work.
 - Drawer can remain for settings temporarily if needed; do not block the navigation refactor on this.
 
 ### Phase 7 — Extract pet presentation registries (completed)

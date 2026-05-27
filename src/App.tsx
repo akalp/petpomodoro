@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import { AppRoutes } from "./app/AppRoutes";
@@ -30,13 +30,6 @@ import {
   isIosOrIpadosDevice,
   isStandaloneDisplayMode,
 } from "./pwa/installHints";
-import {
-  getNotificationPermission,
-  requestLocalNotificationPermission,
-  shouldScheduleFocusNotification,
-  showFocusFinishedNotification,
-  type LocalNotificationPermission,
-} from "./pwa/notifications";
 import {
   buildStartNativeTimerShortcutUrl,
   shouldRunStartNativeTimerShortcut,
@@ -70,18 +63,10 @@ export function App() {
   >(
     null,
   );
-  const [notificationPermission, setNotificationPermission] =
-    useState<LocalNotificationPermission>(() => getNotificationPermission());
-  const [notificationNotice, setNotificationNotice] = useState<
-    "unavailable" | "off" | null
-  >(
-    null,
-  );
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const [selectedPetMessage, setSelectedPetMessage] = useState<string | null>(
     null,
   );
-  const notifiedSessionIds = useRef(new Set<string>());
   const petMessageQueue = useRef<string[]>([]);
   const petMessageKey = useRef("");
   const lastPetMessage = useRef<string | null>(null);
@@ -148,9 +133,6 @@ export function App() {
   const saveShortcutInstalled = useSettingsStore(
     (state) => state.setShortcutInstalled,
   );
-  const saveFocusNotificationsEnabled = useSettingsStore(
-    (state) => state.setFocusNotificationsEnabled,
-  );
   const saveLanguage = useSettingsStore((state) => state.setLanguage);
   const saveMotivationalMessages = useSettingsStore(
     (state) => state.updateMotivationalMessages,
@@ -167,8 +149,6 @@ export function App() {
     settings?.preferredDurationMinutes ?? DEFAULT_FOCUS_DURATION_MINUTES;
   const selectedDuration = selectedDurationOverride ?? persistedDuration;
   const hasInstalledShortcut = settings?.hasInstalledShortcut ?? false;
-  const hasEnabledFocusNotifications =
-    settings?.hasEnabledFocusNotifications ?? false;
   const motivationalMessages =
     settings?.motivationalMessages ?? EMPTY_MOTIVATIONAL_MESSAGES;
   const motivationalMessageKey = motivationalMessages.join("\n");
@@ -180,14 +160,6 @@ export function App() {
     );
   const language = settings?.language ?? DEFAULT_LANGUAGE;
   const t = createTranslator(language);
-  const notificationCopy = useMemo(() => {
-    const translate = createTranslator(language);
-
-    return {
-      body: translate("notificationBody"),
-      title: translate("notificationTitle"),
-    };
-  }, [language]);
   const isFocusActive =
     activeSession?.status === "running" ||
     activeSession?.status === "awaiting_confirmation";
@@ -219,30 +191,6 @@ export function App() {
 
   const setShortcutInstalled = (isInstalled: boolean) => {
     void saveShortcutInstalled(isInstalled).catch(() => undefined);
-  };
-
-  const setFocusNotificationsEnabled = async (isEnabled: boolean) => {
-    if (!isEnabled) {
-      await saveFocusNotificationsEnabled(false);
-      setNotificationNotice(null);
-      setNotificationPermission(getNotificationPermission());
-      return;
-    }
-
-    const isGranted = await requestLocalNotificationPermission();
-    const nextPermission = getNotificationPermission();
-    setNotificationPermission(nextPermission);
-
-    if (isGranted) {
-      await saveFocusNotificationsEnabled(true);
-      setNotificationNotice(null);
-      return;
-    }
-
-    await saveFocusNotificationsEnabled(false);
-    setNotificationNotice(
-      nextPermission === "unsupported" ? "unavailable" : "off",
-    );
   };
 
   useEffect(() => {
@@ -309,7 +257,6 @@ export function App() {
     const handleFocus = () => {
       const now = new Date().toISOString();
       setCurrentTime(Date.parse(now));
-      setNotificationPermission(getNotificationPermission());
       void updateAppOpenDecay(now)
         .then(() => refreshSession(now))
         .catch(() => undefined);
@@ -319,7 +266,6 @@ export function App() {
       if (document.visibilityState === "visible") {
         const now = new Date().toISOString();
         setCurrentTime(Date.parse(now));
-        setNotificationPermission(getNotificationPermission());
         void updateAppOpenDecay(now)
           .then(() => refreshSession(now))
           .catch(() => undefined);
@@ -349,54 +295,6 @@ export function App() {
 
     return () => window.clearInterval(intervalId);
   }, [activeSession?.status, petIsSleeping, refreshSession]);
-
-  useEffect(() => {
-    const scheduledSession = activeSession;
-
-    if (
-      !shouldScheduleFocusNotification(
-        supportsIosFeatures && hasEnabledFocusNotifications,
-        notificationPermission,
-        scheduledSession,
-      )
-    ) {
-      return;
-    }
-
-    if (!scheduledSession) {
-      return;
-    }
-
-    const notificationDelayMs =
-      Date.parse(scheduledSession.expectedEndAt) - Date.now();
-
-    if (notificationDelayMs <= 0) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      if (notifiedSessionIds.current.has(scheduledSession.id)) {
-        return;
-      }
-
-      notifiedSessionIds.current.add(scheduledSession.id);
-      setCurrentTime(Date.now());
-      void refreshSessionStatus(scheduledSession.expectedEndAt)
-        .then(() => loadRecentSessions())
-        .catch(() => undefined);
-      showFocusFinishedNotification(scheduledSession.id, notificationCopy);
-    }, notificationDelayMs);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [
-    activeSession,
-    hasEnabledFocusNotifications,
-    loadRecentSessions,
-    notificationPermission,
-    notificationCopy,
-    refreshSessionStatus,
-    supportsIosFeatures,
-  ]);
 
   const isBusy = isInitializing || isSessionLoading || isPetLoading;
   const error = uiError ?? petError ?? pomodoroError ?? settingsError;
@@ -533,7 +431,6 @@ export function App() {
         });
         clearAfterLocalDataReset();
         setSelectedDurationOverride(null);
-        setNotificationNotice(null);
         useUiStore.setState({
           error: null,
           hasHydrated: false,
@@ -674,15 +571,9 @@ export function App() {
         <SettingsPanel
           disabled={isBusy || !hasHydrated}
           framed={false}
-          hasEnabledFocusNotifications={hasEnabledFocusNotifications}
           hasInstalledShortcut={hasInstalledShortcut}
-          notificationNotice={notificationNotice}
-          notificationPermission={notificationPermission}
           language={language}
           motivationalMessages={motivationalMessages}
-          onFocusNotificationsChange={(isEnabled) => {
-            void setFocusNotificationsEnabled(isEnabled).catch(() => undefined);
-          }}
           onLanguageChange={(nextLanguage) => {
             void saveLanguage(nextLanguage).catch(() => undefined);
           }}

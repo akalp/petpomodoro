@@ -117,7 +117,7 @@ Development proceeds in small, reviewable steps. The MVP foundation is now imple
 5. Hash-router app shell with Pet, Focus, Shop, and Journal routes.
 6. Mobile bottom navigation and desktop side navigation.
 7. CSS-art pet and food presentation registries.
-8. PWA manifest, app icons, service worker precaching, install hints, Shortcut convenience, and best-effort local reminders.
+8. PWA manifest, app icons, service worker precaching, install hints, and Shortcut convenience.
 
 Future changes should continue following `docs/MVP_TASKS.md`, the architecture direction in `docs/ARCHITECTURE_EVOLUTION.md`, and the balance model in `docs/METRICS_ARCHITECTURE_EVOLUTION.md`.
 
@@ -143,7 +143,7 @@ The MVP should include:
 - Local user-authored pet speech messages saved on the device.
 - Mobile-first UI optimized for iOS Home Screen usage.
 - Hash-based Pet, Focus, Shop, and Journal routes with mobile bottom tabs and desktop side navigation.
-- Optional native-timer Shortcut launch and best-effort local reminders as convenience features only.
+- Optional native-timer Shortcut launch as a convenience feature only.
 
 The MVP should not include backend services, auth, cloud sync, social features, cross-device recovery, or any claim that PetPomodoro can verify a native iOS timer.
 

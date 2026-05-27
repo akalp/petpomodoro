@@ -199,7 +199,7 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Open Settings.
 - [ ] Confirm the reset checkbox enables the reset button.
 - [ ] Cancel the browser confirmation and verify data remains.
-- [ ] Confirm reset and verify pet, sleep state, sessions, rewards, duration, language, Shortcut preference, and reminder preference reset locally.
+- [ ] Confirm reset and verify pet, sleep state, sessions, rewards, duration, language, and Shortcut preference reset locally.
 - [ ] Reload after reset and verify a fresh pet is initialized.
 
 ## Settings Migration
@@ -211,7 +211,7 @@ Use this checklist before the first MVP deployment and again after every release
 
 ## Language Selection
 
-- [ ] Choose `Türkçe` in Settings and confirm the focus flow, pet stats, history, reminder settings, and reset confirmation render in Turkish.
+- [ ] Choose `Türkçe` in Settings and confirm the focus flow, pet stats, history, Shortcut setting, and reset confirmation render in Turkish.
 - [ ] Dates and expected finish times use the selected locale.
 - [ ] Reload the app and confirm the saved language remains selected.
 - [ ] Choose `English` and confirm the interface returns to English without losing pet or session data.
@@ -264,17 +264,7 @@ Use this checklist before the first MVP deployment and again after every release
 - [ ] Return to PetPomodoro manually when the native timer ends.
 - [ ] Confirm the session still uses the normal timestamp-based honesty confirmation.
 - [ ] Confirm that Shortcut support is treated as convenience only, not verification.
-
-## Local Reminder Notifications
-
-- [ ] Enable "Notify me when focus time is done." in Settings.
-- [ ] If permission is denied, confirm the setting stays off and says: "Notifications are off for this device."
-- [ ] Start a 5-minute session with reminders enabled.
-- [ ] Keep the app open or otherwise eligible to run until `expectedEndAt`.
-- [ ] Confirm a local notification says "Your pet is waiting." and does not imply verification.
-- [ ] Tap the notification and confirm PetPomodoro opens or focuses when supported.
-- [ ] Confirm the session still asks the normal honesty confirmation question.
-- [ ] Close or background the app and confirm no copy promises reliable closed-app delivery.
+- [ ] Confirm Settings has no built-in focus-end reminder option.
 
 ## Copy Review
 

@@ -129,7 +129,7 @@ Current implemented architecture includes:
 - Add offline fallback for the main route.
 - Add iOS Home Screen metadata.
 - Add install hint copy for Safari on iOS.
-- Add optional Shortcut launch and best-effort local reminder controls.
+- Add optional Shortcut launch for starting a native timer.
 - Verify the app opens offline after first load.
 
 ## Phase 8: Polish
@@ -177,7 +177,7 @@ Current implemented architecture includes:
 
 Use `docs/ARCHITECTURE_EVOLUTION.md` as the canonical UI/application direction and `docs/METRICS_ARCHITECTURE_EVOLUTION.md` as the canonical active balance reference for post-MVP cleanup and future features.
 
-- Keep `App.tsx` moving toward a composition root by extracting bootstrap, notification, overlay, and feature wiring when those changes can stay small.
+- Keep `App.tsx` moving toward a composition root by extracting bootstrap, overlay, and feature wiring when those changes can stay small.
 - Keep route metadata centralized in `src/app/routeRegistry.ts`.
 - Keep future `/games` and `/settings` paths out of primary tabs until real product scope exists.
 - Prefer registries/config maps for UI variants such as pet moods, species, food presentation, route icons, and future mini-games.

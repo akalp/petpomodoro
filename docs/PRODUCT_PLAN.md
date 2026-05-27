@@ -69,7 +69,7 @@ Completed focus minutes accumulate toward a 25-minute local daily goal. Reaching
 - English and Türkçe interface copy bundled in the app, with language choice stored locally.
 - User-authored pet speech messages stored locally in device settings.
 - Cozy mobile-first interface and copy.
-- Optional iOS Shortcut launch and best-effort local reminder notifications.
+- Optional iOS Shortcut launch for starting a native timer.
 
 ## Non-Goals
 
@@ -90,7 +90,7 @@ iOS PWA behavior shapes the product:
 - The app cannot reliably run JavaScript continuously in the background.
 - The app cannot observe the native iOS Clock timer state.
 - The app cannot know whether a Shortcut timer actually ran to completion.
-- Push notifications and local notification behavior are limited compared with native apps.
+- The offline PWA does not offer built-in scheduled focus-end notifications; users may use an iOS timer or Shortcut and return to confirm.
 - Installed PWA storage can be cleared by the user or the operating system.
 - The app should rely on timestamps and rehydration logic when opened again.
 
@@ -124,7 +124,7 @@ The abandoned path should be neutral and supportive. A user who chooses "Not thi
 - Richer streak milestones and achievement presentation.
 - Break timers.
 - Focus intention notes.
-- Richer reminder and iOS Shortcut templates.
+- Richer iOS Shortcut templates.
 - Import and export backup files.
 - Optional local analytics dashboard.
 - Seasonal cosmetics stored locally.

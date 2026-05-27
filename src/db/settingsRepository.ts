@@ -12,7 +12,6 @@ import { db as defaultDb, type PetPomodoroDatabase } from "./database";
 export interface InitialSettingsValues {
   preferredDurationMinutes?: number;
   hasInstalledShortcut?: boolean;
-  hasEnabledFocusNotifications?: boolean;
   language?: SupportedLanguage;
   motivationalMessages?: string[];
 }
@@ -62,9 +61,6 @@ export async function loadOrCreateSettings(
     preferredDurationMinutes,
     hasInstalledShortcut:
       initialValues.hasInstalledShortcut ?? defaults.hasInstalledShortcut,
-    hasEnabledFocusNotifications:
-      initialValues.hasEnabledFocusNotifications ??
-      defaults.hasEnabledFocusNotifications,
     language: initialValues.language ?? defaults.language,
     motivationalMessages: sanitizeMotivationalMessages(
       initialValues.motivationalMessages ?? defaults.motivationalMessages,

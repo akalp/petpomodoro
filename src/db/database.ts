@@ -18,6 +18,10 @@ import type {
 
 export const DATABASE_NAME = "petpomodoro";
 
+interface RetiredFocusNotificationSettings {
+  hasEnabledFocusNotifications?: boolean;
+}
+
 export class PetPomodoroDatabase extends Dexie {
   pets!: Table<PetState, string>;
   sessions!: Table<FocusSession, string>;
@@ -242,6 +246,23 @@ export class PetPomodoroDatabase extends Dexie {
             dailyFocusState.lastStreakFreezeAt ??= null;
           });
       });
+
+    this.version(10)
+      .stores({
+        pets: "id, createdAt, updatedAt",
+        sessions: "id, status, startedAt, expectedEndAt, rewardClaimedAt",
+        rewardLedger: "id, &sessionId, petId, createdAt",
+        settings: "id, updatedAt",
+        dailyFocus: "[petId+dateKey], petId, dateKey, dailyGoalAwarded",
+      })
+      .upgrade((transaction) =>
+        transaction
+          .table("settings")
+          .toCollection()
+          .modify((settings: RetiredFocusNotificationSettings) => {
+            delete settings.hasEnabledFocusNotifications;
+          }),
+      );
   }
 }
 

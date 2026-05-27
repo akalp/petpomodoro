@@ -27,11 +27,11 @@ describe("SettingsPanel", () => {
     expect(html).not.toContain("Local reminders");
   });
 
-  it("renders Shortcut and reminder controls on iOS and iPadOS", () => {
+  it("renders the Shortcut control without reminders on iOS and iPadOS", () => {
     const html = renderPanel(true);
 
     expect(html).toContain("iOS Shortcut");
-    expect(html).toContain("Local reminders");
+    expect(html).not.toContain("Local reminders");
   });
 });
 
@@ -40,13 +40,9 @@ function renderPanel(supportsIosFeatures: boolean) {
     <SettingsPanel
       disabled={false}
       framed={false}
-      hasEnabledFocusNotifications={false}
       hasInstalledShortcut={false}
       language="en"
       motivationalMessages={["Keep breathing."]}
-      notificationNotice={null}
-      notificationPermission="unsupported"
-      onFocusNotificationsChange={() => undefined}
       onLanguageChange={() => undefined}
       onMotivationalMessagesSave={() => undefined}
       onPetNameSave={() => undefined}
