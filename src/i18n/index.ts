@@ -54,6 +54,7 @@ const englishMessages = {
   errorStreakFreezeLimit:
     "That missed day already has a streak freeze tucked in.",
   continue: "Continue",
+  retry: "Retry",
   close: "Close",
   store: "Store",
   petTab: "Pet",
@@ -341,6 +342,7 @@ const turkishMessages: Record<MessageKey, string> = {
   errorStreakFreezeLimit:
     "Bu kaçan gün için seri dondurma zaten yerinde.",
   continue: "Devam et",
+  retry: "Yeniden dene",
   close: "Kapat",
   store: "Dükkan",
   petTab: "Dost",
