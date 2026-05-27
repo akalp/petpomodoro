@@ -11,9 +11,13 @@ import { db as defaultDb, type PetPomodoroDatabase } from "./database";
 
 export interface InitialSettingsValues {
   preferredDurationMinutes?: number;
-  hasInstalledShortcut?: boolean;
+  installedShortcutVersion?: number | null;
   language?: SupportedLanguage;
   motivationalMessages?: string[];
+}
+
+interface LegacyShortcutSettings {
+  hasInstalledShortcut?: boolean;
 }
 
 export async function getSettings(
@@ -34,16 +38,32 @@ export async function loadOrCreateSettings(
     const motivationalMessages = sanitizeMotivationalMessages(
       settings.motivationalMessages ?? [],
     );
+    const legacySettings = settings as AppSettings & LegacyShortcutSettings;
+    const installedShortcutVersion =
+      settings.installedShortcutVersion === undefined
+        ? legacySettings.hasInstalledShortcut
+          ? 1
+          : null
+        : settings.installedShortcutVersion;
 
     if (
       settings.language !== language ||
+      settings.installedShortcutVersion !== installedShortcutVersion ||
+      legacySettings.hasInstalledShortcut !== undefined ||
       settings.motivationalMessages === undefined ||
       settings.motivationalMessages.length !== motivationalMessages.length ||
       settings.motivationalMessages.some(
         (message, index) => message !== motivationalMessages[index],
       )
     ) {
-      const upgradedSettings = { ...settings, language, motivationalMessages };
+      const savedSettings = { ...legacySettings };
+      delete savedSettings.hasInstalledShortcut;
+      const upgradedSettings: AppSettings = {
+        ...savedSettings,
+        installedShortcutVersion,
+        language,
+        motivationalMessages,
+      };
       await database.settings.put(upgradedSettings);
       return upgradedSettings;
     }
@@ -59,8 +79,9 @@ export async function loadOrCreateSettings(
   const created: AppSettings = {
     ...defaults,
     preferredDurationMinutes,
-    hasInstalledShortcut:
-      initialValues.hasInstalledShortcut ?? defaults.hasInstalledShortcut,
+    installedShortcutVersion:
+      initialValues.installedShortcutVersion ??
+      defaults.installedShortcutVersion,
     language: initialValues.language ?? defaults.language,
     motivationalMessages: sanitizeMotivationalMessages(
       initialValues.motivationalMessages ?? defaults.motivationalMessages,

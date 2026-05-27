@@ -48,7 +48,7 @@ describe("Dexie repositories", () => {
       now,
       {
         preferredDurationMinutes: 90,
-        hasInstalledShortcut: true,
+        installedShortcutVersion: 2,
       },
       database,
     );
@@ -56,7 +56,7 @@ describe("Dexie repositories", () => {
     expect(created).toMatchObject({
       id: "local-settings",
       preferredDurationMinutes: 90,
-      hasInstalledShortcut: true,
+      installedShortcutVersion: 2,
       language: "en",
       motivationalMessages: [],
     });
@@ -81,7 +81,7 @@ describe("Dexie repositories", () => {
     > = {
       id: "local-settings",
       preferredDurationMinutes: 25,
-      hasInstalledShortcut: false,
+      installedShortcutVersion: null,
       updatedAt: now,
     };
     await database.settings.add(legacySettings as AppSettings);

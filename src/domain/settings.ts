@@ -83,7 +83,7 @@ export function createDefaultSettings(now: string): AppSettings {
   return {
     id: "local-settings",
     preferredDurationMinutes: DEFAULT_FOCUS_DURATION_MINUTES,
-    hasInstalledShortcut: false,
+    installedShortcutVersion: null,
     language: "en",
     motivationalMessages: [],
     updatedAt: now,

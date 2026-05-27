@@ -23,7 +23,7 @@ export interface SettingsStoreDependencies {
   updateSettings: typeof updateSettings;
   readLegacySettings: () => {
     preferredDurationMinutes?: number;
-    hasInstalledShortcut?: boolean;
+    installedShortcutVersion?: number | null;
     language?: SupportedLanguage;
   };
   clearLegacySettings: () => void;
@@ -36,7 +36,10 @@ export interface SettingsStoreState {
   error: string | null;
   initializeSettings: (now?: string) => Promise<AppSettings>;
   updatePreferredDuration: (duration: number, now?: string) => Promise<AppSettings>;
-  setShortcutInstalled: (isInstalled: boolean, now?: string) => Promise<AppSettings>;
+  setInstalledShortcutVersion: (
+    installedShortcutVersion: number | null,
+    now?: string,
+  ) => Promise<AppSettings>;
   setLanguage: (language: SupportedLanguage, now?: string) => Promise<AppSettings>;
   updateMotivationalMessages: (
     messages: string[],
@@ -90,12 +93,15 @@ export function createSettingsStore(
       );
     },
 
-    setShortcutInstalled: async (isInstalled, now = dependencies.now()) =>
+    setInstalledShortcutVersion: async (
+      installedShortcutVersion,
+      now = dependencies.now(),
+    ) =>
       persistSettings(
         get,
         set,
         dependencies,
-        (settings) => ({ ...settings, hasInstalledShortcut: isInstalled, updatedAt: now }),
+        (settings) => ({ ...settings, installedShortcutVersion, updatedAt: now }),
         now,
       ),
 
@@ -172,8 +178,8 @@ function readLegacySettings() {
         savedDuration === null
           ? undefined
           : (parseFocusDurationInput(savedDuration) ?? undefined),
-      hasInstalledShortcut:
-        savedShortcut === null ? undefined : savedShortcut === "true",
+      installedShortcutVersion:
+        savedShortcut === null ? undefined : savedShortcut === "true" ? 1 : null,
       language: normalizeLanguage(savedLanguage ?? window.navigator.language),
     };
   } catch {

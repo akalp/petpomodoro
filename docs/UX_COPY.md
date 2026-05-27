@@ -499,3 +499,24 @@ Do not imply:
 - The Shortcut proves that focus was completed.
 - PetPomodoro can observe the native timer.
 - The confirmation step is skipped.
+
+## Updates
+
+App update:
+
+- A new PetPomodoro version is ready.
+- Update now to get the latest improvements. Your pet and focus history stay on this device.
+- Update now
+
+Shortcut update:
+
+- A new timer Shortcut is ready.
+- Install the update and choose Replace when asked. If an older copy named PetPomodoro Start Timer 1 remains afterward, you can remove it.
+- Install update
+- I installed the update
+
+Guidance:
+
+- The Shortcut update prompt records the user's confirmation only after they return from installation.
+- Keep the runnable Shortcut name `PetPomodoro Start Timer`; the app launches it by name.
+- Do not claim the app detects installed Shortcut contents or verifies the timer.

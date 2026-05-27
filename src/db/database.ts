@@ -22,6 +22,11 @@ interface RetiredFocusNotificationSettings {
   hasEnabledFocusNotifications?: boolean;
 }
 
+interface LegacyShortcutSettings {
+  hasInstalledShortcut?: boolean;
+  installedShortcutVersion?: number | null;
+}
+
 export class PetPomodoroDatabase extends Dexie {
   pets!: Table<PetState, string>;
   sessions!: Table<FocusSession, string>;
@@ -261,6 +266,29 @@ export class PetPomodoroDatabase extends Dexie {
           .toCollection()
           .modify((settings: RetiredFocusNotificationSettings) => {
             delete settings.hasEnabledFocusNotifications;
+          }),
+      );
+
+    this.version(11)
+      .stores({
+        pets: "id, createdAt, updatedAt",
+        sessions: "id, status, startedAt, expectedEndAt, rewardClaimedAt",
+        rewardLedger: "id, &sessionId, petId, createdAt",
+        settings: "id, updatedAt",
+        dailyFocus: "[petId+dateKey], petId, dateKey, dailyGoalAwarded",
+      })
+      .upgrade((transaction) =>
+        transaction
+          .table("settings")
+          .toCollection()
+          .modify((settings: LegacyShortcutSettings) => {
+            if (settings.installedShortcutVersion === undefined) {
+              settings.installedShortcutVersion = settings.hasInstalledShortcut
+                ? 1
+                : null;
+            }
+
+            delete settings.hasInstalledShortcut;
           }),
       );
   }

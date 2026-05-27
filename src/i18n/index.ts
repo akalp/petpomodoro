@@ -65,10 +65,20 @@ const englishMessages = {
     "For the coziest experience, add PetPomodoro to your Home Screen from Safari.",
   installBody:
     "Open the share menu, then choose Add to Home Screen. After the first load, PetPomodoro is designed to keep working offline.",
+  appUpdateTitle: "A new PetPomodoro version is ready.",
+  appUpdateBody:
+    "Update now to get the latest improvements. Your pet and focus history stay on this device.",
+  updateNow: "Update now",
   shortcutInstallTitle: "Install the Start Native Timer Shortcut.",
   shortcutInstallBody:
     "It can start an iOS timer alongside PetPomodoro. Your pet will still ask you to confirm honestly when you come back.",
   installShortcut: "Install Shortcut",
+  confirmShortcutInstall: "I installed this Shortcut",
+  shortcutUpdateTitle: "A new timer Shortcut is ready.",
+  shortcutUpdateBody:
+    "Install the update and choose Replace when asked. If an older copy named PetPomodoro Start Timer 1 remains afterward, you can remove it.",
+  installShortcutUpdate: "Install update",
+  confirmShortcutUpdate: "I installed the update",
   meetPet: "Meet your focus friend.",
   startSmallSession: "Start with one small session.",
   levelValue: "Level {level}",
@@ -278,8 +288,8 @@ const englishMessages = {
   petMessagesLimit: "You can save up to {max} pet messages.",
   shortcutTitle: "iOS Shortcut",
   shortcutSettingsSupport:
-    "This only remembers whether this device should hide the Shortcut install hint.",
-  installedShortcut: "I installed shortcut already.",
+    "This only remembers whether the current timer Shortcut is installed on this device.",
+  installedShortcut: "I installed the current Shortcut.",
   resetTitle: "Reset local data",
   resetSupport:
     "This clears the pet, sessions, rewards, and preferences saved on this device.",
@@ -342,10 +352,20 @@ const turkishMessages: Record<MessageKey, string> = {
     "En sıcak deneyim için PetPomodoro'yu Safari'den Ana Ekranına ekle.",
   installBody:
     "Paylaş menüsünü aç, ardından Ana Ekrana Ekle'yi seç. İlk yüklemeden sonra PetPomodoro çevrimdışı çalışmak üzere tasarlanmıştır.",
+  appUpdateTitle: "PetPomodoro'nun yeni bir sürümü hazır.",
+  appUpdateBody:
+    "En yeni iyileştirmeleri almak için şimdi güncelle. Dostun ve odak geçmişin bu cihazda kalır.",
+  updateNow: "Şimdi güncelle",
   shortcutInstallTitle: "Yerel Zamanlayıcı Başlat kestirmesini yükle.",
   shortcutInstallBody:
     "PetPomodoro ile birlikte bir iOS zamanlayıcısı başlatabilir. Geri geldiğinde dostun yine dürüstçe onaylamanı isteyecek.",
   installShortcut: "Kestirmeyi yükle",
+  confirmShortcutInstall: "Bu kestirmeyi yükledim",
+  shortcutUpdateTitle: "Yeni bir zamanlayıcı kestirmesi hazır.",
+  shortcutUpdateBody:
+    "Güncellemeyi yükle ve sorulduğunda Değiştir'i seç. Sonrasında PetPomodoro Start Timer 1 adlı eski bir kopya kalırsa kaldırabilirsin.",
+  installShortcutUpdate: "Güncellemeyi yükle",
+  confirmShortcutUpdate: "Güncellemeyi yükledim",
   meetPet: "Odak arkadaşınla tanış.",
   startSmallSession: "Küçük bir oturumla başla.",
   levelValue: "Seviye {level}",
@@ -556,8 +576,8 @@ const turkishMessages: Record<MessageKey, string> = {
   petMessagesLimit: "En fazla {max} dost mesajı kaydedebilirsin.",
   shortcutTitle: "iOS Kestirmesi",
   shortcutSettingsSupport:
-    "Bu ayar yalnızca bu cihazda kestirme yükleme ipucunun gizlenip gizlenmeyeceğini hatırlar.",
-  installedShortcut: "Kestirmeyi zaten yükledim.",
+    "Bu ayar yalnızca güncel zamanlayıcı kestirmesinin bu cihazda yüklü olup olmadığını hatırlar.",
+  installedShortcut: "Güncel kestirmeyi yükledim.",
   resetTitle: "Yerel verileri sıfırla",
   resetSupport:
     "Bu cihazda kayıtlı dostunu, oturumlarını, ödüllerini ve tercihlerini temizler.",

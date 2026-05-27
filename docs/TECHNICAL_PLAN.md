@@ -146,7 +146,7 @@ interface RewardLedger {
 interface AppSettings {
   id: "local-settings";
   preferredDurationMinutes: number;
-  hasInstalledShortcut: boolean;
+  installedShortcutVersion: number | null;
   language: "en" | "tr";
   motivationalMessages: string[];
   updatedAt: string;
@@ -201,7 +201,7 @@ Initial schema:
 
 The unique `rewardLedger.sessionId` index is required. It is the persistence-level guard that prevents one Pomodoro session from rewarding the pet more than once, for completion or honest declined confirmation.
 
-Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`. Version 6 backfills `customName`, preserving user-supplied names while allowing an unnamed pet to display its selected species name. Version 7 backfills `motivationalMessages = []` on existing settings. Version 8 adds `dailyFocus`, reconstructs completed-minute and honesty-cap state from reward history, and recalculates the visible daily-goal streak. Version 9 adds persisted streak-freeze metadata. Version 10 removes the retired focus-notification setting. Rescue-use fields are normalized onto `dailyFocus` records as they are loaded or written.
+Database changes use Dexie version upgrades. Version 2 adds the settings table and backfills `abandonmentReason = null` on existing sessions without changing historical pet or reward data. Version 3 backfills `lastAppOpenedAt`, `focusImpactAppliedUntil`, and `focusCoinsAwarded`. Version 4 backfills `sleepStartedAt = null`. Version 5 backfills `speciesId = "momo"`. Version 6 backfills `customName`, preserving user-supplied names while allowing an unnamed pet to display its selected species name. Version 7 backfills `motivationalMessages = []` on existing settings. Version 8 adds `dailyFocus`, reconstructs completed-minute and honesty-cap state from reward history, and recalculates the visible daily-goal streak. Version 9 adds persisted streak-freeze metadata. Version 10 removes the retired focus-notification setting. Version 11 replaces `hasInstalledShortcut` with `installedShortcutVersion`; an existing confirmed install is treated as Shortcut version 1 so the user is offered later published updates. Rescue-use fields are normalized onto `dailyFocus` records as they are loaded or written.
 
 The feeding shop v1 uses a bundled static food catalog and does not need a new IndexedDB table. Buying food runs in a Dexie transaction that reads the current pet, applies the pure purchase function, and writes the updated pet. Failed purchases, such as insufficient coins or an unknown food id, must leave the stored pet unchanged.
 
@@ -276,6 +276,7 @@ The app should meet these installable PWA requirements:
 - Apple-specific metadata where useful, such as `apple-mobile-web-app-capable`.
 - App shell precaching via `vite-plugin-pwa`.
 - Offline fallback that can load the app shell after first load, including hash routes.
+- An in-app update-ready prompt that lets the user apply a newly downloaded app shell with an explicit reload.
 - No network dependency for core user flows after initial installation.
 - Icons sized for iOS Home Screen and general PWA installability.
 - No scheduled local-notification feature; focus completion is handled when the user returns to the app.
@@ -293,6 +294,8 @@ For MVP, the app may optionally launch a user-installed Shortcut as a convenienc
 5. Confirm honestly.
 
 Any Shortcut integration must be described as a convenience flow, not as verification. PetPomodoro should still treat completion as user-confirmed.
+
+The install URL may change when a new Shortcut definition is shared, but the runnable Shortcut name remains `PetPomodoro Start Timer` because the app launches it by name. Settings store the locally confirmed installed Shortcut version. When the published version is newer, the app prompts the user to install it, choose Replace in Shortcuts, remove an older numbered copy if iOS keeps one, and explicitly confirm the update in PetPomodoro.
 
 ## Testing Strategy
 

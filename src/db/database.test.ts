@@ -230,7 +230,7 @@ describe("PetPomodoroDatabase", () => {
     await legacy.table("settings").add({
       id: "local-settings",
       preferredDurationMinutes: 25,
-      hasInstalledShortcut: false,
+      hasInstalledShortcut: true,
       hasEnabledFocusNotifications: false,
       language: "en",
       updatedAt: "2026-05-22T12:00:00.000Z",
@@ -244,8 +244,10 @@ describe("PetPomodoroDatabase", () => {
 
     expect(settings).toMatchObject({
       motivationalMessages: [],
+      installedShortcutVersion: 1,
     });
     expect(settings).not.toHaveProperty("hasEnabledFocusNotifications");
+    expect(settings).not.toHaveProperty("hasInstalledShortcut");
 
     await database.delete();
   });

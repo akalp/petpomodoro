@@ -686,7 +686,7 @@ describe("settings workflows", () => {
       },
       readLegacySettings: () => ({
         preferredDurationMinutes: 50,
-        hasInstalledShortcut: true,
+        installedShortcutVersion: 1,
         language: "tr",
       }),
       clearLegacySettings: () => {
@@ -704,7 +704,7 @@ describe("settings workflows", () => {
 
     expect(hydrated).toMatchObject({
       preferredDurationMinutes: 50,
-      hasInstalledShortcut: true,
+      installedShortcutVersion: 1,
       language: "tr",
       motivationalMessages: [],
     });

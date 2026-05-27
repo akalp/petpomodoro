@@ -59,7 +59,7 @@ export interface FocusSession {
 export interface AppSettings {
   id: "local-settings";
   preferredDurationMinutes: number;
-  hasInstalledShortcut: boolean;
+  installedShortcutVersion: number | null;
   language: SupportedLanguage;
   motivationalMessages: string[];
   updatedAt: string;

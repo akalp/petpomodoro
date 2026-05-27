@@ -11,6 +11,7 @@ import {
 describe("settings domain", () => {
   it("creates default settings without custom pet messages", () => {
     expect(createDefaultSettings("2026-05-22T12:30:00.000Z")).toMatchObject({
+      installedShortcutVersion: null,
       motivationalMessages: [],
     });
   });

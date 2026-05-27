@@ -1,21 +1,30 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CURRENT_START_NATIVE_TIMER_SHORTCUT_VERSION,
   START_NATIVE_TIMER_SHORTCUT_NAME,
   START_NATIVE_TIMER_SHORTCUT_URL,
   buildStartNativeTimerShortcutUrl,
+  isCurrentStartNativeTimerShortcutInstalled,
   shouldRunStartNativeTimerShortcut,
 } from "./shortcuts";
 
 describe("Shortcut URL helpers", () => {
-  it("keeps the Start Native Timer install URL stable", () => {
+  it("uses the current Start Native Timer install URL", () => {
     expect(START_NATIVE_TIMER_SHORTCUT_URL).toBe(
-      "https://www.icloud.com/shortcuts/ebbf43762a544157a75c0804372c82f2",
+      "https://www.icloud.com/shortcuts/0ba5d222836445fbbee335ec0c16c94c",
     );
   });
 
   it("keeps the Start Native Timer shortcut name stable", () => {
     expect(START_NATIVE_TIMER_SHORTCUT_NAME).toBe("PetPomodoro Start Timer");
+  });
+
+  it("requires the current confirmed Shortcut version before launching it", () => {
+    expect(CURRENT_START_NATIVE_TIMER_SHORTCUT_VERSION).toBe(2);
+    expect(isCurrentStartNativeTimerShortcutInstalled(2)).toBe(true);
+    expect(isCurrentStartNativeTimerShortcutInstalled(1)).toBe(false);
+    expect(isCurrentStartNativeTimerShortcutInstalled(null)).toBe(false);
   });
 
   it("builds a run URL with the selected duration as seconds input", () => {

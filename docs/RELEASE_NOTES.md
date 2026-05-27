@@ -25,10 +25,11 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 - Header Settings sheet kept outside primary navigation.
 - Local snack shop with CSS-art food visuals and disabled states for focus, sleep, and insufficient coins.
 - Recent session history.
-- IndexedDB-backed settings for pet name, preferred focus duration, Shortcut preference, and resetting local data.
+- IndexedDB-backed settings for pet name, preferred focus duration, confirmed Shortcut version, and resetting local data.
 - PWA manifest, app icons, service worker precaching, and offline app-shell support after first load.
+- In-app prompt when a newly downloaded app shell is ready to apply.
 - iOS Safari install hint and Home Screen metadata.
-- Optional iOS Shortcut launch for starting a native timer with the selected duration.
+- Optional version-aware iOS Shortcut launch for starting a native timer with the selected duration, including an update prompt for an older installed Shortcut.
 - Care stats, hunger and happiness decay, streak tracking, and honesty hearts.
 - Configured achievement rule evaluation for future local presentation, without an achievement screen or persisted unlocks.
 - Bundled English and Türkçe interface copy with local language persistence.

@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { AppRoutes } from "./app/AppRoutes";
 import { AppShell } from "./app/AppShell";
 import { AppTopBar } from "./components/layout/AppTopBar";
+import { AppUpdatePrompt } from "./components/pwa/AppUpdatePrompt";
 import { InstallHint } from "./components/pwa/InstallHint";
 import { ShortcutInstallHint } from "./components/pwa/ShortcutInstallHint";
 import { RewardModal } from "./components/session/RewardModal";
@@ -31,7 +32,9 @@ import {
   isStandaloneDisplayMode,
 } from "./pwa/installHints";
 import {
+  CURRENT_START_NATIVE_TIMER_SHORTCUT_VERSION,
   buildStartNativeTimerShortcutUrl,
+  isCurrentStartNativeTimerShortcutInstalled,
   shouldRunStartNativeTimerShortcut,
 } from "./pwa/shortcuts";
 import {
@@ -130,8 +133,8 @@ export function App() {
   const updatePreferredDuration = useSettingsStore(
     (state) => state.updatePreferredDuration,
   );
-  const saveShortcutInstalled = useSettingsStore(
-    (state) => state.setShortcutInstalled,
+  const saveInstalledShortcutVersion = useSettingsStore(
+    (state) => state.setInstalledShortcutVersion,
   );
   const saveLanguage = useSettingsStore((state) => state.setLanguage);
   const saveMotivationalMessages = useSettingsStore(
@@ -148,7 +151,10 @@ export function App() {
   const persistedDuration =
     settings?.preferredDurationMinutes ?? DEFAULT_FOCUS_DURATION_MINUTES;
   const selectedDuration = selectedDurationOverride ?? persistedDuration;
-  const hasInstalledShortcut = settings?.hasInstalledShortcut ?? false;
+  const installedShortcutVersion = settings?.installedShortcutVersion ?? null;
+  const hasInstalledShortcut = isCurrentStartNativeTimerShortcutInstalled(
+    installedShortcutVersion,
+  );
   const motivationalMessages =
     settings?.motivationalMessages ?? EMPTY_MOTIVATIONAL_MESSAGES;
   const motivationalMessageKey = motivationalMessages.join("\n");
@@ -190,7 +196,9 @@ export function App() {
   };
 
   const setShortcutInstalled = (isInstalled: boolean) => {
-    void saveShortcutInstalled(isInstalled).catch(() => undefined);
+    void saveInstalledShortcutVersion(
+      isInstalled ? CURRENT_START_NATIVE_TIMER_SHORTCUT_VERSION : null,
+    ).catch(() => undefined);
   };
 
   useEffect(() => {
@@ -524,6 +532,7 @@ export function App() {
         onOpenSettings={openSettings}
         t={t}
       />
+      <AppUpdatePrompt t={t} />
       {error ? <ErrorNotice message={localizeErrorMessage(error, t)} t={t} /> : null}
       {!hasHydrated && isInitializing ? <LoadingCard t={t} /> : null}
       <AppRoutes
@@ -532,8 +541,8 @@ export function App() {
             focusPanel={focusPanel}
             shortcutInstallHint={
               <ShortcutInstallHint
-                hasInstalledShortcut={hasInstalledShortcut}
-                onInstallShortcut={() => setShortcutInstalled(true)}
+                installedShortcutVersion={installedShortcutVersion}
+                onConfirmInstalledShortcut={() => setShortcutInstalled(true)}
                 t={t}
               />
             }
