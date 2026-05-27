@@ -1,10 +1,10 @@
-import { motion, useReducedMotion } from "framer-motion";
 import { NavLink, useLocation } from "react-router-dom";
 
 import type { Translator } from "../i18n";
 
 import { primaryTabRoutes } from "./routeRegistry";
 import { RouteIcon } from "./RouteIcon";
+import { useActiveTabIndicator } from "./useActiveTabIndicator";
 
 interface DesktopSideNavProps {
   t: Translator;
@@ -12,15 +12,11 @@ interface DesktopSideNavProps {
 
 export function DesktopSideNav({ t }: DesktopSideNavProps) {
   const { pathname } = useLocation();
-  const activeIndex = Math.max(
-    primaryTabRoutes.findIndex((route) => route.path === pathname),
-    0,
-  );
-  const shouldReduceMotion = useReducedMotion();
-  const selectionTransition = shouldReduceMotion
-    ? { duration: 0 }
-    : { duration: 0.34, ease: [0.22, 1, 0.36, 1] as const };
-  const indicatorY = `calc(${activeIndex * 100}% + ${activeIndex * 0.25}rem)`;
+  const activePath =
+    primaryTabRoutes.find((route) => route.path === pathname)?.path ??
+    primaryTabRoutes[0].path;
+  const { activeLinkRef, containerRef, indicatorStyle } =
+    useActiveTabIndicator(activePath, "vertical");
 
   return (
     <aside className="hidden md:block md:w-36 lg:w-52">
@@ -28,16 +24,17 @@ export function DesktopSideNav({ t }: DesktopSideNavProps) {
         aria-label="Primary"
         className="sticky top-[max(1.25rem,env(safe-area-inset-top))] rounded-lg border border-white/80 bg-white/80 p-2 shadow-sm shadow-rose-100/70 backdrop-blur"
       >
-        <div className="relative flex flex-col gap-1">
-          <motion.span
-            animate={{ y: indicatorY }}
+        <div className="relative flex flex-col gap-1" ref={containerRef}>
+          <span
             aria-hidden="true"
-            className="absolute inset-x-0 top-0 h-14 rounded-lg bg-rose-100"
-            initial={false}
-            transition={selectionTransition}
+            className={[
+              "ui-tab-indicator ui-tab-indicator--vertical absolute inset-x-0 top-0 rounded-lg bg-rose-100",
+              indicatorStyle ? "" : "opacity-0",
+            ].join(" ")}
+            style={indicatorStyle ?? undefined}
           >
             <span className="absolute inset-y-3 left-1 h-auto w-1 rounded-full bg-rose-500" />
-          </motion.span>
+          </span>
           {primaryTabRoutes.map((route) => (
             <NavLink
               className={({ isActive }) =>
@@ -51,6 +48,7 @@ export function DesktopSideNav({ t }: DesktopSideNavProps) {
               }
               end
               key={route.id}
+              ref={route.path === activePath ? activeLinkRef : undefined}
               to={route.path}
             >
               {route.icon ? (

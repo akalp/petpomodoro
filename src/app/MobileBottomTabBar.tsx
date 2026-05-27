@@ -1,10 +1,10 @@
-import { motion, useReducedMotion } from "framer-motion";
 import { NavLink, useLocation } from "react-router-dom";
 
 import type { Translator } from "../i18n";
 
 import { primaryTabRoutes } from "./routeRegistry";
 import { RouteIcon } from "./RouteIcon";
+import { useActiveTabIndicator } from "./useActiveTabIndicator";
 
 interface MobileBottomTabBarProps {
   t: Translator;
@@ -12,31 +12,31 @@ interface MobileBottomTabBarProps {
 
 export function MobileBottomTabBar({ t }: MobileBottomTabBarProps) {
   const { pathname } = useLocation();
-  const activeIndex = Math.max(
-    primaryTabRoutes.findIndex((route) => route.path === pathname),
-    0,
-  );
-  const shouldReduceMotion = useReducedMotion();
-  const selectionTransition = shouldReduceMotion
-    ? { duration: 0 }
-    : { duration: 0.34, ease: [0.22, 1, 0.36, 1] as const };
-  const indicatorX = `calc(${activeIndex * 100}% + ${activeIndex * 0.5}rem)`;
+  const activePath =
+    primaryTabRoutes.find((route) => route.path === pathname)?.path ??
+    primaryTabRoutes[0].path;
+  const { activeLinkRef, containerRef, indicatorStyle } =
+    useActiveTabIndicator(activePath, "horizontal");
 
   return (
     <nav
       aria-label="Primary"
       className="fixed inset-x-0 bottom-0 z-30 border-t border-white/80 bg-white/90 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(244,63,94,0.12)] backdrop-blur md:hidden"
     >
-      <div className="relative mx-auto grid max-w-xl grid-cols-4 gap-2">
-        <motion.span
-          animate={{ x: indicatorX }}
+      <div
+        className="relative mx-auto grid max-w-xl grid-cols-4 gap-2"
+        ref={containerRef}
+      >
+        <span
           aria-hidden="true"
-          className="absolute inset-y-0 left-0 w-[calc((100%_-_1.5rem)/4)] rounded-lg bg-rose-100"
-          initial={false}
-          transition={selectionTransition}
+          className={[
+            "ui-tab-indicator ui-tab-indicator--horizontal absolute inset-y-0 left-0 rounded-lg bg-rose-100",
+            indicatorStyle ? "" : "opacity-0",
+          ].join(" ")}
+          style={indicatorStyle ?? undefined}
         >
           <span className="absolute top-0.5 left-1/2 h-1 w-6 -translate-x-1/2 rounded-full bg-rose-500" />
-        </motion.span>
+        </span>
         {primaryTabRoutes.map((route) => (
           <NavLink
             className={({ isActive }) =>
@@ -50,6 +50,7 @@ export function MobileBottomTabBar({ t }: MobileBottomTabBarProps) {
             }
             end
             key={route.id}
+            ref={route.path === activePath ? activeLinkRef : undefined}
             to={route.path}
           >
             {route.icon ? (

@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 import type { FocusSession } from "../../domain";
 import { languageLocale, type SupportedLanguage, type Translator } from "../../i18n";
 import { Card } from "../ui/Card";
@@ -45,11 +43,9 @@ export function SessionHistory({
       ) : (
         <div className="space-y-3">
           {sessions.map((session) => (
-            <motion.article
-              animate={{ opacity: 1, y: 0 }}
-              initial={{ opacity: 0, y: 8 }}
+            <article
+              className="ui-feedback-enter"
               key={session.id}
-              transition={{ duration: 0.2 }}
             >
               <Card className="flex items-center justify-between gap-4">
                 <div className="min-w-0">
@@ -72,7 +68,7 @@ export function SessionHistory({
                   </p>
                 </div>
               </Card>
-            </motion.article>
+            </article>
           ))}
         </div>
       )}

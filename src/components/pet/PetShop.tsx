@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 import {
   FOOD_CATALOG,
   type FoodItem,
@@ -67,10 +65,8 @@ export function PetShop({
       ) : null}
 
       {lastFoodPurchase ? (
-        <motion.div
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-950"
-          initial={{ opacity: 0, y: 6 }}
+        <div
+          className="ui-feedback-enter rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm leading-6 text-emerald-950"
         >
           <p className="font-semibold">
             {t("foodBought", {
@@ -91,7 +87,7 @@ export function PetShop({
           >
             {t("continue")}
           </Button>
-        </motion.div>
+        </div>
       ) : null}
 
       <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 sm:auto-rows-fr">

@@ -24,6 +24,8 @@ describe("AppShell", () => {
 
     expect(html).toMatch(/<a aria-current="page"[^>]*href="\/shop"/);
     expect(html).toContain("Shop");
+    expect(html).toContain("ui-tab-indicator--horizontal");
+    expect(html).toContain("ui-tab-indicator--vertical");
   });
 });
 

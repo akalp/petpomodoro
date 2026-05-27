@@ -134,7 +134,7 @@ Current implemented architecture includes:
 
 ## Phase 8: Polish
 
-- Add Framer Motion transitions for pet reactions and session result states.
+- Add lightweight CSS transitions for pet reactions and session result states.
 - Add CSS-art pet visuals with `data-mood` and `data-species` variants.
 - Add CSS-art food visuals with `data-food` variants.
 - Add priority-based pet mood rules for future mood expansion.

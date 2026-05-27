@@ -1,5 +1,3 @@
-import { motion, useReducedMotion } from "framer-motion";
-
 interface ProgressBarProps {
   label: string;
   value: number;
@@ -7,7 +5,6 @@ interface ProgressBarProps {
 }
 
 export function ProgressBar({ label, value, max }: ProgressBarProps) {
-  const shouldReduceMotion = useReducedMotion();
   const safeMax = Math.max(1, max);
   const percent = Math.min(100, Math.max(0, (value / safeMax) * 100));
 
@@ -20,13 +17,9 @@ export function ProgressBar({ label, value, max }: ProgressBarProps) {
         </span>
       </div>
       <div className="h-3 overflow-hidden rounded-full bg-rose-100">
-        <motion.div
-          animate={{ width: `${percent}%` }}
-          className="h-full rounded-full bg-teal-500 transition-[width]"
-          initial={false}
-          transition={
-            shouldReduceMotion ? { duration: 0 } : { duration: 0.45, ease: "easeOut" }
-          }
+        <div
+          className="ui-progress-fill h-full rounded-full bg-teal-500"
+          style={{ width: `${percent}%` }}
         />
       </div>
     </div>

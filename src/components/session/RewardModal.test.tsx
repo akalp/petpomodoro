@@ -21,6 +21,9 @@ describe("RewardModal", () => {
     expect(html).toContain("md:z-50");
     expect(html).toContain("max-h-[calc(100dvh-8rem)]");
     expect(html).toContain("overflow-y-auto");
+    expect(html).toContain("ui-reward-backdrop");
+    expect(html).toContain("ui-reward-panel");
+    expect(html).toContain("ui-level-pulse");
     expect(html).toContain("Continue");
   });
 });

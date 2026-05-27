@@ -31,3 +31,176 @@ body {
 * {
   box-sizing: border-box;
 }
+
+.ui-route-enter {
+  animation: ui-rise-in 180ms ease-out;
+}
+
+.ui-tab-indicator {
+  transition:
+    transform 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 120ms ease-out;
+}
+
+.ui-tab-indicator--horizontal {
+  width: var(--tab-indicator-size, 0);
+  transform: translateX(var(--tab-indicator-offset, 0));
+}
+
+.ui-tab-indicator--vertical {
+  height: var(--tab-indicator-size, 0);
+  transform: translateY(var(--tab-indicator-offset, 0));
+}
+
+.ui-progress-fill {
+  transition: width 450ms ease-out;
+}
+
+.ui-value-pulse {
+  animation: ui-value-pulse 250ms ease-out;
+}
+
+.ui-countdown-tick {
+  animation: ui-countdown-tick 160ms ease-out;
+}
+
+.ui-feedback-enter {
+  animation: ui-rise-in 200ms ease-out;
+}
+
+.ui-reward-backdrop {
+  animation: ui-fade-in 180ms ease-out;
+}
+
+.ui-reward-panel {
+  animation: ui-reward-in 240ms ease-out;
+}
+
+.ui-level-pulse {
+  animation: ui-level-pulse 450ms ease-out;
+}
+
+.ui-sheet-backdrop[data-state="open"] {
+  animation: ui-fade-in 180ms ease-out;
+}
+
+.ui-sheet-backdrop[data-state="closing"] {
+  animation: ui-fade-out 180ms ease-out forwards;
+}
+
+.ui-sheet-panel[data-state="open"] {
+  animation: ui-sheet-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ui-sheet-panel[data-state="closing"] {
+  animation: ui-sheet-out 220ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes ui-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.375rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ui-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ui-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ui-countdown-tick {
+  from {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ui-value-pulse {
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes ui-level-pulse {
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes ui-reward-in {
+  from {
+    opacity: 0;
+    transform: translateY(1.125rem) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ui-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes ui-sheet-out {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-route-enter,
+  .ui-value-pulse,
+  .ui-countdown-tick,
+  .ui-feedback-enter,
+  .ui-reward-backdrop,
+  .ui-reward-panel,
+  .ui-level-pulse,
+  .ui-sheet-backdrop,
+  .ui-sheet-panel {
+    animation: none !important;
+  }
+
+  .ui-tab-indicator,
+  .ui-progress-fill {
+    transition: none !important;
+  }
+}

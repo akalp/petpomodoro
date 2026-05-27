@@ -24,6 +24,9 @@ describe("Sheet", () => {
     expect(html).toContain("Sheet content");
     expect(html).toContain("aria-label=\"Close\"");
     expect(html).toContain("data-testid=\"sheet-backdrop\"");
+    expect(html).toContain("ui-sheet-backdrop");
+    expect(html).toContain("ui-sheet-panel");
+    expect(html).toContain("data-state=\"open\"");
   });
 
   it("does not render dialog markup when closed", () => {

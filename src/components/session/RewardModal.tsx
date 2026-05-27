@@ -1,5 +1,3 @@
-import { motion, useReducedMotion } from "framer-motion";
-
 import type { RewardSummary } from "../../domain";
 import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
@@ -82,31 +80,18 @@ function buildRewardRows(
 }
 
 export function RewardModal({ onClose, summary, t }: RewardModalProps) {
-  const shouldReduceMotion = useReducedMotion();
   const rewardRows = buildRewardRows(summary, t);
 
   return (
-    <motion.div
-      animate={{ opacity: 1 }}
-      className="fixed inset-x-0 top-0 bottom-28 z-20 flex items-end justify-center overflow-y-auto bg-slate-950/35 px-4 pt-4 pb-4 md:inset-0 md:z-50 md:items-center"
-      initial={{ opacity: 0 }}
+    <div
+      className="ui-reward-backdrop fixed inset-x-0 top-0 bottom-28 z-20 flex items-end justify-center overflow-y-auto bg-slate-950/35 px-4 pt-4 pb-4 md:inset-0 md:z-50 md:items-center"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onClose();
         }
       }}
-      transition={{ duration: 0.18 }}
     >
-      <motion.div
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-xl sm:max-w-md"
-        initial={{ opacity: 0, scale: 0.98, y: 18 }}
-        transition={
-          shouldReduceMotion
-            ? { duration: 0 }
-            : { duration: 0.24, ease: "easeOut" }
-        }
-      >
+      <div className="ui-reward-panel w-full max-w-xl sm:max-w-md">
         <Card className="max-h-[calc(100dvh-8rem)] w-full space-y-4 overflow-y-auto border-rose-200 bg-white shadow-xl md:max-h-[calc(100dvh-2rem)]">
         <div>
           <p className="text-sm font-semibold uppercase text-rose-700">
@@ -129,13 +114,11 @@ export function RewardModal({ onClose, summary, t }: RewardModalProps) {
         </div>
 
         {summary.leveledUp ? (
-          <motion.div
-            animate={shouldReduceMotion ? undefined : { scale: [1, 1.03, 1] }}
-            className="rounded-lg bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-900"
-            transition={{ duration: 0.45 }}
+          <div
+            className="ui-level-pulse rounded-lg bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-900"
           >
             {t("levelUpSupport")}
-          </motion.div>
+          </div>
         ) : null}
 
         <div className="grid gap-3">
@@ -148,7 +131,7 @@ export function RewardModal({ onClose, summary, t }: RewardModalProps) {
           {t("continue")}
         </Button>
         </Card>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

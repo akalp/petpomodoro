@@ -87,6 +87,32 @@
   transform-origin: 9.65rem 13.6rem;
 }
 
+.pet-art[data-mood="calm"] .pet-art__figure-motion {
+  animation: pet-figure-calm 3s ease-in-out infinite;
+}
+
+.pet-art[data-mood="happy"] .pet-art__figure-motion {
+  animation: pet-figure-happy 1.6s ease-in-out infinite;
+}
+
+.pet-art[data-mood="hungry"] .pet-art__figure-motion,
+.pet-art[data-mood="exhausted"] .pet-art__figure-motion,
+.pet-art[data-mood="sad"] .pet-art__figure-motion {
+  animation: pet-figure-heavy 3s ease-in-out infinite;
+}
+
+.pet-art[data-mood="tired"] .pet-art__figure-motion {
+  animation: pet-figure-tired 3.6s ease-in-out infinite;
+}
+
+.pet-art[data-mood="working"] .pet-art__figure-motion {
+  animation: pet-figure-working 2.2s ease-in-out infinite;
+}
+
+.pet-art[data-mood="sleeping"] .pet-art__figure-motion {
+  animation: pet-figure-tired 4.8s ease-in-out infinite;
+}
+
 .pet-art__body {
   position: absolute;
   right: 2.65rem;
@@ -857,6 +883,65 @@
 .pet-art[data-species="moowi"][data-mood="sleeping"] .pet-art__tail,
 .pet-art[data-species="moowi"][data-mood="sad"] .pet-art__tail {
   transform: rotate(-8deg);
+}
+
+@keyframes pet-figure-calm {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  50% {
+    transform: translateY(-0.1875rem) rotate(1deg);
+  }
+}
+
+@keyframes pet-figure-happy {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  33% {
+    transform: translateY(-0.1875rem) rotate(-2deg);
+  }
+
+  67% {
+    transform: translateY(-0.1875rem) rotate(2deg);
+  }
+}
+
+@keyframes pet-figure-heavy {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  50% {
+    transform: translateY(0.125rem) rotate(1deg);
+  }
+}
+
+@keyframes pet-figure-tired {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  50% {
+    transform: translateY(0.0625rem) rotate(0.5deg);
+  }
+}
+
+@keyframes pet-figure-working {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  50% {
+    transform: translateY(-0.0625rem) rotate(-1deg);
+  }
 }
 
 @keyframes pet-breathe {

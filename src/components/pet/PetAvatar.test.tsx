@@ -18,6 +18,7 @@ describe("PetAvatar", () => {
     expect(html).toContain('aria-label="Pet mood: Working"');
     expect(html).toContain('data-mood="working"');
     expect(html).toContain('data-species="momo"');
+    expect(html).toContain('class="pet-art__figure-motion"');
     expect(html).toContain("One gentle step at a time.");
   });
 

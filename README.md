@@ -28,7 +28,7 @@ The tone should be cozy, trusting, and non-accusatory. The user is rewarded for 
 - React Router for hash-based app navigation
 - Zustand for client state orchestration
 - Dexie and IndexedDB for local persistence
-- Framer Motion for cozy UI motion
+- Lightweight CSS animations and transitions for cozy UI motion
 - vite-plugin-pwa for service worker and installability
 - Vitest for domain and integration tests
 

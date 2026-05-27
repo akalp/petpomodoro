@@ -26,13 +26,14 @@ These constraints come from the existing project direction and must stay true th
 - Keep IndexedDB/Dexie code in `src/db`.
 - Keep Zustand stores as orchestration between UI, domain, and persistence.
 - Do not use Zustand for primary navigation state.
-- Keep Framer Motion for motion orchestration where it is useful.
+- Keep motion lightweight with CSS animations and transitions.
 
 ## Main architectural decisions
 
-### 1. Keep Framer Motion
+### 1. Use lightweight CSS motion
 
-Framer Motion should stay where it improves motion orchestration. The bundle cost is acceptable, and it helps with:
+CSS animation and transitions should preserve the current interaction feel while
+keeping the offline-first PWA shell small. Use CSS for:
 
 - screen transitions,
 - active tab indicator layout animation,
@@ -42,7 +43,10 @@ Framer Motion should stay where it improves motion orchestration. The bundle cos
 - pet container motion,
 - tap/hover interactions.
 
-Do not use Framer Motion as the drawing system for pets or food. Use it as a motion orchestration layer.
+Use minimal React state only where lifecycle depends on exit timing, such as
+keeping a closing sheet mounted until its CSS transition finishes. Use a
+JavaScript-readable `prefers-reduced-motion` path for those lifecycles so
+reduced-motion closes immediately.
 
 ### 2. Use CSS art for pet and food visuals
 
@@ -54,11 +58,11 @@ Recommended approach:
 - CSS classes,
 - `data-mood`, `data-species`, `data-food`, `data-disabled`,
 - CSS modules/files or global CSS art files,
-- typed presentation registries for copy, motion, species, and food metadata,
+- typed presentation registries for copy, species, and food metadata,
 - pseudo-elements where useful,
 - `prefers-reduced-motion` support.
 
-Do not rely on image assets, SVG art, canvas, or Framer Motion to draw the pet or food shapes. Those tools can still be used elsewhere if the product later needs them, but pet and snack visuals should remain HTML/CSS art.
+Do not rely on image assets, SVG art, canvas, or a runtime animation library to draw the pet or food shapes. Those tools can still be used elsewhere if the product later needs them, but pet and snack visuals should remain HTML/CSS art.
 
 Avoid JSX `if` chains for visual variants.
 
@@ -310,13 +314,12 @@ Previously combined:
 
 - mood face mapping,
 - mood label mapping,
-- Framer motion config,
+- overall motion behavior,
 - visual structure.
 
 Target split:
 
 - `petMoodPresentation.ts`
-- `petMotion.ts`
 - `PetRenderer.tsx`
 - `PetAvatar.tsx`
 - CSS art file.
@@ -377,7 +380,6 @@ src/
       PetScreen.tsx
       PetAvatar.tsx
       PetRenderer.tsx
-      petMotion.ts
       petMoodPresentation.ts
       petSpeciesRegistry.ts
       pet-art.css
@@ -449,7 +451,7 @@ Goal: keep this roadmap as the canonical architecture direction before runtime r
 Acceptance criteria:
 
 - `docs/ARCHITECTURE_EVOLUTION.md` exists and matches the intended long-term direction.
-- It documents hash routing, Framer Motion, CSS art, registries, state-machine boundaries, shell/store separation, and multi-pet direction.
+- It documents hash routing, lightweight CSS motion, CSS art, registries, state-machine boundaries, shell/store separation, and multi-pet direction.
 - No runtime code changes.
 - Existing tests/build remain green.
 
@@ -511,7 +513,7 @@ Acceptance criteria:
 - Tablet/desktop uses a side rail or wider side navigation driven by the same route registry.
 - Uses `env(safe-area-inset-bottom)`.
 - Main content has bottom padding on mobile so content is not hidden behind the nav.
-- Uses Framer Motion for active tab indicator if helpful.
+- Uses measured CSS transitions for the active tab indicator.
 - Links navigate hash routes instead of calling a store action.
 - Respects keyboard focus and `aria-current="page"`.
 
@@ -572,23 +574,22 @@ Acceptance criteria:
 
 ### Phase 7 — Extract pet presentation registries (completed)
 
-Goal: remove mood copy/motion logic from `PetAvatar.tsx`.
+Goal: remove mood copy logic from `PetAvatar.tsx` and keep motion in CSS.
 
 Suggested files:
 
 ```txt
 src/features/pet/petMoodPresentation.ts
-src/features/pet/petMotion.ts
 src/features/pet/PetRenderer.tsx
 ```
 
 Acceptance criteria:
 
 - `PET_MOOD_COPY` maps every `PetDisplayMood` to an i18n key.
-- `PET_MOTION_BY_MOOD` maps every `PetDisplayMood` to a Framer motion profile.
-- `PetAvatar.tsx` becomes a thin wrapper around motion, accessibility, and `PetRenderer`.
+- CSS `data-mood` selectors define overall pet motion for every `PetDisplayMood`.
+- `PetAvatar.tsx` becomes a thin wrapper around accessibility and `PetRenderer`.
 - `PetStats.tsx` reuses the same mood copy map.
-- TypeScript fails if a new display mood lacks copy or motion config.
+- TypeScript fails if a new display mood lacks copy; renderer tests cover CSS mood hooks.
 
 ### Phase 8 — Add CSS-art pet renderer (completed)
 
@@ -607,7 +608,7 @@ Acceptance criteria:
 - No SVG, canvas, image, or external art asset.
 - Mood changes are expressed through `data-mood` selectors.
 - Motion-sensitive loops respect `prefers-reduced-motion`.
-- Framer Motion still controls the overall pet container motion.
+- CSS `data-mood` selectors control the overall pet container motion.
 - Tests do not need to inspect visual internals beyond accessible labels/test IDs.
 
 ### Phase 9 — Extract food presentation and CSS-art visuals (completed)

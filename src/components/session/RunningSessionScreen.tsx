@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-
 import type { FocusSession } from "../../domain";
 import { languageLocale, type SupportedLanguage, type Translator } from "../../i18n";
 import { Button } from "../ui/Button";
@@ -41,15 +39,12 @@ export function RunningSessionScreen({
           <p className="text-sm font-semibold uppercase text-teal-700">
             {t("timeRemaining")}
           </p>
-          <motion.p
-            animate={{ opacity: 1, scale: 1 }}
-            className="mt-2 text-4xl font-semibold tabular-nums text-slate-950"
-            initial={{ opacity: 0.9, scale: 0.98 }}
+          <p
+            className="ui-countdown-tick mt-2 text-4xl font-semibold tabular-nums text-slate-950"
             key={countdownLabel}
-            transition={{ duration: 0.16 }}
           >
             {countdownLabel}
-          </motion.p>
+          </p>
         </div>
         <StatRow
           label={t("focusTime")}
