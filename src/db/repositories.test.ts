@@ -415,7 +415,7 @@ describe("Dexie repositories", () => {
     expect(result.pet).toMatchObject({
       coins: 0,
       energy: 0,
-      hunger: 12,
+      hunger: 15,
       xp: 0,
       streak: 0,
       honestyHearts: 0,

@@ -243,7 +243,7 @@ describe("active balance profile", () => {
       maxHunger: EMERGENCY_SNACK_MAX_HUNGER,
       maxUses: MAX_EMERGENCY_SNACKS_PER_DAY,
     }).toEqual({
-      hungerGain: 12,
+      hungerGain: 15,
       happinessGain: 0,
       energyGain: 0,
       maxHunger: 25,

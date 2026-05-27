@@ -152,7 +152,7 @@ describe("emergency snack rescue action", () => {
     expect(rested.pet).toMatchObject({
       coins: 0,
       energy: 18,
-      hunger: 9,
+      hunger: 12,
       streak: 0,
       xp: 0,
     });

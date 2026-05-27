@@ -571,16 +571,16 @@ describe("store workflows", () => {
       .getState()
       .usePowerNap("2026-05-22T12:31:00.000Z");
 
-    expect(snack.pet.hunger).toBe(12);
+    expect(snack.pet.hunger).toBe(15);
     expect(nap.pet).toMatchObject({
       coins: 0,
       energy: 18,
-      hunger: 9,
+      hunger: 12,
       xp: 0,
       streak: 0,
       honestyHearts: 0,
     });
-    expect(petStore.getState().lastEmergencySnackSummary?.hungerGained).toBe(12);
+    expect(petStore.getState().lastEmergencySnackSummary?.hungerGained).toBe(15);
     expect(petStore.getState().lastPowerNapSummary).toMatchObject({
       energyGained: 18,
       hungerChanged: -3,
