@@ -41,6 +41,15 @@ export const TIRED_ENERGY_THRESHOLD = 25;
 export const HAPPY_HAPPINESS_THRESHOLD = 70;
 export const HAPPY_HUNGER_THRESHOLD = 40;
 export const HAPPY_ENERGY_THRESHOLD = 40;
+export const FOCUS_MINUTE_ACHIEVEMENT_THRESHOLDS = [100, 500, 1000] as const;
+export const DAILY_STREAK_ACHIEVEMENT_THRESHOLDS = [3, 7, 14, 30] as const;
+export const HONESTY_HEART_ACHIEVEMENT_THRESHOLDS = [1, 5, 15, 30] as const;
+export const CARE_ACHIEVEMENT_EVENTS = [
+  "first_sleep",
+  "first_power_nap",
+  "first_emergency_snack",
+  "first_happy_mood",
+] as const;
 
 const NO_REWARD = {
   xp: 0,
@@ -258,9 +267,9 @@ export const BALANCE_PROFILE_V1 = {
     ],
   },
   achievements: {
-    focusMinuteThresholds: [],
-    streakThresholds: [],
-    honestyHeartThresholds: [],
-    careAchievementIds: [],
+    focusMinuteThresholds: FOCUS_MINUTE_ACHIEVEMENT_THRESHOLDS,
+    dailyStreakThresholds: DAILY_STREAK_ACHIEVEMENT_THRESHOLDS,
+    honestyHeartThresholds: HONESTY_HEART_ACHIEVEMENT_THRESHOLDS,
+    careEvents: CARE_ACHIEVEMENT_EVENTS,
   },
 } as const satisfies BalanceProfile;

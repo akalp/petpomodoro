@@ -199,6 +199,8 @@ Reward application should happen in a Dexie transaction that:
 
 If any step fails, the transaction should not partially apply the reward.
 
+Achievement rules are domain-only scaffolding until an achievement surface exists. Thresholds live in the balance profile and pure functions can evaluate satisfied IDs from local progress snapshots. Persisting unlocks is deferred to avoid adding an unused write path. When needed, add an `achievementUnlocks` table with primary key `[petId+achievementId]`, indexes `petId`, `category`, and `unlockedAt`, and records shaped as `{ petId, achievementId, category, unlockedAt }`. Unlock writes should be idempotent and local-only.
+
 ## Zustand Store Responsibilities
 
 Use small stores or slices with clear responsibilities:

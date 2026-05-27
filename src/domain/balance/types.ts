@@ -129,11 +129,17 @@ export interface BalanceShopConfig {
   foodCatalog: readonly BalanceFoodItemConfig[];
 }
 
+export type BalanceAchievementCareEvent =
+  | "first_sleep"
+  | "first_power_nap"
+  | "first_emergency_snack"
+  | "first_happy_mood";
+
 export interface BalanceAchievementConfig {
   focusMinuteThresholds: readonly number[];
-  streakThresholds: readonly number[];
+  dailyStreakThresholds: readonly number[];
   honestyHeartThresholds: readonly number[];
-  careAchievementIds: readonly string[];
+  careEvents: readonly BalanceAchievementCareEvent[];
 }
 
 export interface BalanceProgressionConfig {
