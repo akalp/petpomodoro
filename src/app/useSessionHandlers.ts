@@ -4,6 +4,7 @@ import {
   buildStartNativeTimerShortcutUrl,
 } from "../pwa/shortcuts";
 import { isStandaloneDisplayMode } from "../pwa/installHints";
+import { isNativeApp } from "../platform";
 import { usePomodoroStore, usePetStore } from "../stores";
 
 export function useSessionHandlers(
@@ -63,6 +64,10 @@ function runStartNativeTimerShortcut(
   plannedDurationMinutes: number,
   hasInstalledShortcut: boolean,
 ): void {
+  if (isNativeApp) {
+    return;
+  }
+
   if (
     !shouldRunStartNativeTimerShortcut(
       window.navigator.userAgent,

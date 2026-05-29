@@ -33,6 +33,7 @@ import {
 import {
   isIosOrIpadosDevice,
 } from "./pwa/installHints";
+import { isNativeApp } from "./platform";
 import {
   CURRENT_START_NATIVE_TIMER_SHORTCUT_VERSION,
   isCurrentStartNativeTimerShortcutInstalled,
@@ -152,6 +153,7 @@ export function App() {
     settings?.motivationalMessages ?? EMPTY_MOTIVATIONAL_MESSAGES;
   const motivationalMessageKey = motivationalMessages.join("\n");
   const supportsIosFeatures =
+    !isNativeApp &&
     typeof window !== "undefined" &&
     isIosOrIpadosDevice(
       window.navigator.userAgent,
