@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { clearEndNotification } from "../alerts";
 import { usePetStore, usePomodoroStore } from "../stores";
+import { clearFocusLiveActivity } from "../platform/liveActivity";
 
 export function useAppTimer(hasHydrated: boolean) {
   const [currentTime, setCurrentTime] = useState(() => Date.now());
@@ -12,10 +14,13 @@ export function useAppTimer(hasHydrated: boolean) {
 
   const petIsSleeping = pet ? pet.sleepStartedAt !== null : false;
 
-  const refreshSession = useCallback((now = new Date().toISOString()) => {
-    void refreshSessionStatus(now)
-      .then(() => loadRecentSessions())
-      .catch(() => undefined);
+  const refreshSession = useCallback(async (now = new Date().toISOString()) => {
+    const session = await refreshSessionStatus(now);
+    if (session?.status === "awaiting_confirmation") {
+      void clearFocusLiveActivity(session);
+      void clearEndNotification(session.id);
+    }
+    void loadRecentSessions();
   }, [loadRecentSessions, refreshSessionStatus]);
 
   useEffect(() => {
@@ -51,6 +56,15 @@ export function useAppTimer(hasHydrated: boolean) {
   }, [hasHydrated, refreshSession, updateAppOpenDecay]);
 
   useEffect(() => {
+    if (!hasHydrated || activeSession?.status !== "awaiting_confirmation") {
+      return;
+    }
+
+    void clearFocusLiveActivity(activeSession);
+    void clearEndNotification(activeSession.id);
+  }, [activeSession, hasHydrated]);
+
+  useEffect(() => {
     if (activeSession?.status !== "running" && !petIsSleeping) {
       return;
     }
@@ -58,7 +72,7 @@ export function useAppTimer(hasHydrated: boolean) {
     const intervalId = window.setInterval(() => {
       setCurrentTime(Date.now());
       if (activeSession?.status === "running") {
-        refreshSession();
+        void refreshSession();
       }
     }, 1000);
 

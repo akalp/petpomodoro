@@ -1,6 +1,6 @@
 import {
   scheduleEndNotification,
-  cancelEndNotification,
+  clearEndNotification,
 } from "../alerts";
 import {
   isCurrentStartNativeTimerShortcutInstalled,
@@ -9,7 +9,20 @@ import {
 } from "../pwa/shortcuts";
 import { isStandaloneDisplayMode } from "../pwa/installHints";
 import { isNativeApp } from "../platform";
+import {
+  startFocusLiveActivity,
+  endFocusLiveActivity,
+  clearFocusLiveActivity,
+} from "../platform/liveActivity";
+import {
+  startLiveActivityTimer,
+  stopLiveActivityTimer,
+} from "../platform/liveActivityTimer";
+import type { LiveActivityTimerHandle } from "../platform/liveActivityTimer";
 import { usePomodoroStore, usePetStore } from "../stores";
+
+let liveActivityTimer: LiveActivityTimerHandle | null = null;
+let expiryTimeout: ReturnType<typeof setTimeout> | null = null;
 
 export function useSessionHandlers(
   setCurrentTime: (time: number) => void,
@@ -36,6 +49,11 @@ export function useSessionHandlers(
       .then((session) => {
         void loadRecentSessions();
         void scheduleEndNotification(session);
+        void startFocusLiveActivity(session);
+        liveActivityTimer = startLiveActivityTimer(() => {
+          return usePomodoroStore.getState().activeSession ?? session;
+        });
+        scheduleExpiryUpdate(session);
         runStartNativeTimerShortcut(
           session.plannedDurationMinutes,
           isCurrentStartNativeTimerShortcutInstalled(installedShortcutVersion),
@@ -47,7 +65,13 @@ export function useSessionHandlers(
   const handleEnd = () => {
     void cancelSession()
       .then((session) => {
-        void cancelEndNotification(session.id);
+        void clearEndNotification(session.id);
+        void endFocusLiveActivity(session, "abandoned");
+        clearExpiryTimeout();
+        if (liveActivityTimer) {
+          stopLiveActivityTimer(liveActivityTimer);
+          liveActivityTimer = null;
+        }
         return loadRecentSessions();
       })
       .catch(() => undefined);
@@ -56,7 +80,13 @@ export function useSessionHandlers(
   const handleCompleted = () => {
     void confirmCompleted()
       .then((session) => {
-        void cancelEndNotification(session.id);
+        void clearEndNotification(session.id);
+        void endFocusLiveActivity(session, "completed");
+        clearExpiryTimeout();
+        if (liveActivityTimer) {
+          stopLiveActivityTimer(liveActivityTimer);
+          liveActivityTimer = null;
+        }
         return Promise.all([loadRecentSessions(), loadDailyFocusOverview()]);
       })
       .catch(() => undefined);
@@ -65,7 +95,13 @@ export function useSessionHandlers(
   const handleAbandoned = () => {
     void confirmAbandoned()
       .then((session) => {
-        void cancelEndNotification(session.id);
+        void clearEndNotification(session.id);
+        void endFocusLiveActivity(session, "abandoned");
+        clearExpiryTimeout();
+        if (liveActivityTimer) {
+          stopLiveActivityTimer(liveActivityTimer);
+          liveActivityTimer = null;
+        }
         return Promise.all([loadRecentSessions(), loadDailyFocusOverview()]);
       })
       .catch(() => undefined);
@@ -96,4 +132,34 @@ function runStartNativeTimerShortcut(
   window.location.href = buildStartNativeTimerShortcutUrl({
     plannedDurationMinutes,
   });
+}
+
+function clearExpiryTimeout(): void {
+  if (expiryTimeout !== null) {
+    clearTimeout(expiryTimeout);
+    expiryTimeout = null;
+  }
+}
+
+function scheduleExpiryUpdate(session: {
+  id: string;
+  expectedEndAt: string;
+}): void {
+  clearExpiryTimeout();
+  const delay = Date.parse(session.expectedEndAt) - Date.now();
+  if (delay <= 0) {
+    return;
+  }
+  expiryTimeout = setTimeout(() => {
+    expiryTimeout = null;
+    const current = usePomodoroStore.getState().activeSession;
+    if (current?.status === "awaiting_confirmation") {
+      void clearFocusLiveActivity(current);
+      void clearEndNotification(current.id);
+      if (liveActivityTimer) {
+        stopLiveActivityTimer(liveActivityTimer);
+        liveActivityTimer = null;
+      }
+    }
+  }, delay);
 }

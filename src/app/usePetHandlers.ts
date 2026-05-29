@@ -4,6 +4,8 @@
 // unhandled rejection warnings in the UI layer.
 
 import type { Translator } from "../i18n";
+import { cancelAllCareNotifications, clearEndNotification } from "../alerts";
+import { clearFocusLiveActivity } from "../platform/liveActivity";
 import { usePetStore, usePomodoroStore, useSettingsStore, useUiStore } from "../stores";
 import { resetLocalData } from "../db";
 
@@ -100,6 +102,12 @@ export function usePetHandlers({
 
     void resetLocalData()
       .then(() => {
+        const activeSession = usePomodoroStore.getState().activeSession;
+        void cancelAllCareNotifications();
+        if (activeSession) {
+          void clearEndNotification(activeSession.id);
+          void clearFocusLiveActivity(activeSession);
+        }
         resetInitialization();
         onReset?.();
         usePetStore.setState({

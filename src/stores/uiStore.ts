@@ -20,7 +20,7 @@ export interface UiStoreDependencies {
     >
   >;
   pomodoroStore: UseBoundStore<
-    StoreApi<Pick<PomodoroStoreState, "restoreRunningSessionAfterAppLaunch">>
+    StoreApi<Pick<PomodoroStoreState, "activeSession" | "restoreRunningSessionAfterAppLaunch">>
   >;
   settingsStore: UseBoundStore<
     StoreApi<Pick<SettingsStoreState, "initializeSettings">>
@@ -68,7 +68,7 @@ export function createUiStore(
         const currentPet = dependencies.petStore.getState().pet;
 
         if (currentPet) {
-          void scheduleCareNotifications(currentPet);
+          void scheduleCareNotifications(currentPet, activeSession);
         }
 
         set({ hasHydrated: true, isInitializing: false });

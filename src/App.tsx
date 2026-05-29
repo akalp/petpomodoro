@@ -11,6 +11,7 @@ import { useAppTimer } from "./app/useAppTimer";
 import { usePetHandlers } from "./app/usePetHandlers";
 import { useSessionHandlers } from "./app/useSessionHandlers";
 import { AppTopBar } from "./components/layout/AppTopBar";
+import { scheduleCareNotifications } from "./alerts";
 import { AppUpdatePrompt } from "./components/pwa/AppUpdatePrompt";
 import { InstallHint } from "./components/pwa/InstallHint";
 import { ShortcutInstallHint } from "./components/pwa/ShortcutInstallHint";
@@ -207,6 +208,14 @@ export function App() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  useEffect(() => {
+    if (!hasHydrated || !pet) {
+      return;
+    }
+
+    void scheduleCareNotifications(pet, activeSession).catch(() => undefined);
+  }, [activeSession, hasHydrated, pet]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
