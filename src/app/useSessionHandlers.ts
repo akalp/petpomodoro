@@ -1,4 +1,8 @@
 import {
+  scheduleEndNotification,
+  cancelEndNotification,
+} from "../alerts";
+import {
   isCurrentStartNativeTimerShortcutInstalled,
   shouldRunStartNativeTimerShortcut,
   buildStartNativeTimerShortcutUrl,
@@ -31,6 +35,7 @@ export function useSessionHandlers(
     void startSession(duration)
       .then((session) => {
         void loadRecentSessions();
+        void scheduleEndNotification(session);
         runStartNativeTimerShortcut(
           session.plannedDurationMinutes,
           isCurrentStartNativeTimerShortcutInstalled(installedShortcutVersion),
@@ -41,19 +46,28 @@ export function useSessionHandlers(
 
   const handleEnd = () => {
     void cancelSession()
-      .then(() => loadRecentSessions())
+      .then((session) => {
+        void cancelEndNotification(session.id);
+        return loadRecentSessions();
+      })
       .catch(() => undefined);
   };
 
   const handleCompleted = () => {
     void confirmCompleted()
-      .then(() => Promise.all([loadRecentSessions(), loadDailyFocusOverview()]))
+      .then((session) => {
+        void cancelEndNotification(session.id);
+        return Promise.all([loadRecentSessions(), loadDailyFocusOverview()]);
+      })
       .catch(() => undefined);
   };
 
   const handleAbandoned = () => {
     void confirmAbandoned()
-      .then(() => Promise.all([loadRecentSessions(), loadDailyFocusOverview()]))
+      .then((session) => {
+        void cancelEndNotification(session.id);
+        return Promise.all([loadRecentSessions(), loadDailyFocusOverview()]);
+      })
       .catch(() => undefined);
   };
 

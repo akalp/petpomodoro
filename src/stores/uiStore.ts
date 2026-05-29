@@ -1,5 +1,6 @@
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 
+import { scheduleCareNotifications } from "../alerts";
 import { errorMessage } from "./errors";
 import { usePetStore, type PetStoreState } from "./petStore";
 import { usePomodoroStore, type PomodoroStoreState } from "./pomodoroStore";
@@ -14,6 +15,7 @@ export interface UiStoreDependencies {
         | "loadDailyFocusOverview"
         | "updateAppOpenDecay"
         | "updateDecayOnOpen"
+        | "pet"
       >
     >
   >;
@@ -63,6 +65,12 @@ export function createUiStore(
           await dependencies.petStore.getState().updateDecayOnOpen(now);
         }
         await dependencies.petStore.getState().loadDailyFocusOverview(now);
+        const currentPet = dependencies.petStore.getState().pet;
+
+        if (currentPet) {
+          void scheduleCareNotifications(currentPet);
+        }
+
         set({ hasHydrated: true, isInitializing: false });
       } catch (error) {
         set({ error: errorMessage(error), isInitializing: false });
