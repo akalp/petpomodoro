@@ -47,6 +47,7 @@ describe("scheduleCareNotifications", () => {
     expect(hungerNotif).toBeDefined();
     expect(hungerNotif.title).toBe("Your pet is getting hungry");
     expect(hungerNotif.body).toBe("A small snack would brighten their day.");
+    expect(hungerNotif.sound).toBe("notification.caf");
     expect(hungerNotif.schedule.at.getTime()).toBeGreaterThan(Date.now());
   });
 
@@ -66,6 +67,7 @@ describe("scheduleCareNotifications", () => {
     expect(energyNotif).toBeDefined();
     expect(energyNotif.title).toBe("Your pet could use a rest");
     expect(energyNotif.body).toBe("A cozy nap helps them recover.");
+    expect(energyNotif.sound).toBe("notification.caf");
   });
 
   it("schedules both notifications when both thresholds will be crossed", async () => {

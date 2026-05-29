@@ -39,6 +39,7 @@ export async function scheduleEndNotification(
           id: notificationIdForSession(session.id),
           title: "Focus time is up",
           body: "Your pet is waiting for you. Come back when you can.",
+          sound: "notification.caf",
           schedule: { at: endAt },
         },
       ],

@@ -56,6 +56,7 @@ export async function scheduleCareNotifications(
     id: number;
     title: string;
     body: string;
+    sound: string;
     schedule: { at: Date };
   }> = [];
 
@@ -68,6 +69,7 @@ export async function scheduleCareNotifications(
       id: CARE_HUNGER_NOTIFICATION_ID,
       title: "Your pet is getting hungry",
       body: "A small snack would brighten their day.",
+      sound: "notification.caf",
       schedule: { at: hungerAt },
     });
   }
@@ -85,6 +87,7 @@ export async function scheduleCareNotifications(
       id: CARE_ENERGY_NOTIFICATION_ID,
       title: "Your pet could use a rest",
       body: "A cozy nap helps them recover.",
+      sound: "notification.caf",
       schedule: { at: energyAt },
     });
   }

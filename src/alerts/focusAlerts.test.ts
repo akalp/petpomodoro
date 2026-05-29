@@ -75,6 +75,7 @@ describe("scheduleEndNotification", () => {
     expect(call.notifications[0].body).toBe(
       "Your pet is waiting for you. Come back when you can.",
     );
+    expect(call.notifications[0].sound).toBe("notification.caf");
     expect(call.notifications[0].schedule.at).toEqual(new Date(future));
   });
 
