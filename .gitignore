@@ -11,3 +11,11 @@ coverage
 
 .agents
 skills-lock.json
+
+# Capacitor iOS – build outputs, dependencies, copied web assets, user state
+ios/App/Pods/
+ios/App/build/
+ios/App/App/public/
+ios/**/xcuserdata/
+ios/**/*.mobileprovision
+ios/**/*.cer

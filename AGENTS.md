@@ -66,3 +66,27 @@ PetPomodoro is a local-first, cozy tamagotchi plus Pomodoro PWA designed mainly 
 - Treat iOS background execution limits as product constraints.
 - Treat Shortcuts integration as convenience only, never as verification.
 - Do not imply native iOS timer observability in UI, docs, tests, or code comments.
+
+## Capacitor Native App Rules
+
+PetPomodoro must remain a working PWA and offline-first web app.
+
+Capacitor is an additional native shell, not a replacement for the PWA.
+
+Native-only behavior must be isolated behind small adapter modules. Do not import Capacitor APIs directly inside React screens unless there is no clean alternative.
+
+Use native local notifications only when running inside Capacitor. In the browser/PWA, keep existing best-effort PWA and Shortcut behavior.
+
+Never auto-complete a Pomodoro session from a notification. Notifications may remind the user, but completion must still go through the existing awaiting-confirmation flow.
+
+Do not remove the existing iOS Shortcut integration from the PWA path unless explicitly asked. In the native Capacitor app, bypass Shortcut timer launching.
+
+Keep all data local. Do not add backend, auth, cloud sync, analytics, tracking, or push notification server code.
+
+After changes, run:
+
+- npm run build
+- npm test
+- npm run lint
+
+If a native command cannot be verified in the current environment, document the exact command the user should run locally.
