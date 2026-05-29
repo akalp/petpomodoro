@@ -19,3 +19,4 @@ ios/App/App/public/
 ios/**/xcuserdata/
 ios/**/*.mobileprovision
 ios/**/*.cer
+ios/**/*.xcworkspace/xcshareddata/
