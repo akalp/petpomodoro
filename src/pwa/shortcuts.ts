@@ -6,10 +6,10 @@ export interface NativeTimerShortcutUrlInput {
 
 const SHORTCUTS_RUN_SHORTCUT_URL = "shortcuts://run-shortcut";
 
-export const CURRENT_START_NATIVE_TIMER_SHORTCUT_VERSION = 2;
+export const CURRENT_START_NATIVE_TIMER_SHORTCUT_VERSION = 3;
 export const START_NATIVE_TIMER_SHORTCUT_URL =
-  "https://www.icloud.com/shortcuts/0ba5d222836445fbbee335ec0c16c94c";
-export const START_NATIVE_TIMER_SHORTCUT_NAME = "PetPomodoro Start Timer";
+  "https://www.icloud.com/shortcuts/2ce1d9eff8494e2ba63379c41a1a36a9";
+export const START_NATIVE_TIMER_SHORTCUT_NAME = "PetPomodoro";
 
 export function isCurrentStartNativeTimerShortcutInstalled(
   installedShortcutVersion: number | null,

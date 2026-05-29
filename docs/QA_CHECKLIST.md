@@ -259,12 +259,13 @@ Use this checklist before the first MVP deployment and again after every release
 ## Shortcut Timer Launch
 
 - [ ] From an older confirmed Shortcut install, confirm the app offers the current Shortcut update.
-- [ ] Tap Install update, choose Replace when iOS asks, and confirm the retained runnable Shortcut is named `PetPomodoro Start Timer`.
-- [ ] If iOS retains `PetPomodoro Start Timer 1`, confirm it is the older copy and can be removed.
+- [ ] Tap Install update and confirm the new Shortcut named `PetPomodoro` opens in Shortcuts.
+- [ ] Confirm the old Shortcut named `PetPomodoro Start Timer` still exists alongside the new one.
+- [ ] Open the Shortcuts app and delete the old `PetPomodoro Start Timer` Shortcut.
 - [ ] Tap "I installed the update" in PetPomodoro and confirm the update card hides after reopening.
 - [ ] Mark "I installed the current Shortcut." in Settings on the installed iOS PWA when manually testing fresh setup.
 - [ ] Start a running session.
-- [ ] Confirm the app opens the `PetPomodoro Start Timer` Shortcut with the selected duration in seconds.
+- [ ] Confirm the app opens the `PetPomodoro` Shortcut with the selected duration in seconds.
 - [ ] Return to PetPomodoro manually when the native timer ends.
 - [ ] Confirm the session still uses the normal timestamp-based honesty confirmation.
 - [ ] Confirm that Shortcut support is treated as convenience only, not verification.

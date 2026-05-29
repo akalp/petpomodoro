@@ -12,18 +12,18 @@ import {
 describe("Shortcut URL helpers", () => {
   it("uses the current Start Native Timer install URL", () => {
     expect(START_NATIVE_TIMER_SHORTCUT_URL).toBe(
-      "https://www.icloud.com/shortcuts/0ba5d222836445fbbee335ec0c16c94c",
+      "https://www.icloud.com/shortcuts/2ce1d9eff8494e2ba63379c41a1a36a9",
     );
   });
 
   it("keeps the Start Native Timer shortcut name stable", () => {
-    expect(START_NATIVE_TIMER_SHORTCUT_NAME).toBe("PetPomodoro Start Timer");
+    expect(START_NATIVE_TIMER_SHORTCUT_NAME).toBe("PetPomodoro");
   });
 
   it("requires the current confirmed Shortcut version before launching it", () => {
-    expect(CURRENT_START_NATIVE_TIMER_SHORTCUT_VERSION).toBe(2);
-    expect(isCurrentStartNativeTimerShortcutInstalled(2)).toBe(true);
-    expect(isCurrentStartNativeTimerShortcutInstalled(1)).toBe(false);
+    expect(CURRENT_START_NATIVE_TIMER_SHORTCUT_VERSION).toBe(3);
+    expect(isCurrentStartNativeTimerShortcutInstalled(3)).toBe(true);
+    expect(isCurrentStartNativeTimerShortcutInstalled(2)).toBe(false);
     expect(isCurrentStartNativeTimerShortcutInstalled(null)).toBe(false);
   });
 
@@ -33,7 +33,7 @@ describe("Shortcut URL helpers", () => {
     });
 
     expect(url).toBe(
-      "shortcuts://run-shortcut?name=PetPomodoro%20Start%20Timer&input=text&text=1500",
+      "shortcuts://run-shortcut?name=PetPomodoro&input=text&text=1500",
     );
   });
 

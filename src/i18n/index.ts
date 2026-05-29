@@ -77,7 +77,7 @@ const englishMessages = {
   confirmShortcutInstall: "I installed this Shortcut",
   shortcutUpdateTitle: "A new timer Shortcut is ready.",
   shortcutUpdateBody:
-    "Install the update and choose Replace when asked. If an older copy named PetPomodoro Start Timer 1 remains afterward, you can remove it.",
+    "Install the new Shortcut, then open the Shortcuts app and delete the old one named PetPomodoro Start Timer.",
   installShortcutUpdate: "Install update",
   confirmShortcutUpdate: "I installed the update",
   meetPet: "Meet your focus friend.",
@@ -365,7 +365,7 @@ const turkishMessages: Record<MessageKey, string> = {
   confirmShortcutInstall: "Bu kestirmeyi yükledim",
   shortcutUpdateTitle: "Yeni bir zamanlayıcı kestirmesi hazır.",
   shortcutUpdateBody:
-    "Güncellemeyi yükle ve sorulduğunda Değiştir'i seç. Sonrasında PetPomodoro Start Timer 1 adlı eski bir kopya kalırsa kaldırabilirsin.",
+    "Yeni kestirmeyi yükle, sonra Kısayollar uygulamasını aç ve PetPomodoro Start Timer adlı eski olanı sil.",
   installShortcutUpdate: "Güncellemeyi yükle",
   confirmShortcutUpdate: "Güncellemeyi yükledim",
   meetPet: "Odak arkadaşınla tanış.",

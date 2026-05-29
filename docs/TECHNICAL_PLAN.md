@@ -295,7 +295,7 @@ For MVP, the app may optionally launch a user-installed Shortcut as a convenienc
 
 Any Shortcut integration must be described as a convenience flow, not as verification. PetPomodoro should still treat completion as user-confirmed.
 
-The install URL may change when a new Shortcut definition is shared, but the runnable Shortcut name remains `PetPomodoro Start Timer` because the app launches it by name. Settings store the locally confirmed installed Shortcut version. When the published version is newer, the app prompts the user to install it, choose Replace in Shortcuts, remove an older numbered copy if iOS keeps one, and explicitly confirm the update in PetPomodoro.
+The install URL may change when a new Shortcut definition is shared, but the runnable Shortcut name remains `PetPomodoro` because the app launches it by name. Settings store the locally confirmed installed Shortcut version. When the published version is newer, the app prompts the user to install it, delete the old Shortcut in the Shortcuts app, and explicitly confirm the update in PetPomodoro.
 
 ## Testing Strategy
 

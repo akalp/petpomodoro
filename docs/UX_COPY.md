@@ -511,12 +511,12 @@ App update:
 Shortcut update:
 
 - A new timer Shortcut is ready.
-- Install the update and choose Replace when asked. If an older copy named PetPomodoro Start Timer 1 remains afterward, you can remove it.
+- Install the new Shortcut, then open the Shortcuts app and delete the old one named PetPomodoro Start Timer.
 - Install update
 - I installed the update
 
 Guidance:
 
 - The Shortcut update prompt records the user's confirmation only after they return from installation.
-- Keep the runnable Shortcut name `PetPomodoro Start Timer`; the app launches it by name.
+- Keep the runnable Shortcut name `PetPomodoro`; the app launches it by name.
 - Do not claim the app detects installed Shortcut contents or verifies the timer.
