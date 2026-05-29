@@ -23,7 +23,7 @@ vi.mock("../platform", () => ({
 }));
 
 import { cancelAllCareNotifications, scheduleCareNotifications } from "./careAlerts";
-import { makePet } from "../test/factories";
+import { makePet, makeSession } from "../test/factories";
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -31,6 +31,21 @@ afterEach(() => {
 });
 
 describe("scheduleCareNotifications", () => {
+  it("cancels stale care notifications before scheduling new ones", async () => {
+    const pet = makePet({ hunger: 40, energy: 80 });
+    mockRequestPermissions.mockResolvedValue({ display: "granted" });
+    mockSchedule.mockResolvedValue({ notifications: [] });
+
+    await scheduleCareNotifications(pet);
+
+    expect(mockCancel).toHaveBeenCalledWith({
+      notifications: [{ id: 1_000_001 }, { id: 1_000_002 }],
+    });
+    expect(mockCancel.mock.invocationCallOrder[0]).toBeLessThan(
+      mockSchedule.mock.invocationCallOrder[0],
+    );
+  });
+
   it("schedules hunger notification when hunger is above threshold", async () => {
     const pet = makePet({ hunger: 40, energy: 80 });
     mockRequestPermissions.mockResolvedValue({ display: "granted" });
@@ -123,6 +138,28 @@ describe("scheduleCareNotifications", () => {
 
     await scheduleCareNotifications(pet);
 
+    expect(mockRequestPermissions).not.toHaveBeenCalled();
+    expect(mockSchedule).not.toHaveBeenCalled();
+  });
+
+  it("does not schedule during an active focus session", async () => {
+    const pet = makePet({ hunger: 40, energy: 80 });
+    const session = makeSession({ status: "running" });
+
+    await scheduleCareNotifications(pet, session);
+
+    expect(mockCancel).toHaveBeenCalledOnce();
+    expect(mockRequestPermissions).not.toHaveBeenCalled();
+    expect(mockSchedule).not.toHaveBeenCalled();
+  });
+
+  it("does not schedule while a session awaits confirmation", async () => {
+    const pet = makePet({ hunger: 40, energy: 80 });
+    const session = makeSession({ status: "awaiting_confirmation" });
+
+    await scheduleCareNotifications(pet, session);
+
+    expect(mockCancel).toHaveBeenCalledOnce();
     expect(mockRequestPermissions).not.toHaveBeenCalled();
     expect(mockSchedule).not.toHaveBeenCalled();
   });

@@ -65,4 +65,35 @@ export async function cancelEndNotification(
   }
 }
 
+export async function removeDeliveredEndNotification(
+  sessionId: string,
+): Promise<void> {
+  if (!isNativeApp) {
+    return;
+  }
+
+  try {
+    const id = notificationIdForSession(sessionId);
+    const delivered = await LocalNotifications.getDeliveredNotifications();
+    const notifications = delivered.notifications.filter(
+      (notification) => notification.id === id,
+    );
+
+    if (notifications.length === 0) {
+      return;
+    }
+
+    await LocalNotifications.removeDeliveredNotifications({ notifications });
+  } catch {
+    // Silently ignore.
+  }
+}
+
+export async function clearEndNotification(sessionId: string): Promise<void> {
+  await Promise.all([
+    cancelEndNotification(sessionId),
+    removeDeliveredEndNotification(sessionId),
+  ]);
+}
+
 export { notificationIdForSession };

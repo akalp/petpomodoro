@@ -1,9 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const { mockSchedule, mockCancel, mockRequestPermissions } = vi.hoisted(() => ({
+const {
+  mockSchedule,
+  mockCancel,
+  mockRequestPermissions,
+  mockGetDeliveredNotifications,
+  mockRemoveDeliveredNotifications,
+} = vi.hoisted(() => ({
   mockSchedule: vi.fn(),
   mockCancel: vi.fn(),
   mockRequestPermissions: vi.fn(),
+  mockGetDeliveredNotifications: vi.fn(),
+  mockRemoveDeliveredNotifications: vi.fn(),
 }));
 
 vi.mock("@capacitor/local-notifications", () => ({
@@ -11,6 +19,8 @@ vi.mock("@capacitor/local-notifications", () => ({
     schedule: mockSchedule,
     cancel: mockCancel,
     requestPermissions: mockRequestPermissions,
+    getDeliveredNotifications: mockGetDeliveredNotifications,
+    removeDeliveredNotifications: mockRemoveDeliveredNotifications,
   },
 }));
 
@@ -24,7 +34,9 @@ vi.mock("../platform", () => ({
 
 import {
   cancelEndNotification,
+  clearEndNotification,
   notificationIdForSession,
+  removeDeliveredEndNotification,
   scheduleEndNotification,
 } from "./focusAlerts";
 import { makeSession } from "../test/factories";
@@ -143,5 +155,61 @@ describe("cancelEndNotification", () => {
     mockCancel.mockRejectedValue(new Error("native error"));
 
     await expect(cancelEndNotification("sess-1")).resolves.toBeUndefined();
+  });
+});
+
+describe("removeDeliveredEndNotification", () => {
+  it("removes a delivered notification by derived id", async () => {
+    const notification = {
+      id: notificationIdForSession("sess-1"),
+      title: "Focus time is up",
+      body: "Your pet is waiting for you. Come back when you can.",
+    };
+    mockGetDeliveredNotifications.mockResolvedValue({
+      notifications: [notification, { ...notification, id: 123 }],
+    });
+
+    await removeDeliveredEndNotification("sess-1");
+
+    expect(mockRemoveDeliveredNotifications).toHaveBeenCalledOnce();
+    expect(mockRemoveDeliveredNotifications).toHaveBeenCalledWith({
+      notifications: [notification],
+    });
+  });
+
+  it("does not remove when no delivered notification matches", async () => {
+    mockGetDeliveredNotifications.mockResolvedValue({ notifications: [] });
+
+    await removeDeliveredEndNotification("sess-1");
+
+    expect(mockRemoveDeliveredNotifications).not.toHaveBeenCalled();
+  });
+
+  it("does not remove in the browser/PWA", async () => {
+    nativeApp = false;
+
+    await removeDeliveredEndNotification("sess-1");
+
+    expect(mockGetDeliveredNotifications).not.toHaveBeenCalled();
+    expect(mockRemoveDeliveredNotifications).not.toHaveBeenCalled();
+  });
+
+  it("does not throw if delivered cleanup fails", async () => {
+    mockGetDeliveredNotifications.mockRejectedValue(new Error("native error"));
+
+    await expect(
+      removeDeliveredEndNotification("sess-1"),
+    ).resolves.toBeUndefined();
+  });
+});
+
+describe("clearEndNotification", () => {
+  it("cancels pending and removes delivered focus notifications", async () => {
+    mockGetDeliveredNotifications.mockResolvedValue({ notifications: [] });
+
+    await clearEndNotification("sess-1");
+
+    expect(mockCancel).toHaveBeenCalledOnce();
+    expect(mockGetDeliveredNotifications).toHaveBeenCalledOnce();
   });
 });

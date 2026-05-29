@@ -1,23 +1,20 @@
 import { LocalNotifications } from "@capacitor/local-notifications";
 
 import { isNativeApp } from "../platform";
-import type { PetState } from "../domain";
+import { ACTIVE_BALANCE_PROFILE, type FocusSession, type PetState } from "../domain";
 
 const CARE_HUNGER_NOTIFICATION_ID = 1_000_001;
 const CARE_ENERGY_NOTIFICATION_ID = 1_000_002;
 
-const HUNGER_THRESHOLD = 15;
-const ENERGY_THRESHOLD = 30;
-const HUNGER_DECAY_PER_HOUR = 2;
-const CRITICAL_HUNGER_THRESHOLD = 20;
-const ENERGY_DECAY_PER_HOUR = 2;
+const HUNGER_THRESHOLD = moodThreshold("hungry", "hunger", 15);
+const ENERGY_THRESHOLD = moodThreshold("tired", "energy", 30);
 
 function hoursUntilHungerReaches(hunger: number, target: number): number {
   if (hunger <= target) {
     return 0;
   }
 
-  return (hunger - target) / HUNGER_DECAY_PER_HOUR;
+  return (hunger - target) / ACTIVE_BALANCE_PROFILE.care.hungerDecayPerHour;
 }
 
 function hoursUntilEnergyReaches(
@@ -29,25 +26,34 @@ function hoursUntilEnergyReaches(
     return 0;
   }
 
-  if (hunger > CRITICAL_HUNGER_THRESHOLD) {
+  if (hunger > ACTIVE_BALANCE_PROFILE.care.criticalHungerEnergyThreshold) {
     const hoursToCriticalHunger =
-      (hunger - CRITICAL_HUNGER_THRESHOLD) / HUNGER_DECAY_PER_HOUR;
-    const hoursToTargetEnergy = (energy - target) / ENERGY_DECAY_PER_HOUR;
+      (hunger - ACTIVE_BALANCE_PROFILE.care.criticalHungerEnergyThreshold) /
+      ACTIVE_BALANCE_PROFILE.care.hungerDecayPerHour;
+    const hoursToTargetEnergy =
+      (energy - target) /
+      ACTIVE_BALANCE_PROFILE.care.criticalHungerEnergyDecayPerHour;
 
     return hoursToCriticalHunger + hoursToTargetEnergy;
   }
 
-  return (energy - target) / ENERGY_DECAY_PER_HOUR;
+  return (
+    (energy - target) /
+    ACTIVE_BALANCE_PROFILE.care.criticalHungerEnergyDecayPerHour
+  );
 }
 
 export async function scheduleCareNotifications(
   pet: PetState,
+  activeSession?: FocusSession | null,
 ): Promise<void> {
   if (!isNativeApp) {
     return;
   }
 
-  if (pet.sleepStartedAt) {
+  await cancelAllCareNotifications();
+
+  if (pet.sleepStartedAt || isFocusActive(activeSession)) {
     return;
   }
 
@@ -124,4 +130,27 @@ export async function cancelAllCareNotifications(): Promise<void> {
   } catch {
     // Silently ignore.
   }
+}
+
+function isFocusActive(session: FocusSession | null | undefined): boolean {
+  return (
+    session?.status === "running" ||
+    session?.status === "awaiting_confirmation"
+  );
+}
+
+function moodThreshold(
+  mood: "hungry" | "tired",
+  metric: "hunger" | "energy",
+  fallback: number,
+): number {
+  const rule = ACTIVE_BALANCE_PROFILE.mood.rules.find(
+    (candidate) => candidate.mood === mood,
+  );
+  const condition = rule?.conditions.find(
+    (candidate) =>
+      candidate.metric === metric && candidate.comparison === "lte",
+  );
+
+  return condition?.value ?? fallback;
 }
