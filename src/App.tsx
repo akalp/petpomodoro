@@ -294,7 +294,7 @@ export function App() {
     <PetScreen
       displayMood={displayMood}
       dailyFocusToday={dailyFocusToday}
-      installHint={<InstallHint t={t} />}
+      installHint={isNativeApp ? null : <InstallHint t={t} />}
       isFocusActive={isFocusActive}
       isSleepDisabled={isBusy || !hasHydrated}
       lastEmergencySnackSummary={lastEmergencySnackSummary}
@@ -330,7 +330,7 @@ export function App() {
         onOpenSettings={() => { if (hasHydrated) setActiveSheet("settings"); }}
         t={t}
       />
-      <AppUpdatePrompt t={t} />
+      {!isNativeApp && <AppUpdatePrompt t={t} />}
       {error ? <ErrorNotice message={localizeErrorMessage(error, t)} t={t} /> : null}
       {!hasHydrated && isInitializing ? <LoadingCard t={t} /> : null}
       <AppRoutes
@@ -338,11 +338,13 @@ export function App() {
           <FocusScreen
             focusPanel={focusPanel}
             shortcutInstallHint={
-              <ShortcutInstallHint
-                installedShortcutVersion={installedShortcutVersion}
-                onConfirmInstalledShortcut={() => setShortcutInstalled(true)}
-                t={t}
-              />
+              isNativeApp ? null : (
+                <ShortcutInstallHint
+                  installedShortcutVersion={installedShortcutVersion}
+                  onConfirmInstalledShortcut={() => setShortcutInstalled(true)}
+                  t={t}
+                />
+              )
             }
           />
         }
