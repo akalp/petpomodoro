@@ -131,6 +131,20 @@ describe("scheduleEndNotification", () => {
 
     await expect(scheduleEndNotification(session)).resolves.toBeUndefined();
   });
+  it("schedules a notification with Turkish copy when language is tr", async () => {
+    const future = new Date(Date.now() + 60_000).toISOString();
+    const session = makeSession({ id: "sess-1", expectedEndAt: future });
+
+    mockRequestPermissions.mockResolvedValue({ display: "granted" });
+    mockSchedule.mockResolvedValue({ notifications: [] });
+
+    await scheduleEndNotification(session, "tr");
+
+    expect(mockSchedule).toHaveBeenCalledOnce();
+    const call = mockSchedule.mock.calls[0][0];
+    expect(call.notifications[0].title).toBe("Odak süresi doldu");
+    expect(call.notifications[0].body).toBe("Dostun seni bekliyor. Geldiğinde geri gel.");
+  });
 });
 
 describe("cancelEndNotification", () => {

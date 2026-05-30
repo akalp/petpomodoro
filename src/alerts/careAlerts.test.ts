@@ -215,6 +215,41 @@ describe("scheduleCareNotifications", () => {
       before + expectedMs + 1000,
     );
   });
+  it("schedules hunger notification with Turkish copy when language is tr", async () => {
+    const pet = makePet({ hunger: 40, energy: 80 });
+    mockRequestPermissions.mockResolvedValue({ display: "granted" });
+    mockSchedule.mockResolvedValue({ notifications: [] });
+
+    await scheduleCareNotifications(pet, undefined, "tr");
+
+    expect(mockSchedule).toHaveBeenCalledOnce();
+    const call = mockSchedule.mock.calls[0][0];
+    const hungerNotif = call.notifications.find(
+      (n: { id: number }) => n.id === 1_000_001,
+    );
+
+    expect(hungerNotif).toBeDefined();
+    expect(hungerNotif.title).toBe("Dostun acıkmaya başlıyor");
+    expect(hungerNotif.body).toBe("Küçük bir atıştırmalık gününü güzelleştirir.");
+  });
+
+  it("schedules energy notification with Turkish copy when language is tr", async () => {
+    const pet = makePet({ hunger: 18, energy: 50 });
+    mockRequestPermissions.mockResolvedValue({ display: "granted" });
+    mockSchedule.mockResolvedValue({ notifications: [] });
+
+    await scheduleCareNotifications(pet, undefined, "tr");
+
+    expect(mockSchedule).toHaveBeenCalledOnce();
+    const call = mockSchedule.mock.calls[0][0];
+    const energyNotif = call.notifications.find(
+      (n: { id: number }) => n.id === 1_000_002,
+    );
+
+    expect(energyNotif).toBeDefined();
+    expect(energyNotif.title).toBe("Dostunun dinlenmesi gerekiyor");
+    expect(energyNotif.body).toBe("Sıcacık bir uyku onu canlandırır.");
+  });
 });
 
 describe("cancelAllCareNotifications", () => {

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { clearEndNotification } from "../alerts";
-import { usePetStore, usePomodoroStore } from "../stores";
+import { DEFAULT_LANGUAGE } from "../i18n";
+import { usePetStore, usePomodoroStore, useSettingsStore } from "../stores";
 import { clearFocusLiveActivity } from "../platform/liveActivity";
 
 export function useAppTimer(hasHydrated: boolean) {
@@ -11,17 +12,18 @@ export function useAppTimer(hasHydrated: boolean) {
   const loadRecentSessions = usePomodoroStore((state) => state.loadRecentSessions);
   const updateAppOpenDecay = usePetStore((state) => state.updateAppOpenDecay);
   const pet = usePetStore((state) => state.pet);
+  const language = useSettingsStore((state) => state.settings?.language ?? DEFAULT_LANGUAGE);
 
   const petIsSleeping = pet ? pet.sleepStartedAt !== null : false;
 
   const refreshSession = useCallback(async (now = new Date().toISOString()) => {
     const session = await refreshSessionStatus(now);
     if (session?.status === "awaiting_confirmation") {
-      void clearFocusLiveActivity(session);
+      void clearFocusLiveActivity(session, language);
       void clearEndNotification(session.id);
     }
     void loadRecentSessions();
-  }, [loadRecentSessions, refreshSessionStatus]);
+  }, [loadRecentSessions, refreshSessionStatus, language]);
 
   useEffect(() => {
     if (!hasHydrated) {
@@ -60,9 +62,9 @@ export function useAppTimer(hasHydrated: boolean) {
       return;
     }
 
-    void clearFocusLiveActivity(activeSession);
+    void clearFocusLiveActivity(activeSession, language);
     void clearEndNotification(activeSession.id);
-  }, [activeSession, hasHydrated]);
+  }, [activeSession, hasHydrated, language]);
 
   useEffect(() => {
     if (activeSession?.status !== "running" && !petIsSleeping) {

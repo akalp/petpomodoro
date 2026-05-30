@@ -20,13 +20,13 @@ describe("startLiveActivityTimer", () => {
     const session = makeSession({ id: "sess-1" });
     const getter = vi.fn().mockReturnValue(session);
 
-    const handle = startLiveActivityTimer(getter);
+    const handle = startLiveActivityTimer(getter, "en");
 
     expect(mockUpdate).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(60_000);
     expect(mockUpdate).toHaveBeenCalledOnce();
-    expect(mockUpdate).toHaveBeenCalledWith(session, "running");
+    expect(mockUpdate).toHaveBeenCalledWith(session, "running", "en");
 
     vi.advanceTimersByTime(60_000);
     expect(mockUpdate).toHaveBeenCalledTimes(2);
@@ -39,7 +39,7 @@ describe("startLiveActivityTimer", () => {
     const session = makeSession();
     const getter = vi.fn().mockReturnValue(session);
 
-    const handle = startLiveActivityTimer(getter);
+    const handle = startLiveActivityTimer(getter, "en");
 
     vi.advanceTimersByTime(60_000);
     expect(mockUpdate).toHaveBeenCalledOnce();
@@ -55,10 +55,10 @@ describe("startLiveActivityTimer", () => {
     const session = makeSession({ id: "sess-1", status: "awaiting_confirmation" });
     const getter = vi.fn().mockReturnValue(session);
 
-    const handle = startLiveActivityTimer(getter);
+    const handle = startLiveActivityTimer(getter, "en");
 
     vi.advanceTimersByTime(60_000);
-    expect(mockUpdate).toHaveBeenCalledWith(session, "awaiting_confirmation");
+    expect(mockUpdate).toHaveBeenCalledWith(session, "awaiting_confirmation", "en");
 
     stopLiveActivityTimer(handle);
   });
@@ -71,13 +71,26 @@ describe("startLiveActivityTimer", () => {
       .mockReturnValueOnce(runningSession)
       .mockReturnValueOnce(awaitingSession);
 
-    const handle = startLiveActivityTimer(getter);
+    const handle = startLiveActivityTimer(getter, "en");
 
     vi.advanceTimersByTime(60_000);
-    expect(mockUpdate).toHaveBeenCalledWith(runningSession, "running");
+    expect(mockUpdate).toHaveBeenCalledWith(runningSession, "running", "en");
 
     vi.advanceTimersByTime(60_000);
-    expect(mockUpdate).toHaveBeenCalledWith(awaitingSession, "awaiting_confirmation");
+    expect(mockUpdate).toHaveBeenCalledWith(awaitingSession, "awaiting_confirmation", "en");
+
+    stopLiveActivityTimer(handle);
+  });
+
+  it("passes language to updateFocusLiveActivity", async () => {
+    vi.useFakeTimers();
+    const session = makeSession({ id: "sess-1" });
+    const getter = vi.fn().mockReturnValue(session);
+
+    const handle = startLiveActivityTimer(getter, "tr");
+
+    vi.advanceTimersByTime(60_000);
+    expect(mockUpdate).toHaveBeenCalledWith(session, "running", "tr");
 
     stopLiveActivityTimer(handle);
   });
@@ -89,7 +102,7 @@ describe("stopLiveActivityTimer", () => {
     const session = makeSession();
     const getter = vi.fn().mockReturnValue(session);
 
-    const handle = startLiveActivityTimer(getter);
+    const handle = startLiveActivityTimer(getter, "en");
     stopLiveActivityTimer(handle);
 
     vi.advanceTimersByTime(120_000);

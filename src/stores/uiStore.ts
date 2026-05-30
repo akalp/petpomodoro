@@ -1,6 +1,7 @@
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 
 import { scheduleCareNotifications } from "../alerts";
+import { DEFAULT_LANGUAGE } from "../i18n";
 import { errorMessage } from "./errors";
 import { usePetStore, type PetStoreState } from "./petStore";
 import { usePomodoroStore, type PomodoroStoreState } from "./pomodoroStore";
@@ -23,7 +24,7 @@ export interface UiStoreDependencies {
     StoreApi<Pick<PomodoroStoreState, "activeSession" | "restoreRunningSessionAfterAppLaunch">>
   >;
   settingsStore: UseBoundStore<
-    StoreApi<Pick<SettingsStoreState, "initializeSettings">>
+    StoreApi<Pick<SettingsStoreState, "initializeSettings" | "settings">>
   >;
   now: () => string;
 }
@@ -68,7 +69,8 @@ export function createUiStore(
         const currentPet = dependencies.petStore.getState().pet;
 
         if (currentPet) {
-          void scheduleCareNotifications(currentPet, activeSession);
+          const language = dependencies.settingsStore.getState().settings?.language ?? DEFAULT_LANGUAGE;
+          void scheduleCareNotifications(currentPet, activeSession, language);
         }
 
         set({ hasHydrated: true, isInitializing: false });

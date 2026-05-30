@@ -298,6 +298,24 @@ const englishMessages = {
   resetDevice: "Reset this device",
   resetConfirmation:
     "Reset the pet, sessions, and rewards saved on this device?",
+  focusEndNotificationTitle: "Focus time is up",
+  focusEndNotificationBody: "Your pet is waiting for you. Come back when you can.",
+  careHungerNotificationTitle: "Your pet is getting hungry",
+  careHungerNotificationBody: "A small snack would brighten their day.",
+  careEnergyNotificationTitle: "Your pet could use a rest",
+  careEnergyNotificationBody: "A cozy nap helps them recover.",
+  liveActivityRunningTitle: "Focus time",
+  liveActivityAwaitingTitle: "Time's up",
+  liveActivityCompletedTitle: "Session complete",
+  liveActivityAbandonedTitle: "Session ended",
+  liveActivityRunningSupport: "Come back to confirm when time is up",
+  liveActivityAwaitingSupport: "Come back to confirm",
+  liveActivityCompletedSupport: "Your pet noticed",
+  liveActivityAbandonedSupport: "No scolding",
+  liveActivityCompactRunning: "Focus",
+  liveActivityCompactAwaiting: "Confirm",
+  liveActivityCompactCompleted: "Done",
+  liveActivityCompactAbandoned: "Ended",
 } as const;
 
 export type MessageKey = keyof typeof englishMessages;
@@ -587,6 +605,24 @@ const turkishMessages: Record<MessageKey, string> = {
   resetDevice: "Bu cihazı sıfırla",
   resetConfirmation:
     "Bu cihazda kayıtlı dost, oturum ve ödüller sıfırlansın mı?",
+  focusEndNotificationTitle: "Odak süresi doldu",
+  focusEndNotificationBody: "Dostun seni bekliyor. Geldiğinde geri gel.",
+  careHungerNotificationTitle: "Dostun acıkmaya başlıyor",
+  careHungerNotificationBody: "Küçük bir atıştırmalık gününü güzelleştirir.",
+  careEnergyNotificationTitle: "Dostunun dinlenmesi gerekiyor",
+  careEnergyNotificationBody: "Sıcacık bir uyku onu canlandırır.",
+  liveActivityRunningTitle: "Odak süresi",
+  liveActivityAwaitingTitle: "Süre doldu",
+  liveActivityCompletedTitle: "Oturum tamamlandı",
+  liveActivityAbandonedTitle: "Oturum bitti",
+  liveActivityRunningSupport: "Süre dolduğunda geri gel onayla",
+  liveActivityAwaitingSupport: "Geri gel onayla",
+  liveActivityCompletedSupport: "Dostun fark etti",
+  liveActivityAbandonedSupport: "Azarlama yok",
+  liveActivityCompactRunning: "Odak",
+  liveActivityCompactAwaiting: "Onay",
+  liveActivityCompactCompleted: "Tamam",
+  liveActivityCompactAbandoned: "Bitti",
 };
 
 const messages: Record<SupportedLanguage, Record<MessageKey, string>> = {
@@ -611,6 +647,60 @@ export function createTranslator(language: SupportedLanguage): Translator {
         message.replaceAll(`{${name}}`, String(value)),
       messages[language][key],
     );
+}
+
+export interface NativeFocusCopy {
+  focusEndTitle: string;
+  focusEndBody: string;
+  runningTitle: string;
+  runningSupport: string;
+  awaitingTitle: string;
+  awaitingSupport: string;
+  completedTitle: string;
+  completedSupport: string;
+  abandonedTitle: string;
+  abandonedSupport: string;
+  compactRunning: string;
+  compactAwaiting: string;
+  compactCompleted: string;
+  compactAbandoned: string;
+}
+
+export interface NativeCareCopy {
+  hungerTitle: string;
+  hungerBody: string;
+  energyTitle: string;
+  energyBody: string;
+}
+
+export function createNativeFocusCopy(language: SupportedLanguage): NativeFocusCopy {
+  const t = createTranslator(language);
+  return {
+    focusEndTitle: t("focusEndNotificationTitle"),
+    focusEndBody: t("focusEndNotificationBody"),
+    runningTitle: t("liveActivityRunningTitle"),
+    runningSupport: t("liveActivityRunningSupport"),
+    awaitingTitle: t("liveActivityAwaitingTitle"),
+    awaitingSupport: t("liveActivityAwaitingSupport"),
+    completedTitle: t("liveActivityCompletedTitle"),
+    completedSupport: t("liveActivityCompletedSupport"),
+    abandonedTitle: t("liveActivityAbandonedTitle"),
+    abandonedSupport: t("liveActivityAbandonedSupport"),
+    compactRunning: t("liveActivityCompactRunning"),
+    compactAwaiting: t("liveActivityCompactAwaiting"),
+    compactCompleted: t("liveActivityCompactCompleted"),
+    compactAbandoned: t("liveActivityCompactAbandoned"),
+  };
+}
+
+export function createNativeCareCopy(language: SupportedLanguage): NativeCareCopy {
+  const t = createTranslator(language);
+  return {
+    hungerTitle: t("careHungerNotificationTitle"),
+    hungerBody: t("careHungerNotificationBody"),
+    energyTitle: t("careEnergyNotificationTitle"),
+    energyBody: t("careEnergyNotificationBody"),
+  };
 }
 
 export function localizeErrorMessage(message: string, t: Translator): string {

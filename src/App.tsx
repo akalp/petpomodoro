@@ -214,8 +214,8 @@ export function App() {
       return;
     }
 
-    void scheduleCareNotifications(pet, activeSession).catch(() => undefined);
-  }, [activeSession, hasHydrated, pet]);
+    void scheduleCareNotifications(pet, activeSession, language).catch(() => undefined);
+  }, [activeSession, hasHydrated, pet, language]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -398,7 +398,7 @@ export function App() {
           onMotivationalMessagesSave={handleMotivationalMessagesSave}
           onPetNameSave={handlePetNameSave}
           onSelectSpecies={handleSpeciesSelection}
-          onResetLocalData={() => handleResetLocalData(t)}
+          onResetLocalData={() => handleResetLocalData(t, language)}
           onShortcutInstalledChange={setShortcutInstalled}
           pet={pet}
           showHeader={false}

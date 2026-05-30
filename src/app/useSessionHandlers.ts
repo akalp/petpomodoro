@@ -19,7 +19,9 @@ import {
   stopLiveActivityTimer,
 } from "../platform/liveActivityTimer";
 import type { LiveActivityTimerHandle } from "../platform/liveActivityTimer";
-import { usePomodoroStore, usePetStore } from "../stores";
+import { DEFAULT_LANGUAGE } from "../i18n";
+import type { SupportedLanguage } from "../i18n";
+import { usePomodoroStore, usePetStore, useSettingsStore } from "../stores";
 
 let liveActivityTimer: LiveActivityTimerHandle | null = null;
 let expiryTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -33,6 +35,7 @@ export function useSessionHandlers(
   const confirmCompleted = usePomodoroStore((state) => state.confirmCompleted);
   const confirmAbandoned = usePomodoroStore((state) => state.confirmAbandoned);
   const loadDailyFocusOverview = usePetStore((state) => state.loadDailyFocusOverview);
+  const language = useSettingsStore((state) => state.settings?.language ?? DEFAULT_LANGUAGE);
 
   const handleStart = (
     duration: number,
@@ -48,12 +51,12 @@ export function useSessionHandlers(
     void startSession(duration)
       .then((session) => {
         void loadRecentSessions();
-        void scheduleEndNotification(session);
-        void startFocusLiveActivity(session);
+        void scheduleEndNotification(session, language);
+        void startFocusLiveActivity(session, language);
         liveActivityTimer = startLiveActivityTimer(() => {
           return usePomodoroStore.getState().activeSession ?? session;
-        });
-        scheduleExpiryUpdate(session);
+        }, language);
+        scheduleExpiryUpdate(session, language);
         runStartNativeTimerShortcut(
           session.plannedDurationMinutes,
           isCurrentStartNativeTimerShortcutInstalled(installedShortcutVersion),
@@ -66,7 +69,7 @@ export function useSessionHandlers(
     void cancelSession()
       .then((session) => {
         void clearEndNotification(session.id);
-        void endFocusLiveActivity(session, "abandoned");
+        void endFocusLiveActivity(session, "abandoned", language);
         clearExpiryTimeout();
         if (liveActivityTimer) {
           stopLiveActivityTimer(liveActivityTimer);
@@ -81,7 +84,7 @@ export function useSessionHandlers(
     void confirmCompleted()
       .then((session) => {
         void clearEndNotification(session.id);
-        void endFocusLiveActivity(session, "completed");
+        void endFocusLiveActivity(session, "completed", language);
         clearExpiryTimeout();
         if (liveActivityTimer) {
           stopLiveActivityTimer(liveActivityTimer);
@@ -96,7 +99,7 @@ export function useSessionHandlers(
     void confirmAbandoned()
       .then((session) => {
         void clearEndNotification(session.id);
-        void endFocusLiveActivity(session, "abandoned");
+        void endFocusLiveActivity(session, "abandoned", language);
         clearExpiryTimeout();
         if (liveActivityTimer) {
           stopLiveActivityTimer(liveActivityTimer);
@@ -144,7 +147,7 @@ function clearExpiryTimeout(): void {
 function scheduleExpiryUpdate(session: {
   id: string;
   expectedEndAt: string;
-}): void {
+}, language: SupportedLanguage): void {
   clearExpiryTimeout();
   const delay = Date.parse(session.expectedEndAt) - Date.now();
   if (delay <= 0) {
@@ -154,7 +157,7 @@ function scheduleExpiryUpdate(session: {
     expiryTimeout = null;
     const current = usePomodoroStore.getState().activeSession;
     if (current?.status === "awaiting_confirmation") {
-      void clearFocusLiveActivity(current);
+      void clearFocusLiveActivity(current, language);
       void clearEndNotification(current.id);
       if (liveActivityTimer) {
         stopLiveActivityTimer(liveActivityTimer);

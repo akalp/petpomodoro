@@ -4,6 +4,8 @@
 // unhandled rejection warnings in the UI layer.
 
 import type { Translator } from "../i18n";
+import { DEFAULT_LANGUAGE } from "../i18n";
+import type { SupportedLanguage } from "../i18n";
 import { cancelAllCareNotifications, clearEndNotification } from "../alerts";
 import { clearFocusLiveActivity } from "../platform/liveActivity";
 import { usePetStore, usePomodoroStore, useSettingsStore, useUiStore } from "../stores";
@@ -91,7 +93,7 @@ export function usePetHandlers({
     void wakeSleep().catch(() => undefined);
   };
 
-  const handleResetLocalData = (t: Translator) => {
+  const handleResetLocalData = (t: Translator, language: SupportedLanguage = DEFAULT_LANGUAGE) => {
     const shouldReset = window.confirm(
       t("resetConfirmation"),
     );
@@ -106,7 +108,7 @@ export function usePetHandlers({
         void cancelAllCareNotifications();
         if (activeSession) {
           void clearEndNotification(activeSession.id);
-          void clearFocusLiveActivity(activeSession);
+          void clearFocusLiveActivity(activeSession, language);
         }
         resetInitialization();
         onReset?.();

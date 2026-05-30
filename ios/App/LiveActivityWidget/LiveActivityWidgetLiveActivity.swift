@@ -52,30 +52,30 @@ private func displayPhase(context: GenericAttributes.ContentState) -> FocusPhase
     return phase
 }
 
-private func primaryText(for phase: FocusPhase) -> String {
+private func primaryText(for phase: FocusPhase, values: [String: String]) -> String {
     switch phase {
-    case .running: return "Focus time"
-    case .awaitingConfirmation: return "Time's up"
-    case .completed: return "Session complete"
-    case .abandoned: return "Session ended"
+    case .running: return values["title"] ?? "Focus time"
+    case .awaitingConfirmation: return values["title"] ?? "Time's up"
+    case .completed: return values["title"] ?? "Session complete"
+    case .abandoned: return values["title"] ?? "Session ended"
     }
 }
 
-private func supportingText(for phase: FocusPhase) -> String {
+private func supportingText(for phase: FocusPhase, values: [String: String]) -> String {
     switch phase {
-    case .running: return "Come back to confirm when time is up"
-    case .awaitingConfirmation: return "Come back to confirm"
-    case .completed: return "Your pet noticed"
-    case .abandoned: return "No scolding"
+    case .running: return values["support"] ?? "Come back to confirm when time is up"
+    case .awaitingConfirmation: return values["support"] ?? "Come back to confirm"
+    case .completed: return values["support"] ?? "Your pet noticed"
+    case .abandoned: return values["support"] ?? "No scolding"
     }
 }
 
-private func compactText(for phase: FocusPhase) -> String {
+private func compactText(for phase: FocusPhase, values: [String: String]) -> String {
     switch phase {
-    case .running: return "Focus"
-    case .awaitingConfirmation: return "Confirm"
-    case .completed: return "Done"
-    case .abandoned: return "Ended"
+    case .running: return values["compact"] ?? "Focus"
+    case .awaitingConfirmation: return values["compact"] ?? "Confirm"
+    case .completed: return values["compact"] ?? "Done"
+    case .abandoned: return values["compact"] ?? "Ended"
     }
 }
 
@@ -104,13 +104,13 @@ struct LiveActivityWidgetLiveActivity: Widget {
                         .lineLimit(1)
                         .minimumScaleFactor(0.72)
                 } else {
-                    Text(primaryText(for: phase))
+                    Text(primaryText(for: phase, values: context.state.values))
                         .font(.system(size: 30, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.72)
                 }
-                Text(supportingText(for: phase))
+                Text(supportingText(for: phase, values: context.state.values))
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.8))
                     .lineLimit(1)
@@ -139,7 +139,7 @@ struct LiveActivityWidgetLiveActivity: Widget {
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(alignment: .center, spacing: 4) {
-                        Text(phase == .running ? "Focus time" : compactText(for: phase))
+                        Text(phase == .running ? (context.state.values["title"] ?? "Focus time") : compactText(for: phase, values: context.state.values))
                             .font(.system(size: 12, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white.opacity(0.82))
                             .lineLimit(1)
@@ -152,13 +152,13 @@ struct LiveActivityWidgetLiveActivity: Widget {
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.7)
                         } else {
-                            Text(primaryText(for: phase))
+                            Text(primaryText(for: phase, values: context.state.values))
                                 .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .foregroundStyle(.white)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.7)
                         }
-                        Text(supportingText(for: phase))
+                        Text(supportingText(for: phase, values: context.state.values))
                             .font(.system(size: 11, weight: .medium, design: .rounded))
                             .foregroundStyle(.white.opacity(0.8))
                             .lineLimit(1)
@@ -187,7 +187,7 @@ struct LiveActivityWidgetLiveActivity: Widget {
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.white)
                 } else {
-                    Text(compactText(for: phase))
+                    Text(compactText(for: phase, values: context.state.values))
                         .font(.system(size: 10, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white)
                         .lineLimit(1)

@@ -2,6 +2,11 @@ import { LocalNotifications } from "@capacitor/local-notifications";
 
 import { isNativeApp } from "../platform";
 import { ACTIVE_BALANCE_PROFILE, type FocusSession, type PetState } from "../domain";
+import {
+  DEFAULT_LANGUAGE,
+  createNativeCareCopy,
+  type SupportedLanguage,
+} from "../i18n";
 
 const CARE_HUNGER_NOTIFICATION_ID = 1_000_001;
 const CARE_ENERGY_NOTIFICATION_ID = 1_000_002;
@@ -46,6 +51,7 @@ function hoursUntilEnergyReaches(
 export async function scheduleCareNotifications(
   pet: PetState,
   activeSession?: FocusSession | null,
+  language: SupportedLanguage = DEFAULT_LANGUAGE,
 ): Promise<void> {
   if (!isNativeApp) {
     return;
@@ -70,11 +76,12 @@ export async function scheduleCareNotifications(
 
   if (hungerHours > 0) {
     const hungerAt = new Date(now + hungerHours * 3600_000);
+    const copy = createNativeCareCopy(language);
 
     notifications.push({
       id: CARE_HUNGER_NOTIFICATION_ID,
-      title: "Your pet is getting hungry",
-      body: "A small snack would brighten their day.",
+      title: copy.hungerTitle,
+      body: copy.hungerBody,
       sound: "notification.caf",
       schedule: { at: hungerAt },
     });
@@ -88,11 +95,12 @@ export async function scheduleCareNotifications(
 
   if (energyHours > 0) {
     const energyAt = new Date(now + energyHours * 3600_000);
+    const copy = createNativeCareCopy(language);
 
     notifications.push({
       id: CARE_ENERGY_NOTIFICATION_ID,
-      title: "Your pet could use a rest",
-      body: "A cozy nap helps them recover.",
+      title: copy.energyTitle,
+      body: copy.energyBody,
       sound: "notification.caf",
       schedule: { at: energyAt },
     });

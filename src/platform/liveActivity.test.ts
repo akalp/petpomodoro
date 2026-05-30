@@ -58,11 +58,28 @@ describe("startFocusLiveActivity", () => {
     const call = mockStartActivity.mock.calls[0][0];
     expect(call.id).toBe("petpomodoro-focus-sess-1");
     expect(call.attributes.sessionId).toBe("sess-1");
-    expect(call.contentState.title).toBe("Focus Session");
+    expect(call.contentState.title).toBe("Focus time");
     expect(call.contentState.phase).toBe("running");
     expect(call.contentState.startedAt).toBe(session.startedAt);
     expect(call.contentState.expectedEndAt).toBe(session.expectedEndAt);
     expect(call.contentState.petEmoji).toBe("🐾");
+    expect(call.contentState.support).toBe("Come back to confirm when time is up");
+    expect(call.contentState.compact).toBe("Focus");
+  });
+
+  it("starts a live activity with Turkish copy when language is tr", async () => {
+    const future = new Date(Date.now() + 600_000).toISOString();
+    const session = makeSession({ id: "sess-1", expectedEndAt: future });
+    mockIsAvailable.mockResolvedValue({ value: true });
+    mockStartActivity.mockResolvedValue(undefined);
+
+    await startFocusLiveActivity(session, "tr");
+
+    expect(mockStartActivity).toHaveBeenCalledOnce();
+    const call = mockStartActivity.mock.calls[0][0];
+    expect(call.contentState.title).toBe("Odak süresi");
+    expect(call.contentState.support).toBe("Süre dolduğunda geri gel onayla");
+    expect(call.contentState.compact).toBe("Odak");
   });
 
   it("does not start in the browser/PWA", async () => {
@@ -150,6 +167,28 @@ describe("updateFocusLiveActivity", () => {
     expect(mockUpdateActivity).toHaveBeenCalledOnce();
     const call = mockUpdateActivity.mock.calls[0][0];
     expect(call.contentState.phase).toBe("awaiting_confirmation");
+    expect(call.contentState.title).toBe("Time's up");
+    expect(call.contentState.support).toBe("Come back to confirm");
+    expect(call.contentState.compact).toBe("Confirm");
+  });
+
+  it("sends Turkish awaiting-confirmation copy when language is tr", async () => {
+    const future = new Date(Date.now() - 1000).toISOString();
+    const session = makeSession({
+      id: "sess-1",
+      expectedEndAt: future,
+      status: "awaiting_confirmation",
+    });
+    mockIsRunning.mockResolvedValue({ value: true });
+    mockUpdateActivity.mockResolvedValue(undefined);
+
+    await updateFocusLiveActivity(session, "awaiting_confirmation", "tr");
+
+    expect(mockUpdateActivity).toHaveBeenCalledOnce();
+    const call = mockUpdateActivity.mock.calls[0][0];
+    expect(call.contentState.title).toBe("Süre doldu");
+    expect(call.contentState.support).toBe("Geri gel onayla");
+    expect(call.contentState.compact).toBe("Onay");
   });
 });
 
@@ -166,6 +205,21 @@ describe("endFocusLiveActivity", () => {
     const call = mockEndActivity.mock.calls[0][0];
     expect(call.id).toBe("petpomodoro-focus-sess-1");
     expect(call.contentState.phase).toBe("completed");
+    expect(call.contentState.title).toBe("Session complete");
+    expect(call.contentState.compact).toBe("Done");
+  });
+
+  it("ends with Turkish completed copy when language is tr", async () => {
+    const future = new Date(Date.now() + 600_000).toISOString();
+    const session = makeSession({ id: "sess-1", expectedEndAt: future });
+    mockIsRunning.mockResolvedValue({ value: true });
+    mockEndActivity.mockResolvedValue(undefined);
+
+    await endFocusLiveActivity(session, "completed", "tr");
+
+    const call = mockEndActivity.mock.calls[0][0];
+    expect(call.contentState.title).toBe("Oturum tamamlandı");
+    expect(call.contentState.compact).toBe("Tamam");
   });
 
   it("ends a running live activity with abandoned phase", async () => {
@@ -220,8 +274,20 @@ describe("clearFocusLiveActivity", () => {
     const call = mockEndActivity.mock.calls[0][0];
     expect(call.id).toBe("petpomodoro-focus-sess-1");
     expect(call.contentState.phase).toBe("awaiting_confirmation");
+    expect(call.contentState.title).toBe("Time's up");
     expect(call.dismissalDate).toBeTypeOf("number");
     expect(call.dismissalDate).toBeLessThanOrEqual(Date.now() / 1000);
+  });
+
+  it("clears with Turkish copy when language is tr", async () => {
+    const session = makeSession({ id: "sess-1", status: "awaiting_confirmation" });
+    mockIsRunning.mockResolvedValue({ value: true });
+    mockEndActivity.mockResolvedValue(undefined);
+
+    await clearFocusLiveActivity(session, "tr");
+
+    const call = mockEndActivity.mock.calls[0][0];
+    expect(call.contentState.title).toBe("Süre doldu");
   });
 
   it("does not clear in the browser/PWA", async () => {

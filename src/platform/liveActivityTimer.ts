@@ -1,4 +1,5 @@
 import type { FocusSession } from "../domain";
+import type { SupportedLanguage } from "../i18n";
 import {
   updateFocusLiveActivity,
   type FocusLiveActivityPhase,
@@ -24,10 +25,11 @@ function derivePhase(session: FocusSession): FocusLiveActivityPhase {
 
 export function startLiveActivityTimer(
   getSession: () => FocusSession,
+  language: SupportedLanguage,
 ): LiveActivityTimerHandle {
   return setInterval(() => {
     const session = getSession();
-    void updateFocusLiveActivity(session, derivePhase(session));
+    void updateFocusLiveActivity(session, derivePhase(session), language);
   }, UPDATE_INTERVAL_MS);
 }
 

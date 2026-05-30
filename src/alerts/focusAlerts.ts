@@ -2,6 +2,11 @@ import { LocalNotifications } from "@capacitor/local-notifications";
 
 import { isNativeApp } from "../platform";
 import type { FocusSession } from "../domain";
+import {
+  DEFAULT_LANGUAGE,
+  createNativeFocusCopy,
+  type SupportedLanguage,
+} from "../i18n";
 
 function notificationIdForSession(sessionId: string): number {
   let hash = 5381;
@@ -15,6 +20,7 @@ function notificationIdForSession(sessionId: string): number {
 
 export async function scheduleEndNotification(
   session: FocusSession,
+  language: SupportedLanguage = DEFAULT_LANGUAGE,
 ): Promise<void> {
   if (!isNativeApp) {
     return;
@@ -33,12 +39,14 @@ export async function scheduleEndNotification(
       return;
     }
 
+    const copy = createNativeFocusCopy(language);
+
     await LocalNotifications.schedule({
       notifications: [
         {
           id: notificationIdForSession(session.id),
-          title: "Focus time is up",
-          body: "Your pet is waiting for you. Come back when you can.",
+          title: copy.focusEndTitle,
+          body: copy.focusEndBody,
           sound: "notification.caf",
           schedule: { at: endAt },
         },
