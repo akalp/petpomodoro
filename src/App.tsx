@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 
 import { AppRoutes } from "./app/AppRoutes";
 import { AppShell } from "./app/AppShell";
-import { formatCountdown, shufflePetMessages } from "./app/helpers";
+import { formatCountdown } from "./app/helpers";
 import { ErrorNotice } from "./app/ErrorNotice";
 import { LoadingCard } from "./app/LoadingCard";
 import { useAppBootstrap } from "./app/useAppBootstrap";
 import { useAppTimer } from "./app/useAppTimer";
+import { useCareNotifications } from "./app/useCareNotifications";
 import { usePetHandlers } from "./app/usePetHandlers";
+import { usePetMessage } from "./app/usePetMessage";
 import { useSessionHandlers } from "./app/useSessionHandlers";
 import { AppTopBar } from "./components/layout/AppTopBar";
-import { scheduleCareNotifications } from "./alerts";
 import { AppUpdatePrompt } from "./components/pwa/AppUpdatePrompt";
 import { InstallHint } from "./components/pwa/InstallHint";
 import { ShortcutInstallHint } from "./components/pwa/ShortcutInstallHint";
@@ -60,19 +60,12 @@ const EMPTY_MOTIVATIONAL_MESSAGES: string[] = [];
 type AppSheet = "settings" | null;
 
 export function App() {
-  const location = useLocation();
   const [activeSheet, setActiveSheet] = useState<AppSheet>(null);
   const [selectedDurationOverride, setSelectedDurationOverride] = useState<
     number | null
   >(
     null,
   );
-  const [selectedPetMessage, setSelectedPetMessage] = useState<string | null>(
-    null,
-  );
-  const petMessageQueue = useRef<string[]>([]);
-  const petMessageKey = useRef("");
-  const lastPetMessage = useRef<string | null>(null);
 
   const { hasHydrated, isInitializing, resetInitialization } = useAppBootstrap();
   const { currentTime, setCurrentTime } = useAppTimer(hasHydrated);
@@ -148,7 +141,6 @@ export function App() {
   );
   const motivationalMessages =
     settings?.motivationalMessages ?? EMPTY_MOTIVATIONAL_MESSAGES;
-  const motivationalMessageKey = motivationalMessages.join("\n");
   const supportsIosFeatures =
     !isNativeApp &&
     typeof window !== "undefined" &&
@@ -188,7 +180,14 @@ export function App() {
         : null,
     [pet, petIsSleeping, currentTime],
   );
+  const selectedPetMessage = usePetMessage({
+    hasHydrated,
+    motivationalMessages,
+    activeSessionStatus: activeSession?.status ?? null,
+    displayMood,
+  });
   const petMessage = selectedPetMessage ?? t("petEncouragement");
+  useCareNotifications({ pet, activeSession, language, hasHydrated });
 
   const setPreferredDuration = (duration: number) => {
     setSelectedDurationOverride(duration);
@@ -204,52 +203,6 @@ export function App() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
-
-  useEffect(() => {
-    if (!hasHydrated || !pet) {
-      return;
-    }
-
-    void scheduleCareNotifications(pet, activeSession, language).catch(() => undefined);
-  }, [activeSession, hasHydrated, pet, language]);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      if (!hasHydrated || motivationalMessages.length === 0) {
-        petMessageQueue.current = [];
-        petMessageKey.current = motivationalMessageKey;
-        lastPetMessage.current = null;
-        setSelectedPetMessage(null);
-        return;
-      }
-
-      if (petMessageKey.current !== motivationalMessageKey) {
-        petMessageQueue.current = [];
-        petMessageKey.current = motivationalMessageKey;
-      }
-
-      if (petMessageQueue.current.length === 0) {
-        petMessageQueue.current = shufflePetMessages(
-          motivationalMessages,
-          lastPetMessage.current,
-        );
-      }
-
-      const nextMessage =
-        petMessageQueue.current.shift() ?? motivationalMessages[0];
-      lastPetMessage.current = nextMessage;
-      setSelectedPetMessage(nextMessage);
-    }, 0);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [
-    activeSession?.status,
-    displayMood,
-    hasHydrated,
-    location.pathname,
-    motivationalMessageKey,
-    motivationalMessages,
-  ]);
 
   const isBusy = isInitializing || isSessionLoading || isPetLoading;
   const error = uiError ?? petError ?? pomodoroError ?? settingsError;
