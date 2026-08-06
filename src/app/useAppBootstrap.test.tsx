@@ -14,6 +14,7 @@ vi.mock("../stores", () => {
     isInitializing: false,
     error: null,
     initializeApp: () => mockInitializeApp(),
+    resetAllLocalData: async () => undefined,
     clearError: () => set({ error: null }),
   }));
 

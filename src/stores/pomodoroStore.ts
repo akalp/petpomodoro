@@ -54,6 +54,7 @@ export interface PomodoroStoreState {
   refreshSessionStatus: (now?: string) => Promise<FocusSession | null>;
   confirmCompleted: (now?: string) => Promise<FocusSession>;
   confirmAbandoned: (now?: string) => Promise<FocusSession>;
+  resetAfterLocalDataReset: () => void;
   clearError: () => void;
 }
 
@@ -297,6 +298,14 @@ export function createPomodoroStore(
     },
 
     clearError: () => set({ error: null }),
+
+    resetAfterLocalDataReset: () =>
+      set({
+        activeSession: null,
+        error: null,
+        isLoading: false,
+        recentSessions: [],
+      }),
     };
   });
 }

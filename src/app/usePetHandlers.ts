@@ -9,20 +9,14 @@ import type { SupportedLanguage } from "../i18n";
 import { cancelAllCareNotifications, clearEndNotification } from "../alerts";
 import { clearFocusLiveActivity } from "../platform/liveActivity";
 import { usePetStore, usePomodoroStore, useSettingsStore, useUiStore } from "../stores";
-import { resetLocalData } from "../db";
-
 interface UsePetHandlersOptions {
   onReset?: () => void;
   resetInitialization: () => void;
-  initializeApp: () => Promise<void>;
-  loadRecentSessions: (limit?: number) => Promise<unknown>;
 }
 
 export function usePetHandlers({
   onReset,
   resetInitialization,
-  initializeApp,
-  loadRecentSessions,
 }: UsePetHandlersOptions) {
   const renamePet = usePetStore((state) => state.renamePet);
   const changeSpecies = usePetStore((state) => state.changeSpecies);
@@ -35,7 +29,7 @@ export function usePetHandlers({
   const loadDailyFocusOverview = usePetStore((state) => state.loadDailyFocusOverview);
   const updatePreferredDuration = useSettingsStore((state) => state.updatePreferredDuration);
   const saveMotivationalMessages = useSettingsStore((state) => state.updateMotivationalMessages);
-  const clearAfterLocalDataReset = useSettingsStore((state) => state.clearAfterLocalDataReset);
+  const resetAllLocalData = useUiStore((state) => state.resetAllLocalData);
 
   const handlePetNameSave = (name: string) => {
     void renamePet(name).catch(() => undefined);
@@ -102,43 +96,18 @@ export function usePetHandlers({
       return;
     }
 
-    void resetLocalData()
-      .then(() => {
-        const activeSession = usePomodoroStore.getState().activeSession;
-        void cancelAllCareNotifications();
-        if (activeSession) {
-          void clearEndNotification(activeSession.id);
-          void clearFocusLiveActivity(activeSession, language);
-        }
-        resetInitialization();
-        onReset?.();
-        usePetStore.setState({
-          error: null,
-          isLoading: false,
-          lastFoodPurchase: null,
-          lastRewardSummary: null,
-          lastSleepSummary: null,
-          lastPowerNapSummary: null,
-          lastEmergencySnackSummary: null,
-          dailyFocusToday: null,
-          previousDailyFocusState: null,
-          pet: null,
-        });
-        usePomodoroStore.setState({
-          activeSession: null,
-          error: null,
-          isLoading: false,
-          recentSessions: [],
-        });
-        clearAfterLocalDataReset();
-        useUiStore.setState({
-          error: null,
-          hasHydrated: false,
-          isInitializing: false,
-        });
-        return initializeApp().then(() => loadRecentSessions());
-      })
-      .catch(() => undefined);
+    const activeSession = usePomodoroStore.getState().activeSession;
+
+    void (async () => {
+      await cancelAllCareNotifications();
+      if (activeSession) {
+        await clearEndNotification(activeSession.id);
+        await clearFocusLiveActivity(activeSession, language);
+      }
+      await resetAllLocalData();
+      resetInitialization();
+      onReset?.();
+    })().catch(() => undefined);
   };
 
   return {

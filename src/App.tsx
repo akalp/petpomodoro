@@ -111,7 +111,6 @@ export function App() {
   const recentSessions = usePomodoroStore((state) => state.recentSessions);
   const pomodoroError = usePomodoroStore((state) => state.error);
   const isSessionLoading = usePomodoroStore((state) => state.isLoading);
-  const loadRecentSessions = usePomodoroStore((state) => state.loadRecentSessions);
 
   const settings = useSettingsStore((state) => state.settings);
   const settingsError = useSettingsStore((state) => state.error);
@@ -119,7 +118,6 @@ export function App() {
     (state) => state.setInstalledShortcutVersion,
   );
   const saveLanguage = useSettingsStore((state) => state.setLanguage);
-  const initializeApp = useUiStore((state) => state.initializeApp);
   const uiError = useUiStore((state) => state.error);
 
   const { handleStart, handleEnd, handleCompleted, handleAbandoned } =
@@ -139,8 +137,6 @@ export function App() {
   } = usePetHandlers({
     onReset: () => setSelectedDurationOverride(null),
     resetInitialization,
-    initializeApp,
-    loadRecentSessions,
   });
 
   const persistedDuration =

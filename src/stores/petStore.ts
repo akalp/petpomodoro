@@ -108,6 +108,7 @@ export interface PetStoreState {
   clearLastEmergencySnackSummary: () => void;
   updateAppOpenDecay: (now?: string) => Promise<PetState | null>;
   updateDecayOnOpen: (now?: string) => Promise<PetState | null>;
+  resetAfterLocalDataReset: () => void;
   clearError: () => void;
 }
 
@@ -494,6 +495,20 @@ export function createPetStore(
     },
 
     clearError: () => set({ error: null }),
+
+    resetAfterLocalDataReset: () =>
+      set({
+        error: null,
+        isLoading: false,
+        lastFoodPurchase: null,
+        lastRewardSummary: null,
+        lastSleepSummary: null,
+        lastPowerNapSummary: null,
+        lastEmergencySnackSummary: null,
+        dailyFocusToday: null,
+        previousDailyFocusState: null,
+        pet: null,
+      }),
   }));
 }
 

@@ -1,6 +1,7 @@
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 
 import { scheduleCareNotifications } from "../alerts";
+import { resetLocalData } from "../db";
 import { DEFAULT_LANGUAGE } from "../i18n";
 import { errorMessage } from "./errors";
 import { usePetStore, type PetStoreState } from "./petStore";
@@ -16,17 +17,27 @@ export interface UiStoreDependencies {
         | "loadDailyFocusOverview"
         | "updateAppOpenDecay"
         | "updateDecayOnOpen"
+        | "resetAfterLocalDataReset"
         | "pet"
       >
     >
   >;
   pomodoroStore: UseBoundStore<
-    StoreApi<Pick<PomodoroStoreState, "activeSession" | "restoreRunningSessionAfterAppLaunch">>
+    StoreApi<
+      Pick<
+        PomodoroStoreState,
+        | "activeSession"
+        | "restoreRunningSessionAfterAppLaunch"
+        | "loadRecentSessions"
+        | "resetAfterLocalDataReset"
+      >
+    >
   >;
   settingsStore: UseBoundStore<
-    StoreApi<Pick<SettingsStoreState, "initializeSettings" | "settings">>
+    StoreApi<Pick<SettingsStoreState, "initializeSettings" | "clearAfterLocalDataReset" | "settings">>
   >;
   now: () => string;
+  resetLocalData: typeof resetLocalData;
 }
 
 export interface UiStoreState {
@@ -34,6 +45,7 @@ export interface UiStoreState {
   isInitializing: boolean;
   error: string | null;
   initializeApp: (now?: string) => Promise<void>;
+  resetAllLocalData: (now?: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -42,12 +54,13 @@ const defaultDependencies: UiStoreDependencies = {
   pomodoroStore: usePomodoroStore,
   settingsStore: useSettingsStore,
   now: () => new Date().toISOString(),
+  resetLocalData,
 };
 
 export function createUiStore(
   dependencies: UiStoreDependencies = defaultDependencies,
 ): UseBoundStore<StoreApi<UiStoreState>> {
-  return create<UiStoreState>((set) => ({
+  return create<UiStoreState>((set, get) => ({
     hasHydrated: false,
     isInitializing: false,
     error: null,
@@ -74,6 +87,22 @@ export function createUiStore(
         }
 
         set({ hasHydrated: true, isInitializing: false });
+      } catch (error) {
+        set({ error: errorMessage(error), isInitializing: false });
+        throw error;
+      }
+    },
+
+    resetAllLocalData: async (now = dependencies.now()) => {
+      set({ hasHydrated: false, isInitializing: true, error: null });
+
+      try {
+        await dependencies.resetLocalData();
+        dependencies.petStore.getState().resetAfterLocalDataReset();
+        dependencies.pomodoroStore.getState().resetAfterLocalDataReset();
+        dependencies.settingsStore.getState().clearAfterLocalDataReset();
+        await dependencies.pomodoroStore.getState().loadRecentSessions();
+        await get().initializeApp(now);
       } catch (error) {
         set({ error: errorMessage(error), isInitializing: false });
         throw error;

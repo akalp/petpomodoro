@@ -194,6 +194,7 @@ describe("store workflows", () => {
       pomodoroStore,
       settingsStore,
       now: () => now,
+      resetLocalData: async () => undefined,
     });
 
     await uiStore.getState().initializeApp(now);
@@ -202,8 +203,56 @@ describe("store workflows", () => {
       expect(repo.pet?.hunger).toBeCloseTo(94.83, 2);
   });
 
-  it("keeps a running session active before its expected end time", async () => {
+  it("resets local data through the ui store and reinitializes", async () => {
     const repo = createInMemoryRepositories({
+      pet: makePet({ coins: 42 }),
+      sessions: [makeSession({ status: "awaiting_confirmation" })],
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+    const settingsStore = createSettingsStore({
+      loadOrCreateSettings: async (createdAt) => createDefaultSettings(createdAt),
+      updateSettings: async (settings) => settings,
+      readLegacySettings: () => ({}),
+      clearLegacySettings: () => undefined,
+      now: () => now,
+    });
+    let resetCalls = 0;
+    const uiStore = createUiStore({
+      petStore,
+      pomodoroStore,
+      settingsStore,
+      now: () => now,
+      resetLocalData: async () => {
+        resetCalls += 1;
+        repo.clearLocalData();
+      },
+    });
+
+    await uiStore.getState().initializeApp(now);
+
+    expect(petStore.getState().pet?.coins).toBeGreaterThan(42);
+    expect(pomodoroStore.getState().activeSession?.status).toBe(
+      "awaiting_confirmation",
+    );
+
+    await uiStore.getState().resetAllLocalData(now);
+
+    expect(resetCalls).toBe(1);
+    expect(uiStore.getState().hasHydrated).toBe(true);
+    expect(petStore.getState().pet?.coins).toBe(0);
+    expect(petStore.getState().pet?.id).toBe("local-pet");
+    expect(petStore.getState().lastRewardSummary).toBeNull();
+    expect(pomodoroStore.getState().activeSession).toBeNull();
+    expect(pomodoroStore.getState().recentSessions).toEqual([]);
+  });
+
+  it("keeps a running session active before its expected end time", async () => {    const repo = createInMemoryRepositories({
       pet: makePet(),
       sessions: [
         makeSession({
@@ -678,6 +727,7 @@ describe("store workflows", () => {
       pomodoroStore,
       settingsStore,
       now: () => now,
+      resetLocalData: async () => undefined,
     });
 
     await uiStore.getState().initializeApp(now);
@@ -986,6 +1036,12 @@ function createInMemoryRepositories(state: InMemoryRepositoryState = {}) {
   return {
     get pet() {
       return pet;
+    },
+    clearLocalData: () => {
+      pet = undefined;
+      sessions.clear();
+      rewardLedger.clear();
+      dailyFocus.clear();
     },
     sessions,
     rewardLedger,
