@@ -10,6 +10,7 @@ import {
 } from "../domain";
 
 import { db as defaultDb, type PetPomodoroDatabase } from "./database";
+import { RepositoryError } from "./errors";
 
 export const DEFAULT_PET_ID = "local-pet";
 export const DEFAULT_PET_NAME = defaultPetNameForSpecies(DEFAULT_PET_SPECIES_ID);
@@ -111,7 +112,7 @@ export async function startStoredPetSleep(
     const pet = await database.pets.get(petId);
 
     if (!pet) {
-      throw new Error(`Pet not found: ${petId}`);
+      throw new RepositoryError(`Pet not found: ${petId}`);
     }
 
     const nextPet = startPetSleep(normalizePetState(pet), now);
@@ -128,7 +129,7 @@ export async function wakeStoredPetFromSleep(
     const pet = await database.pets.get(petId);
 
     if (!pet) {
-      throw new Error(`Pet not found: ${petId}`);
+      throw new RepositoryError(`Pet not found: ${petId}`);
     }
 
     const result = wakePetFromSleep(normalizePetState(pet), now);
