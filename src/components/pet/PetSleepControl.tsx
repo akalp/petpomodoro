@@ -84,7 +84,7 @@ export function PetSleepControl({
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-md bg-white/70 p-3 text-sm ring-1 ring-white/80">
           <SleepMetric
             label={t("sleepDurationLabel")}
-            value={formatSleepDuration(sleepPreview.elapsedMinutes)}
+            value={formatSleepDuration(sleepPreview.elapsedMinutes, t)}
           />
           <SleepMetric
             label={t("sleepEnergyLabel")}
@@ -142,14 +142,17 @@ function SleepMetric({ label, value }: SleepMetricProps) {
   );
 }
 
-function formatSleepDuration(elapsedMinutes: number): string {
+function formatSleepDuration(elapsedMinutes: number, t: Translator): string {
   const totalMinutes = Math.max(0, Math.floor(elapsedMinutes));
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
 
   if (hours <= 0) {
-    return `${minutes}m`;
+    return t("durationMinutesShort", { minutes });
   }
 
-  return `${hours}h ${minutes.toString().padStart(2, "0")}m`;
+  return t("durationHoursMinutesShort", {
+    hours,
+    minutes: minutes.toString().padStart(2, "0"),
+  });
 }
