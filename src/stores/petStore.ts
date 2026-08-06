@@ -68,7 +68,7 @@ export interface PetStoreState {
   error: string | null;
   initializePet: (now?: string) => Promise<PetState>;
   loadCurrentPet: () => Promise<PetState | null>;
-  applyReward: (pet: PetState) => Promise<PetState>;
+  persistPet: (pet: PetState) => Promise<PetState>;
   applyHonestyReward: (
     sessionId: string,
     now?: string,
@@ -176,7 +176,7 @@ export function createPetStore(
       }
     },
 
-    applyReward: async (pet) => {
+    persistPet: async (pet) => {
       set({ isLoading: true, error: null });
 
       try {
@@ -403,7 +403,7 @@ export function createPetStore(
         return pet;
       }
 
-      return get().applyReward(nextPet);
+      return get().persistPet(nextPet);
     },
 
     changeSpecies: async (speciesId, now = dependencies.now()) => {
@@ -414,7 +414,7 @@ export function createPetStore(
         return pet;
       }
 
-      return get().applyReward(nextPet);
+      return get().persistPet(nextPet);
     },
 
     clearLastRewardSummary: () => set({ lastRewardSummary: null }),
@@ -470,7 +470,7 @@ export function createPetStore(
         return pet;
       }
 
-      return get().applyReward(decayedPet);
+      return get().persistPet(decayedPet);
     },
 
     updateDecayOnOpen: async (now = dependencies.now()) => {
@@ -490,7 +490,7 @@ export function createPetStore(
         return pet;
       }
 
-      return get().applyReward(decayedPet);
+      return get().persistPet(decayedPet);
     },
 
     clearError: () => set({ error: null }),
