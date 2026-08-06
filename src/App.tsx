@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { routePaths } from "./routes/routePaths";
@@ -7,6 +7,12 @@ import { AppRoutes } from "./app/AppRoutes";
 import { AppShell } from "./app/AppShell";
 import { formatCountdown } from "./app/helpers";
 import { ErrorNotice } from "./app/ErrorNotice";
+import {
+  LazyJournalScreen,
+  LazyPetScreen,
+  LazySettingsPanel,
+  LazyShopScreen,
+} from "./app/lazyScreens";
 import { LoadingCard } from "./app/LoadingCard";
 import { useAppBootstrap } from "./app/useAppBootstrap";
 import { useAppTimer } from "./app/useAppTimer";
@@ -19,7 +25,6 @@ import { AppUpdatePrompt } from "./components/pwa/AppUpdatePrompt";
 import { InstallHint } from "./components/pwa/InstallHint";
 import { ShortcutInstallHint } from "./components/pwa/ShortcutInstallHint";
 import { RewardModal } from "./components/session/RewardModal";
-import { SettingsPanel } from "./components/settings/SettingsPanel";
 import { Sheet } from "./components/ui/Sheet";
 import {
   calculateFocusStartEligibility,
@@ -48,9 +53,6 @@ import {
 } from "./features/focus/FocusBalanceStatus";
 import { FocusScreen } from "./features/focus/FocusScreen";
 import { FocusSessionSwitcher } from "./features/focus/FocusSessionSwitcher";
-import { JournalScreen } from "./features/journal/JournalScreen";
-import { PetScreen } from "./features/pet/PetScreen";
-import { ShopScreen } from "./features/shop/ShopScreen";
 import {
   usePetStore,
   usePomodoroStore,
@@ -253,36 +255,40 @@ export function App() {
     </>
   );
   const petScreen = (
-    <PetScreen
-      displayMood={displayMood}
-      dailyFocusToday={dailyFocusToday}
-      installHint={isNativeApp ? null : <InstallHint t={t} />}
-      isFocusActive={isFocusActive}
-      isSleepDisabled={isBusy || !hasHydrated}
-      lastEmergencySnackSummary={lastEmergencySnackSummary}
-      lastPowerNapSummary={lastPowerNapSummary}
-      lastSleepSummary={lastSleepSummary}
-      now={new Date(currentTime).toISOString()}
-      onClearEmergencySnackSummary={clearLastEmergencySnackSummary}
-      onClearPowerNapSummary={clearLastPowerNapSummary}
-      onClearSleepSummary={clearLastSleepSummary}
-      onEmergencySnack={() => handleEmergencySnack(isFocusActive, petIsSleeping)}
-      onPowerNap={() => handlePowerNap(isFocusActive, petIsSleeping)}
-      onStartSleep={() => handleStartSleep(isFocusActive)}
-      onWakeSleep={handleWakeSleep}
-      pet={pet}
-      petMessage={petMessage}
-      sleepPreview={sleepPreview}
-      t={t}
-    />
+    <Suspense fallback={<LoadingCard t={t} />}>
+      <LazyPetScreen
+        displayMood={displayMood}
+        dailyFocusToday={dailyFocusToday}
+        installHint={isNativeApp ? null : <InstallHint t={t} />}
+        isFocusActive={isFocusActive}
+        isSleepDisabled={isBusy || !hasHydrated}
+        lastEmergencySnackSummary={lastEmergencySnackSummary}
+        lastPowerNapSummary={lastPowerNapSummary}
+        lastSleepSummary={lastSleepSummary}
+        now={new Date(currentTime).toISOString()}
+        onClearEmergencySnackSummary={clearLastEmergencySnackSummary}
+        onClearPowerNapSummary={clearLastPowerNapSummary}
+        onClearSleepSummary={clearLastSleepSummary}
+        onEmergencySnack={() => handleEmergencySnack(isFocusActive, petIsSleeping)}
+        onPowerNap={() => handlePowerNap(isFocusActive, petIsSleeping)}
+        onStartSleep={() => handleStartSleep(isFocusActive)}
+        onWakeSleep={handleWakeSleep}
+        pet={pet}
+        petMessage={petMessage}
+        sleepPreview={sleepPreview}
+        t={t}
+      />
+    </Suspense>
   );
   const journalScreen = (
-    <JournalScreen
-      isLoading={isBusy && hasHydrated}
-      language={language}
-      sessions={recentSessions}
-      t={t}
-    />
+    <Suspense fallback={<LoadingCard t={t} />}>
+      <LazyJournalScreen
+        isLoading={isBusy && hasHydrated}
+        language={language}
+        sessions={recentSessions}
+        t={t}
+      />
+    </Suspense>
   );
 
   return (
@@ -319,16 +325,18 @@ export function App() {
         journal={journalScreen}
         pet={petScreen}
         shop={
-          <ShopScreen
-            disabled={isBusy || !hasHydrated || isFocusActive || petIsSleeping}
-            isFocusActive={isFocusActive}
-            isPetSleeping={petIsSleeping}
-            lastFoodPurchase={lastFoodPurchase}
-            onBuyFood={handleBuyFood}
-            onClearPurchase={clearLastFoodPurchase}
-            pet={pet}
-            t={t}
-          />
+          <Suspense fallback={<LoadingCard t={t} />}>
+            <LazyShopScreen
+              disabled={isBusy || !hasHydrated || isFocusActive || petIsSleeping}
+              isFocusActive={isFocusActive}
+              isPetSleeping={petIsSleeping}
+              lastFoodPurchase={lastFoodPurchase}
+              onBuyFood={handleBuyFood}
+              onClearPurchase={clearLastFoodPurchase}
+              pet={pet}
+              t={t}
+            />
+          </Suspense>
         }
       />
       {lastRewardSummary ? (
@@ -349,25 +357,27 @@ export function App() {
         onClose={() => setActiveSheet(null)}
         title={t("settings")}
       >
-        <SettingsPanel
-          disabled={isBusy || !hasHydrated}
-          framed={false}
-          hasInstalledShortcut={hasInstalledShortcut}
-          language={language}
-          motivationalMessages={motivationalMessages}
-          onLanguageChange={(nextLanguage) => {
-            void saveLanguage(nextLanguage).catch(() => undefined);
-          }}
-          onMotivationalMessagesSave={handleMotivationalMessagesSave}
-          onPetNameSave={handlePetNameSave}
-          onSelectSpecies={handleSpeciesSelection}
-          onResetLocalData={() => handleResetLocalData(t, language)}
-          onShortcutInstalledChange={setShortcutInstalled}
-          pet={pet}
-          showHeader={false}
-          supportsIosFeatures={supportsIosFeatures}
-          t={t}
-        />
+        <Suspense fallback={<LoadingCard t={t} />}>
+          <LazySettingsPanel
+            disabled={isBusy || !hasHydrated}
+            framed={false}
+            hasInstalledShortcut={hasInstalledShortcut}
+            language={language}
+            motivationalMessages={motivationalMessages}
+            onLanguageChange={(nextLanguage) => {
+              void saveLanguage(nextLanguage).catch(() => undefined);
+            }}
+            onMotivationalMessagesSave={handleMotivationalMessagesSave}
+            onPetNameSave={handlePetNameSave}
+            onSelectSpecies={handleSpeciesSelection}
+            onResetLocalData={() => handleResetLocalData(t, language)}
+            onShortcutInstalledChange={setShortcutInstalled}
+            pet={pet}
+            showHeader={false}
+            supportsIosFeatures={supportsIosFeatures}
+            t={t}
+          />
+        </Suspense>
       </Sheet>
     </AppShell>
   );
