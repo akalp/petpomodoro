@@ -23,7 +23,7 @@ export function ErrorNotice({ message, onRetry, t }: ErrorNoticeProps) {
   };
 
   return (
-    <Card className="border-rose-200 bg-rose-100">
+    <Card className="border-rose-200 bg-rose-100" role="alert">
       <p className="text-sm font-semibold text-rose-900">
         {t("errorTitle")}
       </p>

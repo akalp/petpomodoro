@@ -171,7 +171,7 @@ function FoodButton({
           </p>
         </div>
       </div>
-      <dl className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-semibold">
+      <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-semibold">
         <StatBoost
           disabled={disabled}
           label={t("hunger")}
@@ -187,7 +187,7 @@ function FoodButton({
           label={t("energy")}
           value={food.energy}
         />
-      </dl>
+      </div>
       <div className="mt-auto flex min-w-0 flex-wrap items-center justify-between gap-2 pt-4 text-sm font-semibold">
         <span className="shrink-0 rounded-full bg-amber-100 px-3 py-1 text-amber-900">
           {t("foodCost", { coins: food.cost })}
@@ -250,15 +250,15 @@ function StatBoost({
         disabled ? "bg-white/70 text-slate-500" : "bg-slate-50 text-slate-700",
       ].join(" ")}
     >
-      <dt
+      <div
         className={[
           "min-h-7 text-[0.62rem] font-medium leading-tight",
           disabled ? "text-slate-400" : "text-slate-500",
         ].join(" ")}
       >
         {label}
-      </dt>
-      <dd className="mt-1 text-sm">{formatSigned(value)}</dd>
+      </div>
+      <div className="mt-1 text-sm">{formatSigned(value)}</div>
     </div>
   );
 }

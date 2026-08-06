@@ -88,7 +88,7 @@ export function PomodoroStartPanel({
         <div
           aria-label={t("focusDuration")}
           className="space-y-2"
-          role="group"
+          role="radiogroup"
         >
           <div className="grid grid-cols-4 gap-2">
             {durations.map((duration) => {
@@ -96,7 +96,7 @@ export function PomodoroStartPanel({
 
               return (
                 <button
-                  aria-pressed={isSelected}
+                  aria-checked={isSelected}
                   className={[
                     "min-h-12 whitespace-nowrap rounded-lg border px-1 text-sm font-semibold transition active:scale-[0.98] min-[360px]:px-2",
                     "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500",
@@ -107,6 +107,7 @@ export function PomodoroStartPanel({
                   disabled={durationsDisabled}
                   key={duration}
                   onClick={() => onDurationChange(duration)}
+                  role="radio"
                   type="button"
                 >
                   {t("durationShort", { minutes: duration })}

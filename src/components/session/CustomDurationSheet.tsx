@@ -52,6 +52,7 @@ export function CustomDurationSheet({
           ].join(" ")}
         >
           <input
+            aria-describedby={durationError ? "custom-duration-error" : undefined}
             aria-invalid={durationError !== null}
             className="min-w-0 flex-1 bg-transparent text-center text-4xl font-semibold tabular-nums text-slate-950 outline-none"
             disabled={disabled}
@@ -67,7 +68,13 @@ export function CustomDurationSheet({
           </span>
         </div>
         {durationError ? (
-          <p className="text-sm leading-6 text-rose-700">{durationError}</p>
+          <p
+            className="text-sm leading-6 text-rose-700"
+            id="custom-duration-error"
+            role="alert"
+          >
+            {durationError}
+          </p>
         ) : null}
         <div
           aria-label={t("durationAdjustments")}

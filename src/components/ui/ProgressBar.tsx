@@ -16,7 +16,13 @@ export function ProgressBar({ label, value, max }: ProgressBarProps) {
           {Math.round(value)} / {safeMax}
         </span>
       </div>
-      <div className="h-3 overflow-hidden rounded-full bg-rose-100">
+      <div
+        aria-valuemax={safeMax}
+        aria-valuemin={0}
+        aria-valuenow={Math.round(value)}
+        className="h-3 overflow-hidden rounded-full bg-rose-100"
+        role="progressbar"
+      >
         <div
           className="ui-progress-fill h-full rounded-full bg-teal-500"
           style={{ width: `${percent}%` }}
