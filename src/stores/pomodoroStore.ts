@@ -70,7 +70,58 @@ const defaultDependencies: PomodoroStoreDependencies = {
 export function createPomodoroStore(
   dependencies: PomodoroStoreDependencies = defaultDependencies,
 ): UseBoundStore<StoreApi<PomodoroStoreState>> {
-  return create<PomodoroStoreState>((set, get) => ({
+  let refreshInFlight: Promise<FocusSession | null> | null = null;
+
+  return create<PomodoroStoreState>((set, get) => {
+    const runRefreshSessionStatus = async (now: string): Promise<FocusSession | null> => {
+      const activeSession =
+        get().activeSession ?? (await dependencies.getActiveFocusSession()) ?? null;
+
+      if (!activeSession) {
+        set({ activeSession: null });
+        return null;
+      }
+
+      if (activeSession.status !== "running") {
+        const impactResult = await dependencies.petStore
+          .getState()
+          .applyFocusImpact(activeSession, now);
+        set({ activeSession: impactResult.session });
+        return impactResult.session;
+      }
+
+      try {
+        const nextSession = moveRunningSessionToAwaitingConfirmation(
+          activeSession,
+          now,
+        );
+
+        if (
+          nextSession === activeSession &&
+          !shouldPersistFocusSessionImpact(activeSession, now)
+        ) {
+          set({ activeSession, error: null });
+          return activeSession;
+        }
+
+        set({ isLoading: true, error: null });
+        const impactResult = await dependencies.petStore
+          .getState()
+          .applyFocusImpact(nextSession, now);
+        const recentSessions = await dependencies.listRecentFocusSessions(10);
+        set({
+          activeSession: impactResult.session,
+          recentSessions,
+          isLoading: false,
+        });
+        return impactResult.session;
+      } catch (error) {
+        set({ error: errorMessage(error), isLoading: false });
+        throw error;
+      }
+    };
+
+    return {
     activeSession: null,
     recentSessions: [],
     isLoading: false,
@@ -180,52 +231,17 @@ export function createPomodoroStore(
       }
     },
 
-    refreshSessionStatus: async (now = dependencies.now()) => {
-      const activeSession =
-        get().activeSession ?? (await dependencies.getActiveFocusSession()) ?? null;
-
-      if (!activeSession) {
-        set({ activeSession: null });
-        return null;
+    refreshSessionStatus: (now = dependencies.now()) => {
+      if (refreshInFlight) {
+        return refreshInFlight;
       }
 
-      if (activeSession.status !== "running") {
-        const impactResult = await dependencies.petStore
-          .getState()
-          .applyFocusImpact(activeSession, now);
-        set({ activeSession: impactResult.session });
-        return impactResult.session;
-      }
+      const refreshPromise = runRefreshSessionStatus(now).finally(() => {
+        refreshInFlight = null;
+      });
+      refreshInFlight = refreshPromise;
 
-      try {
-        const nextSession = moveRunningSessionToAwaitingConfirmation(
-          activeSession,
-          now,
-        );
-
-        if (
-          nextSession === activeSession &&
-          !shouldPersistFocusSessionImpact(activeSession, now)
-        ) {
-          set({ activeSession, error: null });
-          return activeSession;
-        }
-
-        set({ isLoading: true, error: null });
-        const impactResult = await dependencies.petStore
-          .getState()
-          .applyFocusImpact(nextSession, now);
-        const recentSessions = await dependencies.listRecentFocusSessions(10);
-        set({
-          activeSession: impactResult.session,
-          recentSessions,
-          isLoading: false,
-        });
-        return impactResult.session;
-      } catch (error) {
-        set({ error: errorMessage(error), isLoading: false });
-        throw error;
-      }
+      return refreshPromise;
     },
 
     confirmCompleted: async (now = dependencies.now()) => {
@@ -281,7 +297,8 @@ export function createPomodoroStore(
     },
 
     clearError: () => set({ error: null }),
-  }));
+    };
+  });
 }
 
 function activeStatus(session: FocusSession | null): FocusSessionStatus {

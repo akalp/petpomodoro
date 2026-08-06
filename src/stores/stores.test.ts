@@ -125,6 +125,46 @@ describe("store workflows", () => {
     expect(repo.rewardLedger.size).toBe(0);
   });
 
+  it("coalesces overlapping refresh calls into one persisted impact", async () => {
+    const repo = createInMemoryRepositories({
+      pet: makePet(),
+      sessions: [
+        makeSession({
+          status: "running",
+          expectedEndAt: "2026-05-22T12:25:00.000Z",
+        }),
+      ],
+    });
+    const petStore = createPetStore(repo.petDependencies);
+    const pomodoroStore = createPomodoroStore({
+      ...repo.pomodoroDependencies,
+      petStore,
+      now: () => now,
+      createId: () => "session-new",
+    });
+
+    let impactCalls = 0;
+    const originalApply = repo.petDependencies.applyStoredSessionImpact;
+    repo.petDependencies.applyStoredSessionImpact = async (input) => {
+      impactCalls += 1;
+      return originalApply(input);
+    };
+
+    await pomodoroStore.getState().loadActiveSession();
+
+    const first = pomodoroStore.getState().refreshSessionStatus(now);
+    const second = pomodoroStore.getState().refreshSessionStatus(now);
+
+    const [firstResult, secondResult] = await Promise.all([first, second]);
+
+    expect(impactCalls).toBe(1);
+    expect(firstResult?.status).toBe("awaiting_confirmation");
+    expect(secondResult?.status).toBe("awaiting_confirmation");
+    expect(repo.pet?.coins).toBe(5);
+    expect(repo.pet?.hunger).toBeCloseTo(94.83, 2);
+    expect(repo.pet?.energy).toBe(73);
+  });
+
   it("initializes an active elapsed session without double-counting idle decay", async () => {
     const repo = createInMemoryRepositories({
       pet: makePet(),
