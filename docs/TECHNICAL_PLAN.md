@@ -19,12 +19,26 @@ Primary screen navigation is route state, not Zustand state. Short-lived overlay
 
 ```text
 src/
+  alerts/
+    careAlerts.ts
+    focusAlerts.ts
   app/
     AppRoutes.tsx
     AppShell.tsx
     DesktopSideNav.tsx
+    ErrorNotice.tsx
+    LoadingCard.tsx
     MobileBottomTabBar.tsx
+    RouteIcon.tsx
+    helpers.ts
     routeRegistry.ts
+    useActiveTabIndicator.ts
+    useAppBootstrap.ts
+    useAppTimer.ts
+    useCareNotifications.ts
+    usePetHandlers.ts
+    usePetMessage.ts
+    useSessionHandlers.ts
   components/
     layout/
     pet/
@@ -35,6 +49,7 @@ src/
   db/
     dailyFocusRepository.ts
     database.ts
+    errors.ts
     petsRepository.ts
     sessionsRepository.ts
     rewardsRepository.ts
@@ -45,6 +60,7 @@ src/
     achievements.ts
     dailyFocus.ts
     dateKeys.ts
+    errors.ts
     focusSessionMachine.ts
     petMoodRules.ts
     pet.ts
@@ -53,19 +69,26 @@ src/
     sessions.ts
     settings.ts
     shop.ts
+    types.ts
   features/
     focus/
     journal/
     pet/
     shop/
+  id.ts
   i18n/
     index.ts
+  platform/
+    liveActivity.ts
+    liveActivityTimer.ts
+    runtime.ts
   pwa/
     installHints.ts
     shortcuts.ts
   routes/
     routePaths.ts
   stores/
+    errors.ts
     petStore.ts
     pomodoroStore.ts
     settingsStore.ts
@@ -75,6 +98,26 @@ src/
 ```
 
 The boundaries should remain: domain logic is pure, persistence is isolated, route state owns navigation, Zustand stores orchestrate local data workflows, and UI stays mobile-first.
+
+## Native Notifications And Live Activity
+
+The Capacitor iOS shell adds two native reminder surfaces. Both are **convenience-only** and must never imply that the app observes a native timer.
+
+### Local Notifications (`src/alerts/`)
+
+- `focusAlerts.ts` schedules a focus-end reminder and cancels it when the session ends. The notification ID is derived from the session so reminders are per-session.
+- `careAlerts.ts` schedules gentle care reminders based on the pet's hunger/energy state.
+- Notifications only remind the user to return; completion still goes through the awaiting-confirmation flow and is never auto-completed.
+- In the browser/PWA these modules are no-ops; local notifications require the native Capacitor runtime.
+
+### Live Activity (`src/platform/`)
+
+- `runtime.ts` exposes `isNativeApp` so UI and adapters can detect the Capacitor runtime.
+- `liveActivity.ts` starts, updates, ends, and clears a Live Activity on the lock screen / Dynamic Island, showing the focus countdown and pet message.
+- `liveActivityTimer.ts` is a tiny interval adapter that pushes countdown updates while a session runs.
+- `liveActivityTimer` is stopped and the Live Activity cleared when a session reaches `awaiting_confirmation` (so the lock screen asks the user to return, not to keep watching a countdown).
+
+These adapters are isolated behind `src/platform` and `src/alerts`; React screens never import `@capacitor/*` directly. All copy is localized through the same i18n keys as the UI.
 
 ## Data Models
 

@@ -17,6 +17,15 @@ This is a personal Capacitor build for running PetPomodoro as a native iOS app o
 
 ## Build Commands
 
+Convenience npm scripts are defined in `package.json`:
+
+```bash
+npm run ios          # npm run build + npx cap sync ios + npx cap open ios
+npm run cap:sync:ios # npm run build + npx cap sync ios (no Xcode launch)
+```
+
+The equivalent manual steps:
+
 ```bash
 npm install
 npm run build
@@ -57,3 +66,11 @@ A paid Apple Developer account ($99/year) removes this limitation.
 - Local notifications are handled entirely on-device by iOS.
 - No backend, no cloud service, no analytics.
 - Notifications remind you to return — they do not complete sessions for you.
+
+## Live Activity And Dynamic Island
+
+- While a focus session runs, the app can start a Live Activity on the lock screen and Dynamic Island showing the countdown and a gentle pet message.
+- The Live Activity is a reminder surface only. It never claims to verify focus work, and it is cleared when the session reaches the awaiting-confirmation state.
+- Like notifications, this is native-only; the PWA keeps its existing best-effort reminder behavior.
+
+See `src/alerts/` and `src/platform/` in the source, and the "Native Notifications And Live Activity" section in `TECHNICAL_PLAN.md`.

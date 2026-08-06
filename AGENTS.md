@@ -12,6 +12,11 @@ PetPomodoro is a local-first, cozy tamagotchi plus Pomodoro PWA designed mainly 
 - `docs/STATE_MACHINE.md`
 - `docs/MVP_TASKS.md`
 - `docs/UX_COPY.md`
+- `docs/ARCHITECTURE_EVOLUTION.md`
+- `docs/METRICS_ARCHITECTURE_EVOLUTION.md`
+- `docs/QA_CHECKLIST.md`
+- `docs/RELEASE_NOTES.md`
+- `docs/NATIVE_IOS_PERSONAL_BUILD.md`
 
 ## Product Rules
 

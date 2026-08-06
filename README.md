@@ -44,7 +44,7 @@ Prerequisites:
 Install dependencies:
 
 ```sh
-npm install
+npm ci
 ```
 
 Start the Vite development server:
