@@ -185,18 +185,18 @@ export function Sheet({
         data-state={phase}
         onAnimationEnd={handlePanelAnimationEnd}
       >
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-rose-100 px-4 py-4 sm:px-5">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-brand-100 px-4 py-4 sm:px-5">
           <div className="min-w-0 flex-1">
-            <div className="mb-3 h-1 w-10 rounded-full bg-rose-200" />
+            <div className="mb-3 h-1 w-10 rounded-full bg-brand-200" />
             <h2
-              className="text-xl font-semibold leading-tight text-slate-950"
+              className="text-xl font-semibold leading-tight text-ink-950"
               id={titleId}
             >
               {title}
             </h2>
             {description ? (
               <p
-                className="mt-1 text-sm leading-6 text-slate-600"
+                className="mt-1 text-sm leading-6 text-ink-600"
                 id={descriptionId}
               >
                 {description}
@@ -205,7 +205,7 @@ export function Sheet({
           </div>
           <button
             aria-label={closeLabel}
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-rose-100 bg-white text-slate-600 transition hover:bg-rose-50 hover:text-rose-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-brand-100 bg-white text-ink-600 transition hover:bg-brand-50 hover:text-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             onClick={requestClose}
             type="button"
           >

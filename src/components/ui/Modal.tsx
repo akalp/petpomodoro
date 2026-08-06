@@ -76,7 +76,7 @@ export function Modal({
       role="dialog"
     >
       <div className="flex max-h-[calc(100dvh-1rem)] w-full min-w-0 max-w-xl flex-col overflow-hidden rounded-lg border border-white/80 bg-white shadow-2xl shadow-slate-950/20 sm:max-h-[min(760px,calc(100dvh-3rem))]">
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-rose-100 px-4 py-4 sm:px-5">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-brand-100 px-4 py-4 sm:px-5">
           <div className="min-w-0">
             <h2 className="text-xl font-semibold leading-tight text-slate-950" id={titleId}>
               {title}
@@ -89,7 +89,7 @@ export function Modal({
           </div>
           <button
             aria-label={closeLabel}
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-rose-100 bg-rose-50/70 text-xl font-semibold leading-none text-slate-500 transition hover:bg-rose-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-brand-100 bg-brand-50/70 text-xl font-semibold leading-none text-ink-500 transition hover:bg-brand-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
             onClick={onClose}
             ref={closeButtonRef}
             type="button"

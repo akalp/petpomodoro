@@ -14,7 +14,7 @@ export function Card({
   return (
     <Component
       className={[
-        "rounded-lg border border-white/80 bg-white/90 p-5 shadow-sm shadow-rose-100/80 backdrop-blur",
+        "rounded-lg border border-white/80 bg-white/90 p-5 shadow-sm shadow-brand-100/80 backdrop-blur",
         className,
       ].join(" ")}
       {...props}

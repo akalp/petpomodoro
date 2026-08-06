@@ -10,7 +10,7 @@ export function ProgressBar({ label, value, max }: ProgressBarProps) {
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between gap-3 text-sm font-medium text-slate-700">
+      <div className="mb-2 flex items-center justify-between gap-3 text-sm font-medium text-ink-700">
         <span>{label}</span>
         <span>
           {Math.round(value)} / {safeMax}
@@ -20,11 +20,11 @@ export function ProgressBar({ label, value, max }: ProgressBarProps) {
         aria-valuemax={safeMax}
         aria-valuemin={0}
         aria-valuenow={Math.round(value)}
-        className="h-3 overflow-hidden rounded-full bg-rose-100"
+        className="h-3 overflow-hidden rounded-full bg-brand-100"
         role="progressbar"
       >
         <div
-          className="ui-progress-fill h-full rounded-full bg-teal-500"
+          className="ui-progress-fill h-full rounded-full bg-positive-500"
           style={{ width: `${percent}%` }}
         />
       </div>

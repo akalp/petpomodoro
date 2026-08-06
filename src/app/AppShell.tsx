@@ -12,7 +12,7 @@ interface AppShellProps {
 
 export function AppShell({ children, t }: AppShellProps) {
   return (
-    <main className="app-shell min-h-dvh bg-[linear-gradient(180deg,#fff7ed_0%,#fff1f2_48%,#ecfeff_100%)] text-slate-900">
+    <main className="app-shell min-h-dvh bg-[linear-gradient(180deg,#fff7ed_0%,#fff1f2_48%,#ecfeff_100%)] text-ink-900">
       <div className="mx-auto flex min-h-[calc(100dvh-2.5rem)] w-full max-w-5xl gap-5">
         <DesktopSideNav t={t} />
         <div className="flex min-w-0 flex-1 justify-center">

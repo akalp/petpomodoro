@@ -140,16 +140,16 @@ export function RewardModal({ onClose, onNavigateToPet, summary, t }: RewardModa
       tabIndex={-1}
     >
       <div className="ui-reward-panel w-full max-w-xl sm:max-w-md">
-        <Card className="max-h-[calc(100dvh-2rem)] w-full space-y-4 overflow-y-auto border-rose-200 bg-white shadow-xl">
+        <Card className="max-h-[calc(100dvh-2rem)] w-full space-y-4 overflow-y-auto border-brand-200 bg-white shadow-xl">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-sm font-semibold uppercase text-rose-700">
+              <p className="text-sm font-semibold uppercase text-brand-700">
                 {summary.rewardType === "focus_completed"
                   ? t("sessionComplete")
                   : t("honestyReward")}
               </p>
               <h2
-                className="mt-2 text-2xl font-semibold text-slate-950"
+                className="mt-2 text-2xl font-semibold text-ink-950"
                 id={titleId}
               >
                 {summary.rewardType === "focus_completed"
@@ -159,7 +159,7 @@ export function RewardModal({ onClose, onNavigateToPet, summary, t }: RewardModa
             </div>
             <button
               aria-label={t("close")}
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-rose-100 bg-white text-slate-600 transition hover:bg-rose-50 hover:text-rose-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-brand-100 bg-white text-ink-600 transition hover:bg-brand-50 hover:text-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
               data-reward-close
               onClick={onClose}
               type="button"
@@ -168,7 +168,7 @@ export function RewardModal({ onClose, onNavigateToPet, summary, t }: RewardModa
             </button>
           </div>
 
-          <p className="text-sm leading-6 text-slate-600">
+          <p className="text-sm leading-6 text-ink-600">
             {summary.leveledUp
               ? t("levelUpReward")
               : summary.rewardType === "focus_completed"
@@ -178,7 +178,7 @@ export function RewardModal({ onClose, onNavigateToPet, summary, t }: RewardModa
 
           {summary.leveledUp ? (
             <div
-              className="ui-level-pulse rounded-lg bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-900"
+              className="ui-level-pulse rounded-lg bg-positive-50 px-4 py-3 text-sm font-semibold text-positive-700"
             >
               {t("levelUpSupport")}
             </div>
