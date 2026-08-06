@@ -9,6 +9,7 @@ import {
   POWER_NAP_DURATION_MINUTES,
   POWER_NAP_COOLDOWN_ACTIVE_ERROR,
   POWER_NAP_DAILY_LIMIT_ERROR,
+  toLocalDateKey,
   POWER_NAP_ENERGY_GAIN,
   POWER_NAP_HUNGER_COST,
   EMERGENCY_SNACK_HUNGER_GAIN,
@@ -54,7 +55,7 @@ export function PetRescueControl({
   const sleeping = isPetSleeping(pet);
   const fallbackDailyFocusState = createDailyFocusState({
     petId: pet.id,
-    dateKey: now.slice(0, 10),
+    dateKey: toLocalDateKey(new Date(now)),
   });
   const dailyFocusState = dailyFocusToday ?? fallbackDailyFocusState;
   const powerNapEligibility = checkPowerNapEligibility(
