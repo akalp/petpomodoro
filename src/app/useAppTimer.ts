@@ -9,7 +9,6 @@ export function useAppTimer(hasHydrated: boolean) {
   const [currentTime, setCurrentTime] = useState(() => Date.now());
   const activeSession = usePomodoroStore((state) => state.activeSession);
   const refreshSessionStatus = usePomodoroStore((state) => state.refreshSessionStatus);
-  const loadRecentSessions = usePomodoroStore((state) => state.loadRecentSessions);
   const updateAppOpenDecay = usePetStore((state) => state.updateAppOpenDecay);
   const pet = usePetStore((state) => state.pet);
   const language = useSettingsStore((state) => state.settings?.language ?? DEFAULT_LANGUAGE);
@@ -22,8 +21,7 @@ export function useAppTimer(hasHydrated: boolean) {
       void clearFocusLiveActivity(session, language);
       void clearEndNotification(session.id);
     }
-    void loadRecentSessions();
-  }, [loadRecentSessions, refreshSessionStatus, language]);
+  }, [refreshSessionStatus, language]);
 
   useEffect(() => {
     if (!hasHydrated) {
