@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { routePaths } from "./routes/routePaths";
 
 import { AppRoutes } from "./app/AppRoutes";
 import { AppShell } from "./app/AppShell";
@@ -60,6 +63,7 @@ const EMPTY_MOTIVATIONAL_MESSAGES: string[] = [];
 type AppSheet = "settings" | null;
 
 export function App() {
+  const navigate = useNavigate();
   const [activeSheet, setActiveSheet] = useState<AppSheet>(null);
   const [selectedDurationOverride, setSelectedDurationOverride] = useState<
     number | null
@@ -330,6 +334,10 @@ export function App() {
       {lastRewardSummary ? (
         <RewardModal
           onClose={clearLastRewardSummary}
+          onNavigateToPet={() => {
+            clearLastRewardSummary();
+            navigate(routePaths.pet);
+          }}
           summary={lastRewardSummary}
           t={t}
         />

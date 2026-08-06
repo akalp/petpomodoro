@@ -10,6 +10,7 @@ import { useFocusTrap } from "../ui/useFocusTrap";
 
 interface RewardModalProps {
   onClose: () => void;
+  onNavigateToPet?: () => void;
   summary: RewardSummary;
   t: Translator;
 }
@@ -83,7 +84,7 @@ function buildRewardRows(
   return rewardRows.filter((row) => row.amount !== 0);
 }
 
-export function RewardModal({ onClose, summary, t }: RewardModalProps) {
+export function RewardModal({ onClose, onNavigateToPet, summary, t }: RewardModalProps) {
   const rewardRows = buildRewardRows(summary, t);
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -189,9 +190,20 @@ export function RewardModal({ onClose, summary, t }: RewardModalProps) {
             ))}
           </div>
 
-          <Button className="w-full" onClick={onClose}>
-            {t("continue")}
-          </Button>
+          {summary.rewardType === "honesty" && onNavigateToPet ? (
+            <div className="grid gap-3">
+              <Button className="w-full" onClick={onNavigateToPet}>
+                {t("backToPet")}
+              </Button>
+              <Button className="w-full" onClick={onClose} variant="secondary">
+                {t("continue")}
+              </Button>
+            </div>
+          ) : (
+            <Button className="w-full" onClick={onClose}>
+              {t("continue")}
+            </Button>
+          )}
         </Card>
       </div>
     </div>
