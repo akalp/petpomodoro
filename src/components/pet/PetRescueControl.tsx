@@ -5,6 +5,7 @@ import {
   EMERGENCY_SNACK_DAILY_LIMIT_ERROR,
   isEmergencySnackNeeded,
   isPetSleeping,
+  PET_ALREADY_SLEEPING_ERROR,
   POWER_NAP_DURATION_MINUTES,
   POWER_NAP_COOLDOWN_ACTIVE_ERROR,
   POWER_NAP_DAILY_LIMIT_ERROR,
@@ -308,6 +309,10 @@ function powerNapSupport(
   petName: string,
   reasons: string[],
 ): string {
+  if (reasons.includes(PET_ALREADY_SLEEPING_ERROR)) {
+    return t("sleepSupportSleeping", { pet: petName });
+  }
+
   if (reasons.includes(POWER_NAP_DAILY_LIMIT_ERROR)) {
     return t("powerNapLimitSupport", { pet: petName });
   }
@@ -323,6 +328,10 @@ function powerNapSupport(
 }
 
 function powerNapStatus(t: Translator, reasons: string[]): string {
+  if (reasons.includes(PET_ALREADY_SLEEPING_ERROR)) {
+    return t("rescueSaved");
+  }
+
   if (reasons.includes(POWER_NAP_DAILY_LIMIT_ERROR)) {
     return t("rescueDoneToday");
   }
