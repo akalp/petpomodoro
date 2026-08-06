@@ -19,9 +19,9 @@ export function SessionHistory({
   return (
     <section className="space-y-3">
       <div className="flex items-end justify-between gap-3">
-        <h2 className="text-xl font-semibold text-slate-950">
+        <h1 className="text-xl font-semibold text-slate-950">
           {t("recentSessions")}
-        </h2>
+        </h1>
         {isLoading ? (
           <span className="text-xs font-semibold uppercase text-slate-500">
             {t("updating")}
@@ -83,7 +83,7 @@ function statusLabel(status: FocusSession["status"], t: Translator): string {
   }
 
   if (status === "abandoned") {
-    return t("abandonedChoice");
+    return t("statusAbandoned");
   }
 
   if (status === "awaiting_confirmation") {

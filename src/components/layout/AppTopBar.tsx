@@ -22,7 +22,7 @@ export function AppTopBar({
         </div>
         <button
           aria-label={t("settings")}
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-rose-100 bg-white text-rose-800 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-400"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-rose-100 bg-white text-rose-800 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-slate-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
           disabled={isSettingsDisabled}
           onClick={onOpenSettings}
           title={t("settings")}

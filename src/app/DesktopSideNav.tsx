@@ -21,7 +21,7 @@ export function DesktopSideNav({ t }: DesktopSideNavProps) {
   return (
     <aside className="hidden md:block md:w-36 lg:w-52">
       <nav
-        aria-label="Primary"
+        aria-label={t("navigationPrimary")}
         className="sticky top-[max(1.25rem,env(safe-area-inset-top))] rounded-lg border border-white/80 bg-white/80 p-2 shadow-sm shadow-rose-100/70 backdrop-blur"
       >
         <div className="relative flex flex-col gap-1" ref={containerRef}>

@@ -75,9 +75,9 @@ export function PomodoroStartPanel({
     <>
       <Card className="space-y-5 border-rose-100 bg-white max-[359px]:p-4">
         <div>
-          <h2 className="text-3xl font-semibold text-slate-950 max-[359px]:text-2xl">
+          <h1 className="text-3xl font-semibold text-slate-950 max-[359px]:text-2xl">
             {t("startTitle")}
-          </h2>
+          </h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             {t("startInstructions")}
           </p>

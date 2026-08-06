@@ -20,7 +20,7 @@ export function MobileBottomTabBar({ t }: MobileBottomTabBarProps) {
 
   return (
     <nav
-      aria-label="Primary"
+      aria-label={t("navigationPrimary")}
       className="fixed inset-x-0 bottom-0 z-30 border-t border-white/80 bg-white/90 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(244,63,94,0.12)] backdrop-blur md:hidden"
     >
       <div

@@ -75,7 +75,7 @@ function buildRewardRows(
     {
       id: "new-level",
       label: t("newLevel"),
-      value: summary.newLevel,
+      value: t("level", { level: summary.newLevel }),
       amount: summary.leveledUp ? summary.newLevel : 0,
     },
   ];

@@ -40,9 +40,9 @@ export function PetShop({
       <div className="flex items-start justify-between gap-3">
         {showHeader ? (
           <div>
-            <h2 className="text-xl font-semibold text-slate-950">
+            <h1 className="text-xl font-semibold text-slate-950">
               {t("shopTitle")}
-            </h2>
+            </h1>
             <p className="mt-1 text-sm leading-6 text-slate-600">
               {t("shopSupport")}
             </p>
