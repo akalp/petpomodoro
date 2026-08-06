@@ -59,12 +59,12 @@ describe("notificationIdForSession", () => {
     );
   });
 
-  it("returns an unsigned 32-bit integer", () => {
+  it("returns a safe-integer id in the positive number range", () => {
     const id = notificationIdForSession("test-session");
 
     expect(id).toBeGreaterThanOrEqual(0);
-    expect(id).toBeLessThanOrEqual(0xffffffff);
-    expect(Number.isInteger(id)).toBe(true);
+    expect(id).toBeLessThanOrEqual(Number.MAX_SAFE_INTEGER);
+    expect(Number.isSafeInteger(id)).toBe(true);
   });
 });
 

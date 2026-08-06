@@ -8,14 +8,21 @@ import {
   type SupportedLanguage,
 } from "../i18n";
 
-function notificationIdForSession(sessionId: string): number {
-  let hash = 5381;
+function hashString(value: string, seed: number): number {
+  let hash = seed;
 
-  for (let i = 0; i < sessionId.length; i++) {
-    hash = (hash * 33) ^ sessionId.charCodeAt(i);
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 33) ^ value.charCodeAt(i);
   }
 
   return hash >>> 0;
+}
+
+function notificationIdForSession(sessionId: string): number {
+  const high = hashString(sessionId, 5381);
+  const low = hashString(sessionId, 52711);
+
+  return high * 0x200000 + (low & 0x1fffff);
 }
 
 export async function scheduleEndNotification(
