@@ -20,7 +20,7 @@ The target product feel is:
 
 This section records runtime behavior before the configurable balance work began. It is intentionally descriptive only; these values are not the active balance after the completed evolution phases below.
 
-### Current PetState metrics
+### Pre-evolution baseline (v0): PetState metrics
 
 | Field | Current role | Current writes |
 | --- | --- | --- |
@@ -37,7 +37,7 @@ This section records runtime behavior before the configurable balance work began
 | `lastHungerUpdatedAt` | Timestamp anchor for hunger decay and focus/sleep care accounting. | Initial pet starts at `now`; hunger-changing adjustments set it to `now`; focus impact sets it to the focus impact timestamp; idle hunger decay sets it to `now`; wake sets it to `now` only when sleep elapsed. |
 | `lastAppOpenedAt` | Timestamp anchor for app-open happiness decay. | Initial pet starts at `now`; app-open decay and wake set it to `now`; normalization/backfill defaults missing values from hunger/update timestamps. |
 
-### Current FocusSession metrics
+### Pre-evolution baseline (v0): FocusSession metrics
 
 | Field | Current role | Current writes |
 | --- | --- | --- |
@@ -50,7 +50,7 @@ This section records runtime behavior before the configurable balance work began
 | `focusImpactAppliedUntil` | Timestamp through which elapsed focus care impact has already been applied. | Starts at `startedAt`; focus impact advances up to the earliest of `now`, terminal timestamp, and `expectedEndAt`; prevents duplicate focus care impact. |
 | `focusCoinsAwarded` | Count of base focus coins already awarded for elapsed focus blocks. | Starts at `0`; focus impact sets it to total full 5-minute blocks already earned; prevents duplicate base coin grants. |
 
-### Current focus reward rules
+### Pre-evolution baseline (v0): focus reward rules
 
 Completion reward is fixed and idempotent per session:
 
@@ -64,7 +64,7 @@ Reward idempotency exists in two layers:
 - domain: `claimSessionReward` returns no new reward when `rewardClaimedAt` is set or an existing ledger entry is supplied;
 - persistence: `rewardLedger.sessionId` has a unique index, and reward application runs in a Dexie transaction.
 
-### Current focus care impact rules
+### Pre-evolution baseline (v0): focus care impact rules
 
 Elapsed focus care impact is separate from completion/honesty reward and applies to running, awaiting-confirmation, completed, and abandoned sessions when persisted through store/repository paths.
 
@@ -82,7 +82,7 @@ Current examples from tests:
 | 25 min | `+5` | `-5` | `-7` |
 | 90 min | `+18` | `-18` | `-25.2` |
 
-### Current idle care and sleep rules
+### Pre-evolution baseline (v0): idle care and sleep rules
 
 - Idle hunger decay subtracts `2` hunger per hour since `lastHungerUpdatedAt`.
 - App-open happiness decay subtracts `0.25` happiness per hour since `lastAppOpenedAt`, capped at `6` per app-open update.
@@ -98,7 +98,7 @@ Current examples from tests:
   - sets `lastAppOpenedAt = now`;
   - sets `lastHungerUpdatedAt = now` only if time elapsed.
 
-### Current shop catalog
+### Pre-evolution baseline (v0): shop catalog
 
 | Item | Cost | Hunger | Happiness | Energy |
 | --- | ---: | ---: | ---: | ---: |
@@ -109,7 +109,7 @@ Current examples from tests:
 
 Food purchases require enough coins and an awake pet. Successful purchases subtract coins, add the listed stats with `0..100` stat caps, update mood, set `updatedAt = now`, and set `lastHungerUpdatedAt = now` because hunger is adjusted. Failed purchases leave the saved pet unchanged.
 
-### Current mood rules
+### Pre-evolution baseline (v0): mood rules
 
 Persisted `PetState.mood` is resolved by priority:
 
@@ -126,7 +126,7 @@ Display mood overrides are not persisted:
 - a running focus session displays `working`;
 - a sleeping pet displays `sleeping` unless a running session is active, though focus start is blocked while sleeping in current store/UI paths.
 
-### Current persistence and store orchestration
+### Pre-evolution baseline (v0): persistence and store orchestration
 
 - `pets` stores the single local pet; load paths normalize legacy/default fields.
 - `sessions` stores session history and active sessions; active lookup returns the newest `running` or `awaiting_confirmation` session.
@@ -136,7 +136,7 @@ Display mood overrides are not persisted:
 - App initialization loads settings, initializes the pet, applies app-open happiness decay, restores/refreshes the active session, and only applies idle hunger decay if there is no active session.
 - Store actions block focus while sleeping; UI disables food during active focus or sleep; domain/repository also block food while sleeping.
 
-### Current risks and gaps to preserve while refactoring
+### Pre-evolution baseline (v0): risks and gaps to preserve while refactoring
 
 - Balance values are scattered across `pet.ts`, `rewards.ts`, `shop.ts`, and `petMoodRules.ts`.
 - Completion XP/coin/happiness rewards are fixed and do not use `plannedDurationMinutes`; a 1-minute completed session can currently claim the same completion reward as a 180-minute session after confirmation.
