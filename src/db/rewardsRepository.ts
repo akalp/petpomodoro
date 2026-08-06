@@ -8,6 +8,7 @@ import {
   type ClaimFocusRewardResult,
   type DailyFocusState,
   type FocusSession,
+  type FocusSessionStatus,
   type PetState,
   type RewardLedger,
 } from "../domain";
@@ -96,7 +97,11 @@ export async function claimStoredSessionReward(
         return result;
       }
 
-      const impactResult = applyStoredSessionImpactValues(pet, rewardSession, now);
+      const impactResult = applyStoredSessionImpactValues(
+        pet,
+        mergeSessionImpactState(session, rewardSession),
+        now,
+      );
       const result = claimSessionReward({
         pet: impactResult.pet,
         session: impactResult.session,
@@ -154,7 +159,8 @@ export async function applyStoredSessionImpact(
       throw new RepositoryError(`Focus session not found: ${nextSession.id}`);
     }
 
-    const impactResult = applyStoredSessionImpactValues(pet, nextSession, now);
+    const impactSession = mergeSessionImpactState(session, nextSession);
+    const impactResult = applyStoredSessionImpactValues(pet, impactSession, now);
 
     await database.pets.put(impactResult.pet);
     await database.sessions.put(impactResult.session);
@@ -178,4 +184,35 @@ function applyStoredSessionImpactValues(
     pet: nextPet,
     session: focusResult.session,
   };
+}
+
+function mergeSessionImpactState(
+  persisted: FocusSession,
+  intended: FocusSession,
+): FocusSession {
+  const advanced =
+    sessionAdvanceRank(intended.status) >= sessionAdvanceRank(persisted.status)
+      ? intended
+      : persisted;
+
+  return {
+    ...persisted,
+    status: advanced.status,
+    abandonmentReason: advanced.abandonmentReason,
+    confirmedAt: advanced.confirmedAt,
+    abandonedAt: advanced.abandonedAt,
+    rewardClaimedAt: advanced.rewardClaimedAt ?? persisted.rewardClaimedAt,
+  };
+}
+
+function sessionAdvanceRank(status: FocusSessionStatus): number {
+  switch (status) {
+    case "awaiting_confirmation":
+      return 1;
+    case "completed":
+    case "abandoned":
+      return 2;
+    default:
+      return 0;
+  }
 }

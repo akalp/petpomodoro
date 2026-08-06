@@ -21,7 +21,7 @@ import {
   applyStoredStreakFreeze,
   getStoredDailyFocusState,
 } from "./dailyFocusRepository";
-import { claimStoredSessionReward } from "./rewardsRepository";
+import { claimStoredSessionReward, applyStoredSessionImpact } from "./rewardsRepository";
 import { loadOrCreateSettings, updateSettings } from "./settingsRepository";
 import { buyFoodForStoredPet } from "./shopRepository";
 
@@ -96,8 +96,33 @@ describe("Dexie repositories", () => {
     });
   });
 
-  it("enforces one reward ledger record per session", async () => {
-    const database = makeDatabase("unique-reward");
+  it("applies focus impact only once across overlapping stale writes", async () => {
+    const database = makeDatabase("overlapping-impact");
+    await database.pets.add(makePet());
+    await database.sessions.add(makeSession());
+
+    const staleSession = makeSession();
+
+    const first = await applyStoredSessionImpact(
+      { petId: "pet-1", session: staleSession, now: "2026-05-22T12:10:00.000Z" },
+      database,
+    );
+    const second = await applyStoredSessionImpact(
+      { petId: "pet-1", session: staleSession, now: "2026-05-22T12:12:00.000Z" },
+      database,
+    );
+
+    expect(first.pet.hunger).toBeCloseTo(98);
+    expect(first.pet.energy).toBeCloseTo(77.2);
+    expect(second.pet.hunger).toBeCloseTo(97.6);
+    expect(second.pet.energy).toBeCloseTo(76.64);
+    expect(second.session.focusCoinsAwarded).toBe(first.session.focusCoinsAwarded);
+    expect(second.session.focusImpactAppliedUntil).toBe(
+      "2026-05-22T12:12:00.000Z",
+    );
+  });
+
+  it("enforces one reward ledger record per session", async () => {    const database = makeDatabase("unique-reward");
 
     await database.rewardLedger.add(makeReward());
 
