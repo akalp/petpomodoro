@@ -706,78 +706,29 @@ export function createNativeCareCopy(language: SupportedLanguage): NativeCareCop
   };
 }
 
+const ERROR_MESSAGE_TO_KEY: Record<string, MessageKey> = {
+  [englishMessages.errorGeneric]: "errorGeneric",
+  [englishMessages.errorStorage]: "errorStorage",
+  [englishMessages.errorPetName]: "errorPetName",
+  [PET_ALREADY_SLEEPING_ERROR]: "errorPetAlreadySleeping",
+  [PET_NOT_SLEEPING_ERROR]: "errorPetNotSleeping",
+  [PET_SLEEPING_CANNOT_EAT_ERROR]: "errorPetSleepingCannotEat",
+  [PET_SLEEPING_CANNOT_FOCUS_ERROR]: "errorPetSleepingCannotFocus",
+  [PET_FOCUS_NEEDS_CARE_ERROR]: "errorPetFocusNeedsCare",
+  [POWER_NAP_DAILY_LIMIT_ERROR]: "errorPowerNapLimit",
+  [POWER_NAP_COOLDOWN_ACTIVE_ERROR]: "errorPowerNapCooldown",
+  [EMERGENCY_SNACK_DAILY_LIMIT_ERROR]: "errorEmergencySnackLimit",
+  [EMERGENCY_SNACK_NOT_NEEDED_ERROR]: "errorEmergencySnackNotNeeded",
+  [STREAK_FREEZE_DAY_NOT_MISSED_ERROR]: "errorStreakFreezeNotMissed",
+  [STREAK_FREEZE_INSUFFICIENT_HEARTS_ERROR]: "errorStreakFreezeHearts",
+  [STREAK_FREEZE_COOLDOWN_ACTIVE_ERROR]: "errorStreakFreezeCooldown",
+  [STREAK_FREEZE_DAILY_LIMIT_ERROR]: "errorStreakFreezeLimit",
+  [INSUFFICIENT_COINS_ERROR]: "errorFoodNotEnoughCoins",
+  [FOOD_NOT_FOUND_ERROR]: "errorFoodNotFound",
+};
+
 export function localizeErrorMessage(message: string, t: Translator): string {
-  if (message === englishMessages.errorGeneric) {
-    return t("errorGeneric");
-  }
+  const messageKey = ERROR_MESSAGE_TO_KEY[message];
 
-  if (message === englishMessages.errorStorage) {
-    return t("errorStorage");
-  }
-
-  if (message === englishMessages.errorPetName) {
-    return t("errorPetName");
-  }
-
-  if (message === PET_ALREADY_SLEEPING_ERROR) {
-    return t("errorPetAlreadySleeping");
-  }
-
-  if (message === PET_NOT_SLEEPING_ERROR) {
-    return t("errorPetNotSleeping");
-  }
-
-  if (message === PET_SLEEPING_CANNOT_EAT_ERROR) {
-    return t("errorPetSleepingCannotEat");
-  }
-
-  if (message === PET_SLEEPING_CANNOT_FOCUS_ERROR) {
-    return t("errorPetSleepingCannotFocus");
-  }
-
-  if (message === PET_FOCUS_NEEDS_CARE_ERROR) {
-    return t("errorPetFocusNeedsCare");
-  }
-
-  if (message === POWER_NAP_DAILY_LIMIT_ERROR) {
-    return t("errorPowerNapLimit");
-  }
-
-  if (message === POWER_NAP_COOLDOWN_ACTIVE_ERROR) {
-    return t("errorPowerNapCooldown");
-  }
-
-  if (message === EMERGENCY_SNACK_DAILY_LIMIT_ERROR) {
-    return t("errorEmergencySnackLimit");
-  }
-
-  if (message === EMERGENCY_SNACK_NOT_NEEDED_ERROR) {
-    return t("errorEmergencySnackNotNeeded");
-  }
-
-  if (message === STREAK_FREEZE_DAY_NOT_MISSED_ERROR) {
-    return t("errorStreakFreezeNotMissed");
-  }
-
-  if (message === STREAK_FREEZE_INSUFFICIENT_HEARTS_ERROR) {
-    return t("errorStreakFreezeHearts");
-  }
-
-  if (message === STREAK_FREEZE_COOLDOWN_ACTIVE_ERROR) {
-    return t("errorStreakFreezeCooldown");
-  }
-
-  if (message === STREAK_FREEZE_DAILY_LIMIT_ERROR) {
-    return t("errorStreakFreezeLimit");
-  }
-
-  if (message === INSUFFICIENT_COINS_ERROR) {
-    return t("errorFoodNotEnoughCoins");
-  }
-
-  if (message === FOOD_NOT_FOUND_ERROR) {
-    return t("errorFoodNotFound");
-  }
-
-  return message;
+  return messageKey ? t(messageKey) : message;
 }
