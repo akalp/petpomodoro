@@ -7,7 +7,7 @@ import { createTranslator } from "../../i18n";
 import { RewardModal } from "./RewardModal";
 
 describe("RewardModal", () => {
-  it("renders above mobile navigation and keeps long rewards scrollable", () => {
+  it("renders an accessible dialog above mobile navigation and keeps long rewards scrollable", () => {
     const html = renderToStaticMarkup(
       <RewardModal
         onClose={() => undefined}
@@ -16,15 +16,17 @@ describe("RewardModal", () => {
       />,
     );
 
-    expect(html).toContain("bottom-28");
-    expect(html).toContain("z-20");
-    expect(html).toContain("md:z-50");
-    expect(html).toContain("max-h-[calc(100dvh-8rem)]");
+    expect(html).toContain("role=\"dialog\"");
+    expect(html).toContain("aria-modal=\"true\"");
+    expect(html).toContain("aria-labelledby");
+    expect(html).toContain("fixed inset-0 z-50");
+    expect(html).toContain("max-h-[calc(100dvh-2rem)]");
     expect(html).toContain("overflow-y-auto");
     expect(html).toContain("ui-reward-backdrop");
     expect(html).toContain("ui-reward-panel");
     expect(html).toContain("ui-level-pulse");
     expect(html).toContain("Continue");
+    expect(html).toContain("aria-label=\"Close\"");
   });
 });
 

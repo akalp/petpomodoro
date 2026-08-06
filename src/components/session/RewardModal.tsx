@@ -1,8 +1,12 @@
+import { useEffect, useId, useRef } from "react";
+
 import type { RewardSummary } from "../../domain";
 import type { Translator } from "../../i18n";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import { StatRow } from "../ui/StatRow";
+import { useBodyScrollLock } from "../ui/useBodyScrollLock";
+import { useFocusTrap } from "../ui/useFocusTrap";
 
 interface RewardModalProps {
   onClose: () => void;
@@ -81,55 +85,113 @@ function buildRewardRows(
 
 export function RewardModal({ onClose, summary, t }: RewardModalProps) {
   const rewardRows = buildRewardRows(summary, t);
+  const titleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useBodyScrollLock(true);
+  useFocusTrap(dialogRef, true);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    dialogRef.current
+      ?.querySelector<HTMLButtonElement>("[data-reward-close]")
+      ?.focus();
+
+    return () => {
+      if (previouslyFocused?.isConnected) {
+        previouslyFocused.focus();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onCloseRef.current();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div
-      className="ui-reward-backdrop fixed inset-x-0 top-0 bottom-28 z-20 flex items-end justify-center overflow-y-auto bg-slate-950/35 px-4 pt-4 pb-4 md:inset-0 md:z-50 md:items-center"
+      aria-labelledby={titleId}
+      aria-modal="true"
+      className="ui-reward-backdrop fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-slate-950/35 px-4 pt-4 pb-4 md:items-center"
+      data-testid="reward-backdrop"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) {
           onClose();
         }
       }}
+      ref={dialogRef}
+      role="dialog"
+      tabIndex={-1}
     >
       <div className="ui-reward-panel w-full max-w-xl sm:max-w-md">
-        <Card className="max-h-[calc(100dvh-8rem)] w-full space-y-4 overflow-y-auto border-rose-200 bg-white shadow-xl md:max-h-[calc(100dvh-2rem)]">
-        <div>
-          <p className="text-sm font-semibold uppercase text-rose-700">
-            {summary.rewardType === "focus_completed"
-              ? t("sessionComplete")
-              : t("honestyReward")}
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-            {summary.rewardType === "focus_completed"
-              ? t("completedRewardTitle")
-              : t("honestyRewardTitle")}
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+        <Card className="max-h-[calc(100dvh-2rem)] w-full space-y-4 overflow-y-auto border-rose-200 bg-white shadow-xl">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold uppercase text-rose-700">
+                {summary.rewardType === "focus_completed"
+                  ? t("sessionComplete")
+                  : t("honestyReward")}
+              </p>
+              <h2
+                className="mt-2 text-2xl font-semibold text-slate-950"
+                id={titleId}
+              >
+                {summary.rewardType === "focus_completed"
+                  ? t("completedRewardTitle")
+                  : t("honestyRewardTitle")}
+              </h2>
+            </div>
+            <button
+              aria-label={t("close")}
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-rose-100 bg-white text-slate-600 transition hover:bg-rose-50 hover:text-rose-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500"
+              data-reward-close
+              onClick={onClose}
+              type="button"
+            >
+              ×
+            </button>
+          </div>
+
+          <p className="text-sm leading-6 text-slate-600">
             {summary.leveledUp
               ? t("levelUpReward")
               : summary.rewardType === "focus_completed"
                 ? t("completedRewardSupport")
                 : t("honestyRewardSupport")}
           </p>
-        </div>
 
-        {summary.leveledUp ? (
-          <div
-            className="ui-level-pulse rounded-lg bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-900"
-          >
-            {t("levelUpSupport")}
+          {summary.leveledUp ? (
+            <div
+              className="ui-level-pulse rounded-lg bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-900"
+            >
+              {t("levelUpSupport")}
+            </div>
+          ) : null}
+
+          <div className="grid gap-3">
+            {rewardRows.map((row) => (
+              <StatRow key={row.id} label={row.label} value={row.value} />
+            ))}
           </div>
-        ) : null}
 
-        <div className="grid gap-3">
-          {rewardRows.map((row) => (
-            <StatRow key={row.id} label={row.label} value={row.value} />
-          ))}
-        </div>
-
-        <Button className="w-full" onClick={onClose}>
-          {t("continue")}
-        </Button>
+          <Button className="w-full" onClick={onClose}>
+            {t("continue")}
+          </Button>
         </Card>
       </div>
     </div>
