@@ -1,3 +1,12 @@
+// Intentional scaffolding, not active product code.
+//
+// These pure achievement rules are evaluated in tests but have no runtime
+// consumer yet: no store, repository, or screen persists or surfaces unlocks.
+// This matches the documented MVP scope ("Pure achievement rule scaffolding
+// without achievement UI or persistence" in docs/MVP_TASKS.md). Wire this
+// module into petStore/persistence when the achievements feature is planned,
+// or delete it if the scope is dropped.
+
 import { ACTIVE_BALANCE_PROFILE } from "./balance";
 import type {
   BalanceAchievementCareEvent,
