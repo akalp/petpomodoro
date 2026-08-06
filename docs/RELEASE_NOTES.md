@@ -40,7 +40,7 @@ PetPomodoro is a local-first, cozy focus companion for iOS Home Screen and moder
 - User accounts or authentication.
 - Cloud sync or cross-device recovery.
 - Social features, leaderboards, subscriptions, or paid features.
-- Native iOS app functionality.
+- App Store distribution of a native iOS app. (A personal, unsigned Capacitor build exists for the developer's own device.)
 - Native timer verification or monitoring.
 - Multi-pet selection, pet accounts, or cross-device pet profiles.
 - Mini-games or a Games tab.

@@ -79,7 +79,7 @@ Completed focus minutes accumulate toward a 25-minute local daily goal. Reaching
 - Cross-device sync.
 - Social sharing, leaderboards, or competitive streaks.
 - Paid features.
-- Native iOS app implementation.
+- App Store distribution of a native iOS app. (A personal, unsigned Capacitor build exists for the developer's own device; see `NATIVE_IOS_PERSONAL_BUILD.md`.)
 - Claims that the app can verify native iOS timer completion.
 - Strict productivity enforcement or shame-based failure states.
 
