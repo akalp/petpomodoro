@@ -340,7 +340,13 @@ export function App() {
         t={t}
       />
       {!isNativeApp && <AppUpdatePrompt t={t} />}
-      {error ? <ErrorNotice message={localizeErrorMessage(error, t)} t={t} /> : null}
+      {error ? (
+        <ErrorNotice
+          message={localizeErrorMessage(error, t)}
+          onRetry={!hasHydrated && !isInitializing ? resetInitialization : undefined}
+          t={t}
+        />
+      ) : null}
       {!hasHydrated && isInitializing ? <LoadingCard t={t} /> : null}
       <AppRoutes
         focus={

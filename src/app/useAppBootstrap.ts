@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { usePomodoroStore, useUiStore } from "../stores";
 
@@ -10,6 +10,7 @@ export function useAppBootstrap() {
   const initializeApp = useUiStore((state) => state.initializeApp);
   const loadRecentSessions = usePomodoroStore((state) => state.loadRecentSessions);
   const initializedRef = useRef(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (initializedRef.current) {
@@ -21,8 +22,17 @@ export function useAppBootstrap() {
 
     void appInitialization
       .then(() => loadRecentSessions())
-      .catch(() => undefined);
-  }, [initializeApp, loadRecentSessions]);
+      .catch(() => {
+        appInitialization = null;
+        initializedRef.current = false;
+      });
+  }, [attempt, initializeApp, loadRecentSessions]);
 
-  return { hasHydrated, isInitializing, resetInitialization: () => { appInitialization = null; initializedRef.current = false; } };
+  const resetInitialization = useCallback(() => {
+    appInitialization = null;
+    initializedRef.current = false;
+    setAttempt((current) => current + 1);
+  }, []);
+
+  return { hasHydrated, isInitializing, resetInitialization };
 }
