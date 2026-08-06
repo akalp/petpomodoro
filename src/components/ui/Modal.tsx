@@ -1,5 +1,8 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 
+import { useBodyScrollLock } from "./useBodyScrollLock";
+import { useFocusTrap } from "./useFocusTrap";
+
 interface ModalProps {
   children: ReactNode;
   closeLabel: string;
@@ -20,7 +23,11 @@ export function Modal({
   const titleId = useId();
   const descriptionId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
+
+  useBodyScrollLock(isOpen);
+  useFocusTrap(dialogRef, isOpen);
 
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -65,6 +72,7 @@ export function Modal({
           onClose();
         }
       }}
+      ref={dialogRef}
       role="dialog"
     >
       <div className="flex max-h-[calc(100dvh-1rem)] w-full min-w-0 max-w-xl flex-col overflow-hidden rounded-lg border border-white/80 bg-white shadow-2xl shadow-slate-950/20 sm:max-h-[min(760px,calc(100dvh-3rem))]">

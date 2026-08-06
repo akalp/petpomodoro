@@ -9,6 +9,8 @@ import {
 } from "react";
 
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+import { useBodyScrollLock } from "./useBodyScrollLock";
+import { useFocusTrap } from "./useFocusTrap";
 
 interface SheetProps {
   children: ReactNode;
@@ -41,6 +43,10 @@ export function Sheet({
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
   const ownsFocusRef = useRef(false);
   const requestedCloseRef = useRef(false);
+
+  const overlayIsOpen = isOpen && phase === "open";
+  useBodyScrollLock(overlayIsOpen);
+  useFocusTrap(dialogRef, overlayIsOpen);
 
   useEffect(() => {
     onCloseRef.current = onClose;
